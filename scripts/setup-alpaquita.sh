@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+MIMALLOC_PATH=$1
+
 # Install system packages
 apk add --no-cache \
     bash \
@@ -12,9 +14,9 @@ apk add --no-cache \
     libstdc++ \
     mimalloc-global
 
-# Create stable symlink for mimalloc shared library
-MIMALLOC_PATH=$(find /usr/lib -name "libmimalloc.so.[0-9]" | head -n 1)
-ln -s "$MIMALLOC_PATH" /usr/lib/libmimalloc_stable.so
+# Create symlink for mimalloc shared library
+MIMALLOC_REAL_PATH=$(find /usr/lib -name "libmimalloc.so.[0-9]" | head -n 1)
+ln -s "$MIMALLOC_REAL_PATH" "$MIMALLOC_PATH"
 
 # Summary
 echo "---BEGIN_APK_PACKAGES---"

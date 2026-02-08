@@ -14,6 +14,7 @@ ARG ANDROID_PLATFORM_TOOLS_VERSION
 ARG ANDROID_BUILD_TOOLS_VERSION
 ARG ANDROID_PLATFORM_VERSION
 ARG USER_UID=1000
+ARG MIMALLOC_PATH=/usr/lib/libmimalloc_stable.so
 
 LABEL org.opencontainers.image.title="Alpaquita Android" \
       org.opencontainers.image.description="Optimized Android CI Image based on Alpaquita and mimalloc" \
@@ -31,7 +32,8 @@ ENV ANDROID_USER_HOME="${ANDROID_HOME}/.android-home"
 ENV PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
-    /bin/sh /tmp/setup-alpaquita.sh
+    /bin/sh /tmp/setup-alpaquita.sh \
+    "${MIMALLOC_PATH}"
 
 RUN --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
     /bin/sh /tmp/setup-android.sh \
@@ -41,7 +43,7 @@ RUN --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.
     "${ANDROID_BUILD_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_VERSION}"
 
-ENV LD_PRELOAD="/usr/lib/libmimalloc_stable.so"
+ENV LD_PRELOAD=$MIMALLOC_PATH
 
 RUN MIMALLOC_VERBOSE=1 ls 2>&1 | grep -q "mimalloc: process init" || \
     (echo "ERROR: mimalloc not active!" && exit 1)
