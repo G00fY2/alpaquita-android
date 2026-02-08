@@ -7,16 +7,51 @@ on:
   pull_request:
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
-
+    outputs:
+      jdk_versions: ${{ steps.jdk-versions-extractor.outputs.jdk_json }}
+      platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.platform_json }}
+      cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_id }}
+      platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
+      build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - name: Setup environment variables
+      - name: Load versions.env
         run: |
           grep -v '^#' versions.env >> $GITHUB_ENV
-          echo "SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Get supported jdk versions from Dockerfile
+        id: jdk-versions-extractor
+        uses: ./.github/actions/jdk-versions-extractor
+        with:
+          dockerfile_path: 'Dockerfile'
+
+      - name: Get command-line tools ID based on version
+        id: cmdline-tools-id-fetcher
+        uses: ./.github/actions/cmdline-tools-id-fetcher
+        with:
+          version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
+
+      - name: Get latest Android Platform versions
+        id: android-platform-versions-fetcher
+        uses: ./.github/actions/android-platform-versions-fetcher
+        with:
+          max_version: ${{ env.ANDROID_PLATFORM_VERSION }}
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk_version: ${{ fromJson(needs.setup.outputs.jdk_versions) }}
+        platform_version: ${{ fromJson(needs.setup.outputs.platform_versions) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -28,20 +63,33 @@ jobs:
           push: false
           tags: alpaquita-android-image:latest
           build-args: |
-            BASE_IMAGE=jdk25
+            BASE_IMAGE=${{ matrix.jdk_version }}
             IMAGE_VERSION=0.0.1
             GIT_HASH=${{ env.SHA_SHORT }}
-            ANDROID_CMDLINE_TOOLS_VERSION=${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
+            ANDROID_CMDLINE_TOOLS_VERSION=${{ needs.setup.outputs.cmdline_id }}
             ANDROID_PLATFORM_TOOLS_VERSION=${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
             ANDROID_BUILD_TOOLS_VERSION=${{ env.ANDROID_BUILD_TOOLS_VERSION }}
-            ANDROID_PLATFORM_VERSION=${{ env.ANDROID_PLATFORM_VERSION }}
+            ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
           outputs: |
             type=docker,dest=image.tar,compression=zstd,compression-level=3,force-compression=true
 
       - name: Upload Image Artifact
+        if: false # Skip now because of matrix builds
         uses: actions/upload-artifact@v6
         with:
           name: android-docker-image
           path: image.tar
           retention-days: 1
           compression-level: 0
+
+  all-checks-passed:
+    name: "Final Status Check"
+    runs-on: ubuntu-slim
+    if: always()
+    needs: build
+    steps:
+      - name: "Validate Matrix results"
+        run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            exit 1
+          fi

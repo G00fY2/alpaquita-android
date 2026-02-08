@@ -1,0 +1,23 @@
+name: 'JDK Version Extractor'
+description: 'Extracts JDK image aliases from a Dockerfile using a bash script'
+
+inputs:
+  dockerfile_path:
+    description: 'Path to the Dockerfile'
+    required: false
+    default: 'Dockerfile'
+
+outputs:
+  jdk_versions_json:
+    description: 'JSON array of jdk names'
+    value: ${{ steps.extract-jdk-versions.outputs.jdk_json }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: extract-jdk-versions
+      shell: bash
+      run: |
+        chmod +x "${{ github.action_path }}/scripts/extract_jdk-versions.sh"
+        JSON_RESULT=$("${{ github.action_path }}/scripts/extract_jdk-versions.sh" "${{ inputs.dockerfile_path }}")
+        echo "json=$JSON_RESULT" >> $GITHUB_OUTPUT

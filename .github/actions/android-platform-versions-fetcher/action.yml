@@ -1,0 +1,22 @@
+name: 'Android Platform Version Fetcher'
+description: 'Fetches the latest Android platform versions'
+
+inputs:
+  max_version:
+    description: 'The highest Android API level to include (e.g. 36.1)'
+    required: true
+
+outputs:
+  platform_json:
+    description: 'The latest platform versions as a JSON array'
+    value: ${{ steps.fetch-versions.outputs.json }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: fetch-versions
+      shell: bash
+      run: |
+        chmod +x "${{ github.action_path }}/scripts/fetch-versions.sh"
+        JSON_RESULT=$("${{ github.action_path }}/scripts/fetch-versions.sh" "${{ inputs.max_version }}")
+        echo "json=$JSON_RESULT" >> $GITHUB_OUTPUT

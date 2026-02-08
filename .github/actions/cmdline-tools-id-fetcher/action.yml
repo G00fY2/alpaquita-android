@@ -1,0 +1,22 @@
+name: 'Android Command-line Tools ID Fetcher'
+description: 'Extracts the specific Linux download ID for a given cmdline-tools version'
+
+inputs:
+  version:
+    description: 'The cmdline-tools version to look for (e.g., "20.0")'
+    required: true
+
+outputs:
+  cmdline_id:
+    description: 'The extracted numeric ID for the Linux download'
+    value: ${{ steps.fetch-id.outputs.id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: fetch-id
+      shell: bash
+      run: |
+        chmod +x "${{ github.action_path }}/scripts/fetch-id.sh"
+        ID=$("${{ github.action_path }}/scripts/fetch-id.sh" "${{ inputs.version }}")
+        echo "id=$ID" >> $GITHUB_OUTPUT
