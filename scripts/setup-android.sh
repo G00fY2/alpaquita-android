@@ -5,23 +5,7 @@ USER_UID=$1
 CMDLINE_TOOLS_VERSION=$2
 PLATFORM_TOOLS_VERSION=$3
 BUILD_TOOLS_VERSION=$4
-PLATFORM_VERSION=$4
-
-
-# Install system packages
-apk add --no-cache \
-    bash \
-    curl \
-    unzip \
-    git \
-    coreutils \
-    openssh-client-default \
-    libstdc++ \
-    mimalloc-global
-
-# Create stable symlink for mimalloc shared library
-MIMALLOC_PATH=$(find /usr/lib -name "libmimalloc.so.[0-9]" | head -n 1)
-ln -s "$MIMALLOC_PATH" /usr/lib/libmimalloc_stable.so
+PLATFORM_VERSION=$5
 
 # Install Android SDK Platform-Tools with explicit version
 mkdir -p "${ANDROID_HOME}/cmdline-tools"
@@ -63,13 +47,10 @@ yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses > /dev/null
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${BUILD_TOOLS_VERSION}"
 
 # Install Android SDK Platform
-sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${PLATFORM_VERSION}"
+PLATFORM_ID=$(echo "$PLATFORM_VERSION" | sed -E 's/\.0(\.0)?$//')
+sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${PLATFORM_ID}"
 
 # Summary
-echo "---BEGIN_APK_PACKAGES---"
-apk info -v 2>/dev/null | sort
-echo "---END_APK_PACKAGES---"
-
 echo "---BEGIN_SDK_PACKAGES---"
 sdkmanager --list_installed --verbose
 echo "---END_SDK_PACKAGES---"
