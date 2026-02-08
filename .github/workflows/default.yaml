@@ -26,6 +26,7 @@ jobs:
         with:
           context: .
           push: false
+          tags: alpaquita-android-image:latest
           build-args: |
             BASE_IMAGE=jdk25
             IMAGE_VERSION=0.0.1
@@ -34,3 +35,13 @@ jobs:
             ANDROID_PLATFORM_TOOLS_VERSION=${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
             ANDROID_BUILD_TOOLS_VERSION=${{ env.ANDROID_BUILD_TOOLS_VERSION }}
             ANDROID_PLATFORM_VERSION=${{ env.ANDROID_PLATFORM_VERSION }}
+          outputs: |
+            type=docker,dest=image.tar,compression=zstd,compression-level=3,force-compression=true
+
+      - name: Upload Image Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-docker-image
+          path: image.tar
+          retention-days: 1
+          compression-level: 0
