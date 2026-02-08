@@ -23,30 +23,26 @@ LABEL org.opencontainers.image.title="Alpaquita Android" \
       org.opencontainers.image.source="https://github.com/G00fY2/alpaquita-android" \
       org.opencontainers.image.licenses="MIT"
 
-RUN addgroup -g "${USER_UID}" androidgroup && \
-    adduser -D -u "${USER_UID}" -G androidgroup androiduser
-
 ENV ANDROID_HOME="/opt/android/sdk"
 ENV ANDROID_USER_HOME="${ANDROID_HOME}/.android-home"
-
 ENV PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
+    --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
+    addgroup -g "${USER_UID}" androidgroup && \
+    adduser -D -u "${USER_UID}" -G androidgroup androiduser && \
     /bin/sh /tmp/setup-alpaquita.sh \
-    "${MIMALLOC_PATH}"
-
-RUN --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
+    "${MIMALLOC_PATH}" && \
     /bin/sh /tmp/setup-android.sh \
     "${USER_UID}" \
     "${ANDROID_CMDLINE_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \
     "${ANDROID_BUILD_TOOLS_VERSION}" \
-    "${ANDROID_PLATFORM_VERSION}"
+    "${ANDROID_PLATFORM_VERSION}" && \
+    LD_PRELOAD="${MIMALLOC_PATH}" MIMALLOC_VERBOSE=1 ls 2>&1 | grep -q "mimalloc: process init" && \
+    echo "mimalloc is active and working!" || (echo "mimalloc not active!" && exit 1)
 
 ENV LD_PRELOAD=$MIMALLOC_PATH
-
-RUN MIMALLOC_VERBOSE=1 ls 2>&1 | grep -q "mimalloc: process init" || \
-    (echo "ERROR: mimalloc not active!" && exit 1)
 
 USER ${USER_UID}
 
