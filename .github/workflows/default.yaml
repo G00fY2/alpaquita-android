@@ -13,10 +13,24 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      - name: Run a multi-line script
+      - name: Setup environment variables
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          grep -v '^#' versions.env >> $GITHUB_ENV
+          echo "SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          build-args: |
+            BASE_IMAGE=jdk25
+            IMAGE_VERSION=0.0.1
+            GIT_HASH=${{ env.SHA_SHORT }}
+            ANDROID_CMDLINE_TOOLS_VERSION=${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
+            ANDROID_PLATFORM_TOOLS_VERSION=${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
+            ANDROID_BUILD_TOOLS_VERSION=${{ env.ANDROID_BUILD_TOOLS_VERSION }}
+            ANDROID_PLATFORM_VERSION=${{ env.ANDROID_PLATFORM_VERSION }}
