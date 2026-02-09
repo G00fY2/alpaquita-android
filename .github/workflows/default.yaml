@@ -67,8 +67,8 @@ jobs:
             IMAGE_VERSION=0.0.1
             GIT_HASH=${{ env.SHA_SHORT }}
             ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
-            ANDROID_PLATFORM_TOOLS_VERSION=${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
-            ANDROID_BUILD_TOOLS_VERSION=${{ env.ANDROID_BUILD_TOOLS_VERSION }}
+            ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
+            ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
             ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
           outputs: |
             type=docker,dest=image.tar,compression=zstd,compression-level=3,force-compression=true
