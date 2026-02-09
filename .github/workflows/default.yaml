@@ -1,4 +1,4 @@
-name: CI
+name: "Android Image Pipeline"
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   setup:
+    name: "🛠️ Prepare Build Matrix"
     runs-on: ubuntu-latest
     outputs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
@@ -16,26 +17,26 @@ jobs:
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
     steps:
-      - name: Checkout repository
+      - name: "Checkout repository"
         uses: actions/checkout@v6
 
-      - name: Load versions.env
+      - name: "Load versions.env"
         run: |
           grep -v '^#' versions.env >> $GITHUB_ENV
 
-      - name: Get supported jdk versions from Dockerfile
+      - name: "Get supported jdk versions from Dockerfile"
         id: jdk-versions-extractor
         uses: ./.github/actions/jdk-versions-extractor
         with:
           dockerfile_path: 'Dockerfile'
 
-      - name: Get command-line tools ID based on version
+      - name: "Get command-line tools ID based on version"
         id: cmdline-tools-id-fetcher
         uses: ./.github/actions/cmdline-tools-id-fetcher
         with:
           version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
 
-      - name: Get latest Android Platform versions
+      - name: "Get latest Android Platform versions"
         id: android-platform-versions-fetcher
         uses: ./.github/actions/android-platform-versions-fetcher
         with:
@@ -44,19 +45,20 @@ jobs:
   build:
     needs: setup
     runs-on: ubuntu-latest
+    name: "📦 Build (JDK ${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})"
     strategy:
       matrix:
         jdk_version: ${{ fromJson(needs.setup.outputs.jdk_versions) }}
         platform_version: ${{ fromJson(needs.setup.outputs.platform_versions) }}
 
     steps:
-      - name: Checkout repository
+      - name: "Checkout repository"
         uses: actions/checkout@v6
 
-      - name: Set up Docker Buildx
+      - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker Image
+      - name: "Build Docker Image"
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -73,7 +75,7 @@ jobs:
           outputs: |
             type=docker,dest=image.tar,compression=zstd,compression-level=3,force-compression=true
 
-      - name: Upload Image Artifact
+      - name: "Upload Image Artifact"
         if: false # Skip now because of matrix builds
         uses: actions/upload-artifact@v6
         with:
@@ -82,13 +84,13 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-  all-checks-passed:
-    name: "Final Status Check"
+  build-summary:
+    name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-slim
     if: always()
     needs: build
     steps:
-      - name: "Validate Matrix results"
+      - name: "Consolidate build status"
         run: |
           if [ "${{ needs.build.result }}" != "success" ]; then
             exit 1
