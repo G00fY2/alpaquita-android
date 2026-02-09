@@ -7,10 +7,10 @@
         {
             customType: 'regex',
             managerFilePatterns: [
-                '/versions\\.env$/'
+                '/versions\\.env$/',
             ],
             matchStrings: [
-                'ANDROID_CMDLINE_TOOLS_VERSION="(?<currentValue>.*?)"',
+                'ANDROID_CMDLINE_TOOLS_VERSION=(?<currentValue>.*)',
             ],
             depNameTemplate: 'android_cmdline_tools',
             datasourceTemplate: 'custom.android_cmdline_tools',
@@ -21,7 +21,7 @@
                 '/versions\\.env$/',
             ],
             matchStrings: [
-                'ANDROID_PLATFORM_TOOLS_VERSION="(?<currentValue>.*?)"',
+                'ANDROID_PLATFORM_TOOLS_VERSION=(?<currentValue>.*)',
             ],
             depNameTemplate: 'android_platform_tools',
             datasourceTemplate: 'custom.android_platform_tools',
@@ -32,7 +32,7 @@
                 '/versions\\.env$/',
             ],
             matchStrings: [
-                'ANDROID_BUILD_TOOLS_VERSION="(?<currentValue>.*?)"',
+                'ANDROID_BUILD_TOOLS_VERSION=(?<currentValue>.*)',
             ],
             depNameTemplate: 'android_build_tools',
             datasourceTemplate: 'custom.android_build_tools',
@@ -43,7 +43,7 @@
                 '/versions\\.env$/',
             ],
             matchStrings: [
-                'ANDROID_PLATFORM_LATEST_VERSION="(?<currentValue>.*?)"',
+                'ANDROID_PLATFORM_LATEST_VERSION=(?<currentValue>.*)',
             ],
             depNameTemplate: 'android_platform_version',
             datasourceTemplate: 'custom.android_platform_version',
