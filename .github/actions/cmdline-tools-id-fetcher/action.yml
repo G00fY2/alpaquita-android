@@ -7,7 +7,7 @@ inputs:
     required: true
 
 outputs:
-  cmdline_id:
+  cmdline_tools_id:
     description: 'The extracted numeric ID for the Linux download'
     value: ${{ steps.fetch-id.outputs.id }}
 

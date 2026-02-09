@@ -8,9 +8,9 @@ inputs:
     default: 'Dockerfile'
 
 outputs:
-  jdk_versions_json:
+  versions_json:
     description: 'JSON array of jdk names'
-    value: ${{ steps.extract-jdk-versions.outputs.jdk_json }}
+    value: ${{ steps.extract-jdk-versions.outputs.json }}
 
 runs:
   using: 'composite'

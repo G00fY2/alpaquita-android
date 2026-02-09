@@ -3,7 +3,7 @@ set -e
 set -o pipefail
 
 MAX_VERSION=$1
-MAX_MAJORS=3
+MAX_MAJORS=$2
 XML_URL="https://dl.google.com/android/repository/repository2-3.xml"
 
 all_versions=$(curl -fsSL "$XML_URL" | grep -oP '(?<=platforms;android-)[0-9.]+(?=")' | sort -uVr)

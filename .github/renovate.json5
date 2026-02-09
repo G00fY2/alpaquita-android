@@ -7,35 +7,46 @@
         {
             customType: 'regex',
             managerFilePatterns: [
-                '/android_sdk_versions\\.txt$/'
+                '/versions\\.env$/'
             ],
             matchStrings: [
                 'ANDROID_CMDLINE_TOOLS_VERSION="(?<currentValue>.*?)"',
             ],
             depNameTemplate: 'android_cmdline_tools',
-            datasourceTemplate: 'custom.android_cmdline_tools'
+            datasourceTemplate: 'custom.android_cmdline_tools',
         },
         {
             customType: 'regex',
             managerFilePatterns: [
-                '/android_sdk_versions\\.txt$/'
+                '/versions\\.env$/',
             ],
             matchStrings: [
                 'ANDROID_PLATFORM_TOOLS_VERSION="(?<currentValue>.*?)"',
             ],
             depNameTemplate: 'android_platform_tools',
-            datasourceTemplate: 'custom.android_platform_tools'
+            datasourceTemplate: 'custom.android_platform_tools',
         },
         {
             customType: 'regex',
             managerFilePatterns: [
-                '/android_sdk_versions\\.txt$/'
+                '/versions\\.env$/',
             ],
             matchStrings: [
                 'ANDROID_BUILD_TOOLS_VERSION="(?<currentValue>.*?)"',
             ],
             depNameTemplate: 'android_build_tools',
-            datasourceTemplate: 'custom.android_build_tools'
+            datasourceTemplate: 'custom.android_build_tools',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
+                '/versions\\.env$/',
+            ],
+            matchStrings: [
+                'ANDROID_PLATFORM_LATEST_VERSION="(?<currentValue>.*?)"',
+            ],
+            depNameTemplate: 'android_platform_version',
+            datasourceTemplate: 'custom.android_platform_version',
         },
     ],
     customDatasources: {
@@ -45,8 +56,8 @@
             transformTemplates: [
                 'releases[$contains(version, "cmdline-tools;")].version',
                 '$map($, function($v) { $replace($v, /.*cmdline-tools;([^"]+).*/, "$1") })',
-                '{"releases": $map($, function($v) { {"version": $v} })}'
-            ]
+                '{"releases": $map($, function($v) { {"version": $v} })}',
+            ],
         },
         android_platform_tools: {
             defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml?depName={{{depName}}}',
@@ -54,8 +65,8 @@
             transformTemplates: [
                 'releases[$contains(version, "platform-tools_r")].version',
                 '$map($, function($v) { $replace($v, /.*platform-tools_r([^-]+)-linux.*/, "$1") })',
-                '{"releases": $map($, function($v) { {"version": $v} })}'
-            ]
+                '{"releases": $map($, function($v) { {"version": $v} })}',
+            ],
         },
         android_build_tools: {
             defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml?depName={{{depName}}}',
@@ -63,8 +74,17 @@
             transformTemplates: [
                 'releases[$contains(version, "build-tools;")].version',
                 '$map($, function($v) { $replace($v, /.*build-tools;([^"]+).*/, "$1") })',
-                '{"releases": $map($, function($v) { {"version": $v} })}'
-            ]
+                '{"releases": $map($, function($v) { {"version": $v} })}',
+            ],
+        },
+        android_platform_version: {
+            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-3.xml?depName={{{depName}}}',
+            format: 'plain',
+            transformTemplates: [
+                'releases[$contains(version, "platforms;android-")].version',
+                '$map($, function($v) { $replace($v, /.*platforms;android-([^"]+).*/, "$1") })',
+                '{"releases": $map($, function($v) { {"version": $v} })}',
+            ],
         },
     },
 }

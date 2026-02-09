@@ -10,9 +10,9 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      jdk_versions: ${{ steps.jdk-versions-extractor.outputs.jdk_json }}
-      platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.platform_json }}
-      cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_id }}
+      jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
+      platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
+      cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_tools_id }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
     steps:
@@ -39,7 +39,7 @@ jobs:
         id: android-platform-versions-fetcher
         uses: ./.github/actions/android-platform-versions-fetcher
         with:
-          max_version: ${{ env.ANDROID_PLATFORM_VERSION }}
+          max_version: ${{ env.ANDROID_PLATFORM_LATEST_VERSION }}
 
   build:
     needs: setup
@@ -66,7 +66,7 @@ jobs:
             BASE_IMAGE=${{ matrix.jdk_version }}
             IMAGE_VERSION=0.0.1
             GIT_HASH=${{ env.SHA_SHORT }}
-            ANDROID_CMDLINE_TOOLS_VERSION=${{ needs.setup.outputs.cmdline_id }}
+            ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
             ANDROID_PLATFORM_TOOLS_VERSION=${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
             ANDROID_BUILD_TOOLS_VERSION=${{ env.ANDROID_BUILD_TOOLS_VERSION }}
             ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}

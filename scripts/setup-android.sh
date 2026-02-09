@@ -2,7 +2,7 @@
 set -e
 
 USER_UID=$1
-CMDLINE_TOOLS_VERSION=$2
+CMDLINE_TOOLS_ID=$2
 PLATFORM_TOOLS_VERSION=$3
 BUILD_TOOLS_VERSION=$4
 PLATFORM_VERSION=$5
@@ -16,7 +16,7 @@ unzip -q /tmp/platform-tools.zip -d "${ANDROID_HOME}"
 rm /tmp/platform-tools.zip
 
 # Install Android SDK Command-line Tools including
-curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_VERSION}_latest.zip" -o /tmp/commandline-tools.zip
+curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_ID}_latest.zip" -o /tmp/commandline-tools.zip
 unzip -q /tmp/commandline-tools.zip -d "${ANDROID_HOME}/cmdline-tools"
 mv "${ANDROID_HOME}/cmdline-tools/cmdline-tools" "${ANDROID_HOME}/cmdline-tools/latest"
 rm /tmp/commandline-tools.zip
