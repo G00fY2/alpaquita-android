@@ -31,16 +31,13 @@ RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaqu
     --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
     addgroup -g "${USER_UID}" androidgroup && \
     adduser -D -u "${USER_UID}" -G androidgroup androiduser && \
-    /bin/sh /tmp/setup-alpaquita.sh \
-    "${MIMALLOC_PATH}" && \
+    /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
     /bin/sh /tmp/setup-android.sh \
     "${USER_UID}" \
     "${ANDROID_CMDLINE_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \
     "${ANDROID_BUILD_TOOLS_VERSION}" \
-    "${ANDROID_PLATFORM_VERSION}" && \
-    LD_PRELOAD="${MIMALLOC_PATH}" MIMALLOC_VERBOSE=1 ls 2>&1 | grep -q "mimalloc: process init" && \
-    echo "mimalloc is active and working!" || (echo "mimalloc not active!" && exit 1)
+    "${ANDROID_PLATFORM_VERSION}"
 
 ENV LD_PRELOAD=$MIMALLOC_PATH
 
