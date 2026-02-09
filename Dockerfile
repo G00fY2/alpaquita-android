@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=JDK25
+ARG BASE_IMAGE=jdk25
 
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-21-glibc AS JDK21
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25-glibc AS JDK25
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-21-glibc AS jdk21
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25-glibc AS jdk25
 
 FROM ${BASE_IMAGE}
 
