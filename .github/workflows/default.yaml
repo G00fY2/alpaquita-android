@@ -45,7 +45,7 @@ jobs:
   build:
     needs: setup
     runs-on: ubuntu-latest
-    name: "📦 Build (JDK ${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})"
+    name: "📦 Build (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})"
     strategy:
       matrix:
         jdk_version: ${{ fromJson(needs.setup.outputs.jdk_versions) }}
