@@ -19,4 +19,5 @@ runs:
       run: |
         chmod +x "${{ github.action_path }}/scripts/fetch-id.sh"
         ID=$("${{ github.action_path }}/scripts/fetch-id.sh" "${{ inputs.version }}")
+        echo "Result: $ID"
         echo "id=$ID" >> $GITHUB_OUTPUT

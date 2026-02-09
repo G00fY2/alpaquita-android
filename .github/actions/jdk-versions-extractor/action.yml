@@ -20,4 +20,5 @@ runs:
       run: |
         chmod +x "${{ github.action_path }}/scripts/extract-jdk-versions.sh"
         JSON_RESULT=$("${{ github.action_path }}/scripts/extract-jdk-versions.sh" "${{ inputs.dockerfile_path }}")
+        echo "Result: $JSON_RESULT"
         echo "json=$JSON_RESULT" >> $GITHUB_OUTPUT
