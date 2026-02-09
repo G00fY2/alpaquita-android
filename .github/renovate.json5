@@ -51,16 +51,16 @@
     ],
     customDatasources: {
         android_cmdline_tools: {
-            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml?depName={{{depName}}}',
+            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml',
             format: 'plain',
             transformTemplates: [
                 'releases[$contains(version, "cmdline-tools;")].version',
-                '$map($, function($v) { $replace($v, /.*cmdline-tools;([^"]+).*/, "$1") })',
+                '$map($, function($v) { $replace($v, /.*cmdline-tools;([^content]+).*/, "$1") })',
                 '{"releases": $map($, function($v) { {"version": $v} })}',
             ],
         },
         android_platform_tools: {
-            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml?depName={{{depName}}}',
+            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml',
             format: 'plain',
             transformTemplates: [
                 'releases[$contains(version, "platform-tools_r")].version',
@@ -69,7 +69,7 @@
             ],
         },
         android_build_tools: {
-            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml?depName={{{depName}}}',
+            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml',
             format: 'plain',
             transformTemplates: [
                 'releases[$contains(version, "build-tools;")].version',
@@ -78,7 +78,7 @@
             ],
         },
         android_platform_version: {
-            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-3.xml?depName={{{depName}}}',
+            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-3.xml',
             format: 'plain',
             transformTemplates: [
                 'releases[$contains(version, "platforms;android-")].version',
