@@ -32,7 +32,7 @@ RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaqu
     addgroup -g "${USER_UID}" androidgroup && \
     adduser -D -u "${USER_UID}" -G androidgroup androiduser && \
     /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
-    /bin/sh /tmp/setup-android.sh \
+    /bin/bash /tmp/setup-android.sh \
     "${USER_UID}" \
     "${ANDROID_CMDLINE_TOOLS_ID}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \

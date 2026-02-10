@@ -1,11 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
-filter_apk_cache_warning() {
-    grep -v "WARNING: opening from cache" >&2
-}
-
-MIMALLOC_PATH=$1
+MIMALLOC_PATH="$1"
 
 # Install system packages
 apk add --no-cache \
@@ -16,12 +12,11 @@ apk add --no-cache \
     coreutils \
     openssh-client-default \
     libstdc++ \
-    mimalloc-global \
-    2> >(filter_apk_cache_warning)
+    mimalloc-global
 
 # Create symlink for mimalloc shared library
-MIMALLOC_REAL_PATH="/$(apk info -L mimalloc 2> >(filter_apk_cache_warning) | grep -m1 'libmimalloc\.so\.[0-9]$')"
-ln -s "$MIMALLOC_REAL_PATH" "$MIMALLOC_PATH"
+MIMALLOC_REAL_PATH=$(apk info -L mimalloc | grep -m1 'libmimalloc\.so\.[0-9]$')
+ln -s "/${MIMALLOC_REAL_PATH#/}" "$MIMALLOC_PATH"
 
 # Validate mimalloc
 if LD_PRELOAD="$MIMALLOC_PATH" MIMALLOC_VERBOSE=1 sh -c true 2>&1 | grep -q "mimalloc: process init"; then
@@ -33,5 +28,5 @@ fi
 
 # Summary
 echo "---BEGIN_APK_PACKAGES---"
-apk info -v 2> >(filter_apk_cache_warning) | sort
+apk info -v | sort
 echo "---END_APK_PACKAGES---"
