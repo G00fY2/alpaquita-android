@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-DOCKERFILE="${1:-Dockerfile}"
+DOCKERFILE=$1
 
 if [[ ! -f "$DOCKERFILE" ]]; then
     echo "ERROR: Dockerfile not found at $DOCKERFILE" >&2
