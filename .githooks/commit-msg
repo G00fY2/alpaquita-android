@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# 1. Get header and message
+MSG_FILE=$1
+HEADER=$(head -n 1 "$MSG_FILE")
+
+# 2. Strict Regex (Type-Enum, Lowercase, No Empty Subject)
+PATTERN="^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.+\))?(!)?: [a-z0-9].+"
+
+if [[ ! "$HEADER" =~ $PATTERN ]] || [ ${#HEADER} -gt 100 ] || [[ "$HEADER" =~ \.$ ]]; then
+    echo "--------------------------------------------------------"
+    echo "❌ COMMIT REJECTED"
+    echo "Rule violations found:"
+    echo "- Must use: feat, fix, ci, chore, refactor, etc. (lowercase)"
+    echo "- Subject must not start with Uppercase or end with a dot"
+    echo "- Header length must be <= 100 chars"
+    echo "--------------------------------------------------------"
+    exit 1
+fi
+
+# 3. Ensure blank line before body
+if [ "$(wc -l < "$MSG_FILE")" -gt 1 ] && [ -n "$(sed -n '2p' "$MSG_FILE")" ]; then
+    echo "❌ Error: Please provide a blank line before the commit body."
+    exit 1
+fi
