@@ -47,8 +47,7 @@ yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses > /dev/null
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${BUILD_TOOLS_VERSION}"
 
 # Install Android SDK Platform
-PLATFORM_ID=$(echo "$PLATFORM_VERSION" | sed -E 's/\.0(\.0)?$//')
-sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${PLATFORM_ID}"
+sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${PLATFORM_VERSION}"
 
 # Summary
 echo "---BEGIN_SDK_PACKAGES---"
