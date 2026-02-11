@@ -43,3 +43,4 @@ ENV LD_PRELOAD=$MIMALLOC_PATH
 
 USER ${USER_UID}
 
+CMD ["/bin/bash"]
