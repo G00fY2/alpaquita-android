@@ -80,10 +80,10 @@ $RECYCLE.BIN/
 ## IDEs
 ####################################################################################################
 # Visual Studio Code
-.vscode/*
+.vscode/
 *.vsix
 # JetBrains IDEs
-.idea/*
+.idea/
 *.iml
 *.ipr
 *.iws
