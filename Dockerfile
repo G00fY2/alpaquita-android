@@ -25,7 +25,7 @@ LABEL org.opencontainers.image.title="Alpaquita Android" \
 
 ENV ANDROID_HOME="/opt/android/sdk"
 ENV ANDROID_USER_HOME="${ANDROID_HOME}/.android-home"
-ENV PATH=$PATH:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
     --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
