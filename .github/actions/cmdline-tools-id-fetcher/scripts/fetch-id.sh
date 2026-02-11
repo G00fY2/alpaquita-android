@@ -2,12 +2,14 @@
 set -e
 set -o pipefail
 
-TARGET_VERSION=$1
-XML_URL="https://dl.google.com/android/repository/repository2-3.xml"
+target_version=$1
+xml_url="https://dl.google.com/android/repository/repository2-3.xml"
 
-raw_output=$(curl -fsSL "$XML_URL")
+# Fetch Google's XML repository.
+raw_output=$(curl -fsSL "$xml_url")
 
-cmdline_id=$(awk -v ver="$TARGET_VERSION" '
+# Extract the numeric build ID for the latest Linux cmdline-tools matching the target version.
+cmdline_id=$(awk -v ver="$target_version" '
     $0 ~ "remotePackage path=\"cmdline-tools;" ver "\"" { in_block=1 }
     in_block && /commandlinetools-linux-/ {
         if (match($0, /linux-([0-9]+)_latest/, arr)) {
@@ -20,9 +22,9 @@ cmdline_id=$(awk -v ver="$TARGET_VERSION" '
 
 # Validate result
 if [[ -z "$cmdline_id" ]]; then
-    echo "ERROR: Could not find cmdline-tools ID for version $TARGET_VERSION (Linux)" >&2
+    echo "ERROR: Could not find cmdline-tools ID for version $target_version (Linux)" >&2
     exit 1
 fi
 
-# Print only result to stdout
+# Print result to stdout
 echo "$cmdline_id"

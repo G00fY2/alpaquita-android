@@ -17,6 +17,6 @@ runs:
     - id: fetch-id
       shell: bash
       run: |
-        ID=$("${{ github.action_path }}/scripts/fetch-id.sh" "${{ inputs.version }}")
-        echo "Result: $ID"
-        echo "id=$ID" >> $GITHUB_OUTPUT
+        cmdline_id=$("${{ github.action_path }}/scripts/fetch-id.sh" "${{ inputs.version }}")
+        echo "Result: $cmdline_id"
+        echo "id=$cmdline_id" >> "$GITHUB_OUTPUT"
