@@ -22,7 +22,7 @@ jobs:
 
       - name: "Load versions.env"
         run: |
-          grep -v '^#' versions.env >> $GITHUB_ENV
+          grep -v '^#' versions.env >> "$GITHUB_ENV"
 
       - name: "Get supported jdk versions from Dockerfile"
         id: jdk-versions-extractor
@@ -54,6 +54,10 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v6
+
+      - name: "Set short git hash"
+        id: vars
+        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
