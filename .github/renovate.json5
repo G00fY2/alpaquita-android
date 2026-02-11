@@ -55,7 +55,7 @@
             format: 'plain',
             transformTemplates: [
                 'releases[$contains(version, "cmdline-tools;")].version',
-                '$map($, function($v) { $replace($v, /.*cmdline-tools;([^content]+).*/, "$1") })',
+                '$map($, function($v) { $replace($v, /.*cmdline-tools;([^"]+).*/, "$1") })',
                 '{"releases": $map($, function($v) { {"version": $v} })}',
             ],
         },
