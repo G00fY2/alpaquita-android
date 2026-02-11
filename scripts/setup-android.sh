@@ -1,53 +1,53 @@
 #!/bin/bash
 set -e
 
-USER_UID=$1
-CMDLINE_TOOLS_ID=$2
-PLATFORM_TOOLS_VERSION=$3
-BUILD_TOOLS_VERSION=$4
-PLATFORM_VERSION=$5
+user_uid=$1
+cmdline_tools_id=$2
+platform_tools_version=$3
+build_tools_version=$4
+platform_version=$5
 
-# Install Android SDK Platform-Tools with explicit version
+# Install Android SDK Platform-Tools with specified version
 mkdir -p "${ANDROID_HOME}/cmdline-tools"
 mkdir -p "${ANDROID_USER_HOME}"
 touch "${ANDROID_USER_HOME}/repositories.cfg"
-curl -fsSL "https://dl.google.com/android/repository/platform-tools_r${PLATFORM_TOOLS_VERSION}-linux.zip" -o /tmp/platform-tools.zip
+curl -fsSL "https://dl.google.com/android/repository/platform-tools_r${platform_tools_version}-linux.zip" -o /tmp/platform-tools.zip
 unzip -q /tmp/platform-tools.zip -d "${ANDROID_HOME}"
 rm /tmp/platform-tools.zip
 
-# Install Android SDK Command-line Tools including
-curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${CMDLINE_TOOLS_ID}_latest.zip" -o /tmp/commandline-tools.zip
+# Install Android SDK Command-line Tools with specified version
+curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${cmdline_tools_id}_latest.zip" -o /tmp/commandline-tools.zip
 unzip -q /tmp/commandline-tools.zip -d "${ANDROID_HOME}/cmdline-tools"
 mv "${ANDROID_HOME}/cmdline-tools/cmdline-tools" "${ANDROID_HOME}/cmdline-tools/latest"
 rm /tmp/commandline-tools.zip
 
-# Add package.xml to allow sdkmanager self detection
-FULL_VERSION=$(grep "Pkg.Revision" "${ANDROID_HOME}/cmdline-tools/latest/source.properties" | cut -d'=' -f2)
-MAJOR=$(echo "$FULL_VERSION" | cut -d'.' -f1)
-MINOR=$(echo "$FULL_VERSION" | cut -d'.' -s -f2)
-[ -z "$MINOR" ] && MINOR=0
+# Create package.xml based on source.properties to make cmdline-tools visible to sdkmanager
+full_version=$(grep "Pkg.Revision" "${ANDROID_HOME}/cmdline-tools/latest/source.properties" | cut -d'=' -f2)
+major=$(echo "$full_version" | cut -d'.' -f1)
+minor=$(echo "$full_version" | cut -d'.' -s -f2)
+[ -z "$minor" ] && minor=0
 cat <<EOF > "${ANDROID_HOME}/cmdline-tools/latest/package.xml"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:repository xmlns:ns2="http://schemas.android.com/repository/android/common/02" xmlns:ns5="http://schemas.android.com/repository/android/generic/02">
     <localPackage path="cmdline-tools;latest" obsolete="false">
         <type-details xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns5:genericDetailsType"/>
         <revision>
-            <major>$MAJOR</major>
-            <minor>$MINOR</minor>
+            <major>$major</major>
+            <minor>$minor</minor>
         </revision>
         <display-name>Android SDK Command-line Tools (latest)</display-name>
     </localPackage>
 </ns2:repository>
 EOF
 
-# Setup and accept licenses
+# Accept all Android SDK licenses
 yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses > /dev/null
 
-# Install Android SDK Build-Tools
-sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${BUILD_TOOLS_VERSION}"
+# Install Android SDK Build-Tools with specified version
+sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_version}"
 
-# Install Android SDK Platform
-sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${PLATFORM_VERSION}"
+# Install Android SDK Platform with specified version
+sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${platform_version}"
 
 # Summary
 echo "---BEGIN_SDK_PACKAGES---"
@@ -62,4 +62,4 @@ rm -rf "${ANDROID_USER_HOME}/cache"
 rm -rf "${ANDROID_USER_HOME}/build-cache"
 
 # Set ownership of ANDROID_HOME including ANDROID_USER_HOME to target user
-chown -R "${USER_UID}:${USER_UID}" "${ANDROID_HOME}"
+chown -R "${user_uid}:${user_uid}" "${ANDROID_HOME}"
