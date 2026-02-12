@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-mimalloc_path="$1"
+mimalloc_path=$1
 
 # Install system packages
 apk add --no-cache \
