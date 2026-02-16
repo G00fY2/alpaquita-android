@@ -18,10 +18,7 @@ jobs:
 
       - name: "Run sh-checker"
         uses: luizm/action-sh-checker@v0.10.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          sh_checker_comment: true
           sh_checker_checkbashisms_enable: true
 
   hadolint:
