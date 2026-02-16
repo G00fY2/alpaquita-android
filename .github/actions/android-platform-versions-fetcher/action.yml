@@ -5,7 +5,7 @@ inputs:
   max_version:
     description: 'The highest Android API level to include (e.g. 36.1)'
     required: true
-  max_majors:
+  max_major_versions_count:
     description: 'How many major versions to include'
     required: false
     default: '3'
@@ -23,6 +23,6 @@ runs:
       run: |
         json_result=$("${{ github.action_path }}/scripts/fetch-versions.sh" \
           "${{ inputs.max_version }}" \
-          "${{ inputs.max_majors }}")
+          "${{ inputs.max_major_versions_count }}")
         echo "Result: $json_result"
         echo "json=$json_result" >> "$GITHUB_OUTPUT"
