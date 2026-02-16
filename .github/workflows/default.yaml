@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'versions.env'
+      - 'Dockerfile'
+      - 'scripts/**'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   setup:
@@ -16,9 +23,15 @@ jobs:
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
       sha_short: ${{ env.SHA_SHORT }}
+      dry_mode: ${{ steps.set-build-mode.outputs.dry_mode || 'false' }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v6
+
+      - name: "Set build mode"
+        id: set-build-mode
+        if: github.event_name == 'pull_request'
+        run: echo "dry_mode=true" >> "$GITHUB_OUTPUT"
 
       - name: "Prepare environment variables"
         run: |
@@ -63,7 +76,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: false
+          push: ${{ needs.setup.outputs.dry_mode == 'false' }}
           tags: alpaquita-android-image:latest
           build-args: |
             BASE_IMAGE=${{ matrix.jdk_version }}
