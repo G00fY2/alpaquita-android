@@ -28,7 +28,7 @@ full_version=$(grep "Pkg.Revision" "${ANDROID_HOME}/cmdline-tools/latest/source.
 major=$(echo "$full_version" | cut -d'.' -f1)
 minor=$(echo "$full_version" | cut -d'.' -s -f2)
 [ -z "$minor" ] && minor=0
-cat <<EOF > "${ANDROID_HOME}/cmdline-tools/latest/package.xml"
+cat <<EOF >"${ANDROID_HOME}/cmdline-tools/latest/package.xml"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:repository xmlns:ns2="http://schemas.android.com/repository/android/common/02" xmlns:ns5="http://schemas.android.com/repository/android/generic/02">
     <localPackage path="cmdline-tools;latest" obsolete="false">

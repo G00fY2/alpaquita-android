@@ -18,7 +18,7 @@ cmdline_id=$(awk -v ver="$target_version" '
         }
     }
     /<\/remotePackage>/ { in_block=0 }
-' <<< "$raw_output")
+' <<<"$raw_output")
 
 # Validate result
 if [[ -z "$cmdline_id" ]]; then
