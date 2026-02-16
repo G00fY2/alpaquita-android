@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+# check=experimental=all;error=true
 
 ARG BASE_IMAGE=jdk25
 
