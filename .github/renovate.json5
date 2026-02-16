@@ -7,6 +7,28 @@
         {
             customType: 'regex',
             managerFilePatterns: [
+                '.github/workflows/*.yaml',
+            ],
+            matchStrings: [
+                'DOCKER_BUILDX_VERSION:\\s*(?<currentValue>.*)',
+            ],
+            depNameTemplate: 'docker/buildx',
+            datasourceTemplate: 'github-releases',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
+                '.github/workflows/*.yaml',
+            ],
+            matchStrings: [
+                'DOCKER_BUILDKIT_VERSION:\\s*(?<currentValue>.*)',
+            ],
+            depNameTemplate: 'moby/buildkit',
+            datasourceTemplate: 'github-releases',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
                 '/versions\\.env$/',
             ],
             matchStrings: [
