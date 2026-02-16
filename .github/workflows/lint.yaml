@@ -47,10 +47,7 @@ jobs:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           yamllint_comment: true
-          yamllint_config_datapath: |
-            extends: relaxed
-            rules:
-              line-length: {max: 120}
+          yamllint_config_datapath: '{"extends":"relaxed","rules":{"line-length":{"max":120}}}'
 
   actionlint:
     name: "Actionlint"
