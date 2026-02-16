@@ -7,10 +7,12 @@ platform_tools_version=$3
 build_tools_version=$4
 platform_version=$5
 
-# Install Android SDK Platform-Tools with specified version
+# Prepare Android SDK directories and configuration
 mkdir -p "${ANDROID_HOME}/cmdline-tools"
 mkdir -p "${ANDROID_USER_HOME}"
 touch "${ANDROID_USER_HOME}/repositories.cfg"
+
+# Install Android SDK Platform-Tools with specified version
 curl -fsSL "https://dl.google.com/android/repository/platform-tools_r${platform_tools_version}-linux.zip" -o /tmp/platform-tools.zip
 unzip -q /tmp/platform-tools.zip -d "${ANDROID_HOME}"
 rm /tmp/platform-tools.zip
