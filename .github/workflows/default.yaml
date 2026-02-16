@@ -76,15 +76,6 @@ jobs:
           outputs: |
             type=docker,dest=image.tar,compression=zstd,compression-level=3,force-compression=true
 
-      - name: "Upload Image Artifact"
-        if: false # Skip now because of matrix builds
-        uses: actions/upload-artifact@v6
-        with:
-          name: android-docker-image
-          path: image.tar
-          retention-days: 1
-          compression-level: 0
-
   build-summary:
     name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-24.04
