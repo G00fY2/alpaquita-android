@@ -21,6 +21,8 @@ runs:
     - id: fetch-versions
       shell: bash
       run: |
-        json_result=$("${{ github.action_path }}/scripts/fetch-versions.sh" "${{ inputs.max_version }}" "${{ inputs.max_majors }}")
+        json_result=$("${{ github.action_path }}/scripts/fetch-versions.sh" \
+          "${{ inputs.max_version }}" \
+          "${{ inputs.max_majors }}")
         echo "Result: $json_result"
         echo "json=$json_result" >> "$GITHUB_OUTPUT"
