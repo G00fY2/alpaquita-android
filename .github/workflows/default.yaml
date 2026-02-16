@@ -34,7 +34,10 @@ jobs:
 
       - name: "Set build mode"
         id: set-build-mode
-        if: github.event_name == 'pull_request'
+        # TODO remove second if condition for final setup
+        if: |
+          github.event_name == 'pull_request' ||
+          github.ref == 'refs/heads/main'
         run: echo "dry_run=true" >> "$GITHUB_OUTPUT"
 
       - name: "Prepare environment variables"
