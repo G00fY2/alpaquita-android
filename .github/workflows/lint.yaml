@@ -56,8 +56,7 @@ jobs:
       - name: "Run actionlint"
         uses: reviewdog/action-actionlint@v1.71.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-annotations
           fail_level: info
 
   docker-check:
