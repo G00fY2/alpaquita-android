@@ -96,8 +96,11 @@ jobs:
             ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
             ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
             ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
-          outputs: |
-            type=oci,dest=image.tar,compression=zstd,compression-level=9,force-compression=true
+          outputs: >-
+            ${{ needs.setup.outputs.dry_run == 'true'
+              && 'type=image,push=false,compression=zstd,compression-level=1,force-compression=true'
+              || 'type=registry,compression=zstd,compression-level=9,force-compression=true'
+            }}
 
   build-summary:
     name: "🏁 Build Matrix Complete"
