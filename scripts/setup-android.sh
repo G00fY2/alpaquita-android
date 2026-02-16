@@ -43,7 +43,7 @@ cat <<EOF >"${ANDROID_HOME}/cmdline-tools/latest/package.xml"
 EOF
 
 # Accept all Android SDK licenses
-yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses > /dev/null
+yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses >/dev/null
 
 # Install Android SDK Build-Tools with specified version
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_version}"
