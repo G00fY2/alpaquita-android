@@ -84,6 +84,7 @@ jobs:
         with:
           context: .
           push: ${{ needs.setup.outputs.dry_mode == 'false' }}
+          platforms: linux/amd64,linux/arm64
           tags: alpaquita-android-image:latest
           build-args: |
             BASE_IMAGE=${{ matrix.jdk_version }}
@@ -94,7 +95,7 @@ jobs:
             ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
             ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
           outputs: |
-            type=docker,dest=image.tar,compression=zstd,compression-level=3,force-compression=true
+            type=oci,dest=image.tar,compression=zstd,compression-level=9,force-compression=true
 
   build-summary:
     name: "🏁 Build Matrix Complete"
