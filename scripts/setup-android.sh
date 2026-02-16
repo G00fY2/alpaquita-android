@@ -28,7 +28,7 @@ full_version=$(grep "Pkg.Revision" "${ANDROID_HOME}/cmdline-tools/latest/source.
 major=$(echo "$full_version" | cut -d'.' -f1)
 minor=$(echo "$full_version" | cut -d'.' -s -f2)
 [ -z "$minor" ] && minor=0
-cat <<EOF > "${ANDROID_HOME}/cmdline-tools/latest/package.xml"
+cat <<EOF >"${ANDROID_HOME}/cmdline-tools/latest/package.xml"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:repository xmlns:ns2="http://schemas.android.com/repository/android/common/02" xmlns:ns5="http://schemas.android.com/repository/android/generic/02">
     <localPackage path="cmdline-tools;latest" obsolete="false">
@@ -43,7 +43,7 @@ cat <<EOF > "${ANDROID_HOME}/cmdline-tools/latest/package.xml"
 EOF
 
 # Accept all Android SDK licenses
-yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses > /dev/null
+yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses >/dev/null
 
 # Install Android SDK Build-Tools with specified version
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_version}"

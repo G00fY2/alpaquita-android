@@ -4,7 +4,17 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'versions.env'
+      - 'Dockerfile'
+      - 'scripts/**'
   pull_request:
+    branches:
+      - main
+
+env:
+  DOCKER_BUILDX_VERSION: v0.31.1
+  DOCKER_BUILDKIT_VERSION: v0.27.1
 
 jobs:
   setup:
@@ -17,9 +27,15 @@ jobs:
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
       sha_short: ${{ env.SHA_SHORT }}
+      dry_run: ${{ steps.set-build-mode.outputs.dry_run || 'false' }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v6
+
+      - name: "Set build mode"
+        id: set-build-mode
+        if: github.event_name == 'pull_request'
+        run: echo "dry_run=true" >> "$GITHUB_OUTPUT"
 
       - name: "Prepare environment variables"
         run: |
@@ -47,7 +63,9 @@ jobs:
   build:
     needs: setup
     runs-on: ubuntu-24.04
-    name: "📦 Build (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})"
+    name: >
+      ${{ needs.setup.outputs.dry_run == 'true' && '🧪 Validate' || '📦 Build' }}
+      (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     strategy:
       matrix:
         jdk_version: ${{ fromJson(needs.setup.outputs.jdk_versions) }}
@@ -59,12 +77,15 @@ jobs:
 
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+          driver-opts: image=moby/buildkit:${{ env.DOCKER_BUILDKIT_VERSION }}
 
       - name: "Build Docker Image"
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: false
+          push: ${{ needs.setup.outputs.dry_run == 'false' }}
           platforms: linux/amd64,linux/arm64
           tags: alpaquita-android-image:latest
           build-args: |
@@ -75,17 +96,11 @@ jobs:
             ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
             ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
             ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
-          outputs: |
-            type=oci,dest=image.tar,compression=zstd,compression-level=9,force-compression=true
-
-      - name: "Upload Image Artifact"
-        if: false # Skip now because of matrix builds
-        uses: actions/upload-artifact@v6
-        with:
-          name: android-docker-image
-          path: image.tar
-          retention-days: 1
-          compression-level: 0
+          outputs: >-
+            ${{ needs.setup.outputs.dry_run == 'true'
+              && 'type=image,push=false,compression=zstd,compression-level=1,force-compression=true'
+              || 'type=registry,compression=zstd,compression-level=9,force-compression=true'
+            }}
 
   build-summary:
     name: "🏁 Build Matrix Complete"

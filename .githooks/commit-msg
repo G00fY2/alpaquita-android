@@ -19,7 +19,7 @@ if [[ ! "$header" =~ $pattern ]] || [ ${#header} -gt 100 ] || [[ "$header" =~ \.
 fi
 
 # 3. Ensure blank line before body
-if [ "$(wc -l < "$msg_file")" -gt 1 ] && [ -n "$(sed -n '2p' "$msg_file")" ]; then
+if [ "$(wc -l <"$msg_file")" -gt 1 ] && [ -n "$(sed -n '2p' "$msg_file")" ]; then
     echo "❌ Error: Please provide a blank line before the commit body."
     exit 1
 fi
