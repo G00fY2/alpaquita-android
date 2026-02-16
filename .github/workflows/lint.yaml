@@ -23,16 +23,6 @@ jobs:
         with:
           sh_checker_checkbashisms_enable: true
 
-  hadolint:
-    name: "Hadolint"
-    runs-on: ubuntu-24.04
-    steps:
-      - name: "Checkout repository"
-        uses: actions/checkout@v6
-
-      - name: "Run Hadolint"
-        uses: hadolint/hadolint-action@v3.3.0
-
   yamllint:
     name: "Yamllint"
     runs-on: ubuntu-24.04
@@ -62,8 +52,18 @@ jobs:
           reporter: github-annotations
           fail_level: info
 
-  docker-check:
-    name: "Docker Buildx Check"
+  hadolint:
+    name: "Hadolint"
+    runs-on: ubuntu-24.04
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v6
+
+      - name: "Run Hadolint"
+        uses: hadolint/hadolint-action@v3.3.0
+
+  docker-build-checks:
+    name: "Docker Buildx Checks"
     runs-on: ubuntu-24.04
     steps:
       - name: "Checkout repository"
@@ -75,7 +75,7 @@ jobs:
           version: v0.31.1
           driver-opts: image=moby/buildkit:v0.27.1
 
-      - name: "Run Buildx Check"
+      - name: "Run Buildx Checks"
         uses: docker/build-push-action@v6
         with:
           context: .
