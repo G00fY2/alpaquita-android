@@ -27,7 +27,7 @@ jobs:
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
       sha_short: ${{ env.SHA_SHORT }}
-      dry_mode: ${{ steps.set-build-mode.outputs.dry_mode || 'false' }}
+      dry_run: ${{ steps.set-build-mode.outputs.dry_run || 'false' }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v6
@@ -35,7 +35,7 @@ jobs:
       - name: "Set build mode"
         id: set-build-mode
         if: github.event_name == 'pull_request'
-        run: echo "dry_mode=true" >> "$GITHUB_OUTPUT"
+        run: echo "dry_run=true" >> "$GITHUB_OUTPUT"
 
       - name: "Prepare environment variables"
         run: |
@@ -64,7 +64,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-24.04
     name: >
-      ${{ needs.setup.outputs.dry_mode == 'true' && '🧪 Validate' || '📦 Build' }}
+      ${{ needs.setup.outputs.dry_run == 'true' && '🧪 Validate' || '📦 Build' }}
       (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     strategy:
       matrix:
@@ -85,7 +85,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ needs.setup.outputs.dry_mode == 'false' }}
+          push: ${{ needs.setup.outputs.dry_run == 'false' }}
           platforms: linux/amd64,linux/arm64
           tags: alpaquita-android-image:latest
           build-args: |
