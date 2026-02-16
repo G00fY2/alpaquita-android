@@ -1,4 +1,3 @@
----
 name: 'JDK Version Extractor'
 description: 'Extracts JDK image aliases from a Dockerfile using a bash script'
 

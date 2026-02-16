@@ -1,4 +1,3 @@
----
 name: 'Android Command-line Tools ID Fetcher'
 description: 'Extracts the specific Linux download ID for a given cmdline-tools version'
 
