@@ -1,0 +1,25 @@
+name: 'Image Analyzer'
+description: 'Installs dive and analyzes a docker image for efficiency using bash scripts'
+
+inputs:
+  image:
+    description: 'The image to analyze'
+    required: true
+  dive-version:
+    description: 'The version of dive to use (normalizes leading v)'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Dive
+      shell: bash
+      run: |
+        "${{ github.action_path }}/scripts/install-dive.sh" "${{ inputs.dive-version }}"
+
+    - name: Analyze Image
+      id: analyze
+      shell: bash
+      run: |
+        analysis_result=$("${{ github.action_path }}/scripts/analyze-image.sh" "${{ inputs.image }}")
+        echo "Result: $analysis_result"

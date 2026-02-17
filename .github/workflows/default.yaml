@@ -88,7 +88,7 @@ jobs:
         with:
           context: .
           push: ${{ needs.setup.outputs.dry_run == 'false' }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ needs.setup.outputs.dry_run == 'true' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
           tags: alpaquita-android-image:latest
           build-args: |
             BASE_IMAGE=${{ matrix.jdk_version }}
@@ -100,9 +100,19 @@ jobs:
             ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
           outputs: >-
             ${{ needs.setup.outputs.dry_run == 'true'
-              && 'type=image,push=false,compression=zstd,compression-level=1,force-compression=true'
+              && 'type=docker,push=false,compression=zstd,compression-level=1,force-compression=true'
               || 'type=registry,compression=zstd,compression-level=9,force-compression=true'
             }}
+
+      - name: "Run Dive"
+        if: needs.setup.outputs.dry_run == 'true'
+        id: dive-analyze
+        uses: ./.github/actions/dive-analyze
+        env:
+          DIVE_VERSION: v0.13.1
+        with:
+          image: alpaquita-android-image:latest
+          dive-version: ${{ env.DIVE_VERSION }}
 
   build-summary:
     name: "🏁 Build Matrix Complete"

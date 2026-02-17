@@ -9,17 +9,12 @@ jobs:
   sh-checker:
     name: "Shell Checker (shellcheck, shfmt, checkbashisms)"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v6
 
       - name: "Run sh-checker"
         uses: luizm/action-sh-checker@v0.10.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           sh_checker_checkbashisms_enable: true
 
@@ -32,10 +27,8 @@ jobs:
 
       - name: "Run Yamllint"
         uses: karancode/yamllint-github-action@v3.0.0
-        env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          yamllint_comment: true
+          yamllint_strict: true
           yamllint_config_datapath: '{"extends":"relaxed","rules":{"line-length":{"max":120}}}'
 
   actionlint:
@@ -48,9 +41,10 @@ jobs:
       - name: "Run actionlint"
         uses: reviewdog/action-actionlint@v1.71.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-annotations
+          level: info
           fail_level: info
+          filter_mode: nofilter
 
   hadolint:
     name: "Hadolint"
@@ -61,6 +55,12 @@ jobs:
 
       - name: "Run Hadolint"
         uses: hadolint/hadolint-action@v3.3.0
+        with:
+          verbose: true
+
+      - name: "Hadolint Results"
+        if: always()
+        run: echo "${HADOLINT_RESULTS:-No issues found.}"
 
   docker-build-checks:
     name: "Docker Buildx Checks"

@@ -29,6 +29,17 @@
         {
             customType: 'regex',
             managerFilePatterns: [
+                '.github/workflows/*.yaml',
+            ],
+            matchStrings: [
+                'DIVE_VERSION:\\s*(?<currentValue>.*)',
+            ],
+            depNameTemplate: 'wagoodman/dive',
+            datasourceTemplate: 'github-releases',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
                 '/versions\\.env$/',
             ],
             matchStrings: [
