@@ -52,7 +52,7 @@ jobs:
           reporter: github-pr-review
           fail_level: info
           filter_mode: nofilter
-          yamllint_flags: '. -d "{extends:relaxed,rules:{line-length:{max:120}}}"'
+          yamllint_flags: ". -d '{extends: relaxed, rules: {line-length: {max: 120}}}'"
 
   actionlint:
     name: "Actionlint"
