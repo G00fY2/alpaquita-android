@@ -104,6 +104,16 @@ jobs:
               || 'type=registry,compression=zstd,compression-level=9,force-compression=true'
             }}
 
+      - name: "Run Dive"
+        if: needs.setup.outputs.dry_run == 'true'
+        id: dive-analyze
+        uses: ./.github/actions/dive-analyze
+        env:
+          DIVE_VERSION: v0.13.1
+        with:
+          image: alpaquita-android-image:latest
+          dive-version: ${{ env.DIVE_VERSION }}
+
   build-summary:
     name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-24.04
