@@ -22,4 +22,4 @@ runs:
       shell: bash
       run: |
         analysis_result=$("${{ github.action_path }}/scripts/analyze-image.sh" "${{ inputs.image }}")
-         echo "Result: $analysis_result"
+        echo "Result: $analysis_result"
