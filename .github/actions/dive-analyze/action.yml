@@ -14,7 +14,8 @@ runs:
   steps:
     - name: Install Dive
       shell: bash
-      run: "${{ github.action_path }}/scripts/install-dive.sh" "${{ inputs.dive-version }}"
+      run: |
+        "${{ github.action_path }}/scripts/install-dive.sh" "${{ inputs.dive-version }}"
 
     - name: Analyze Image
       id: analyze
