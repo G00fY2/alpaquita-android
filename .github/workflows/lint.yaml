@@ -54,13 +54,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: "Run Hadolint"
+        id: hadolint
         uses: hadolint/hadolint-action@v3.3.0
         with:
           verbose: true
 
       - name: "Print Results from Output"
         if: always()
-        run: echo "$HADOLINT_RESULTS"
+        run: echo "${{ steps.hadolint.outputs.results }}"
 
   docker-build-checks:
     name: "Docker Buildx Checks"
