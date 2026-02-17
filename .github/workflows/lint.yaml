@@ -36,7 +36,7 @@ jobs:
           level: info
           fail_on_error: true
           filter_mode: nofilter
-          shfmt_flags: '-i 2 -ci'
+          shfmt_flags: '-ci -d'
 
   yamllint:
     name: "Yamllint"
