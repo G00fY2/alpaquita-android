@@ -33,9 +33,10 @@ jobs:
         uses: reviewdog/action-shfmt@v1.0.4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          fail_level: info
+          level: info
+          fail_on_error: true
           filter_mode: nofilter
+          shfmt_flags: '-i 2 -ci'
 
   yamllint:
     name: "Yamllint"
@@ -51,7 +52,7 @@ jobs:
           reporter: github-pr-review
           fail_level: info
           filter_mode: nofilter
-          yamllint_flags: '. -d "{extends: relaxed, rules: {line-length: {max: 120}}}"'
+          yamllint_flags: '. -d "{extends:relaxed,rules:{line-length:{max:120}}}"'
 
   actionlint:
     name: "Actionlint"
@@ -77,6 +78,8 @@ jobs:
 
       - name: "Run Hadolint"
         uses: hadolint/hadolint-action@v3.3.0
+        with:
+          verbose: true
 
   docker-build-checks:
     name: "Docker Buildx Checks"
