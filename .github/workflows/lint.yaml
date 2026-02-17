@@ -35,8 +35,9 @@ jobs:
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          yamllint_comment: true
+          yamllint_strict: true
           yamllint_config_datapath: '{"extends":"relaxed","rules":{"line-length":{"max":120}}}'
+          yamllint_comment: true
 
   actionlint:
     name: "Actionlint"
