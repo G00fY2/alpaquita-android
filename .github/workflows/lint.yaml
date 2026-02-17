@@ -42,6 +42,7 @@ jobs:
         uses: reviewdog/action-actionlint@v1.71.0
         with:
           reporter: github-annotations
+          level: info
           fail_level: info
           filter_mode: nofilter
 
