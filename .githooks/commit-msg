@@ -1,25 +1,54 @@
 #!/bin/bash
 
-# 1. Get header and message
+# Reference: https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13
+# Note: This script follows the linked Conventional Commit Messages cheatsheet with two exceptions:
+# 1. 'ci' is used instead of 'ops' for pipeline-related changes.
+# 2. The mandatory 'BREAKING CHANGE:' footer requirement is disabled for this project.
+
+# 1. Get header and full message content
 msg_file=$1
 header=$(head -n 1 "$msg_file")
+full_msg=$(cat "$msg_file")
 
-# 2. Strict Regex (Type-Enum, Lowercase, No Empty Subject)
-pattern="^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.+\))?(!)?: [a-z0-9].+"
+# 2. Regex Definitions
+conv_pattern="^(feat|fix|refactor|perf|style|test|docs|build|ci|chore)(\(.+\))?(!)?: [a-z0-9].+"
 
-if [[ ! "$header" =~ $pattern ]] || [ ${#header} -gt 100 ] || [[ "$header" =~ \.$ ]]; then
+# Patterns for standard Git-generated messages
+merge_pattern="^Merge (branch|remote-tracking branch|tag) .+"
+revert_pattern="^Revert \".+\""
+
+# 3. Validate Header Format
+if [[ ! "$header" =~ $conv_pattern ]] && [[ ! "$header" =~ $merge_pattern ]] && [[ ! "$header" =~ $revert_pattern ]]; then
     echo "--------------------------------------------------------"
-    echo "❌ COMMIT REJECTED"
-    echo "Rule violations found:"
-    echo "- Must use: feat, fix, ci, chore, refactor, etc. (lowercase)"
-    echo "- Subject must not start with Uppercase or end with a dot"
-    echo "- Header length must be <= 100 chars"
+    echo "❌ COMMIT REJECTED: Invalid Header Format"
+    echo "Allowed types: feat, fix, refactor, perf, style, test, docs, build, ci, chore"
+    echo "Example: feat(api)!: add status endpoint"
+    echo "Rules:"
+    echo "- Subject must start with lowercase"
+    echo "- No period (.) at the end"
     echo "--------------------------------------------------------"
     exit 1
 fi
 
-# 3. Ensure blank line before body
-if [ "$(wc -l <"$msg_file")" -gt 1 ] && [ -n "$(sed -n '2p' "$msg_file")" ]; then
-    echo "❌ Error: Please provide a blank line before the commit body."
-    exit 1
+# 4. Length and Period Checks (exempting standard Merges)
+if [[ ! "$header" =~ $merge_pattern ]]; then
+    if [ ${#header} -gt 100 ]; then
+        echo "❌ Error: Header is too long (> 100 chars)."
+        exit 1
+    fi
+    if [[ "$header" =~ \.$ ]]; then
+        echo "❌ Error: Description must not end with a period (.)."
+        exit 1
+    fi
 fi
+
+# 5. Ensure blank line before body (if body exists)
+if [ "$(echo "$full_msg" | wc -l)" -gt 1 ]; then
+    second_line=$(sed -n '2p' "$msg_file")
+    if [ -n "$second_line" ]; then
+        echo "❌ Error: Use an empty line as separator before the body."
+        exit 1
+    fi
+fi
+
+exit 0
