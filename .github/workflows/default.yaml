@@ -63,7 +63,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-24.04
     name: >
-      ${{ needs.setup.outputs.dry_run == 'true' && '🧪 Validate' || '📦 Build' }}
+      ${{ needs.setup.outputs.dry_run == 'true' && '🔬 Validate' || '📦 Build' }}
       (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     strategy:
       matrix:
@@ -100,7 +100,7 @@ jobs:
           platforms: linux/amd64
           tags: alpaquita-android-image:latest
           cache-from: type=gha
-          build-args: ${{ env.SHARED_BUILD_ARGS }}
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
           outputs: type=docker,push=false,compression=zstd,compression-level=9,force-compression=true
 
       - name: "Run Dive"
@@ -128,7 +128,7 @@ jobs:
           tags: alpaquita-android-image:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: ${{ env.SHARED_BUILD_ARGS }}
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
           outputs: type=registry,compression=zstd,compression-level=9,force-compression=true
 
   build-summary:
