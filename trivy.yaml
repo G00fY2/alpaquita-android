@@ -1,0 +1,7 @@
+format: table
+exit-code: 1
+severity:
+  - CRITICAL
+  - HIGH
+vulnerability:
+  ignore-unfixed: true
