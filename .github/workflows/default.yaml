@@ -118,6 +118,7 @@ jobs:
           scan-type: image
           image-ref: alpaquita-android-image:latest
           trivy-config: trivy.yaml
+          trivyignores: .trivyignore.yaml
 
       - name: "Build Docker Image and push images"
         if: needs.setup.outputs.dry_run == 'false'

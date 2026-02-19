@@ -1,0 +1,9 @@
+vulnerabilities:
+  - id: CVE-2021-22569 # Reported: https://issuetracker.google.com/issues/482060894
+    paths:
+      - "opt/android/sdk/cmdline-tools/latest/lib/external/lint-psi/kotlin-compiler/kotlin-compiler-mvn.jar"
+    statement: "Internal protobuf dependency in Kotlin compiler. Low risk in CI environment."
+  - id: CVE-2024-7254 # Reported: https://issuetracker.google.com/issues/482060894
+    paths:
+      - "opt/android/sdk/cmdline-tools/latest/lib/external/lint-psi/kotlin-compiler/kotlin-compiler-mvn.jar"
+    statement: "StackOverflow vulnerability in protobuf parser. Not exploitable during standard Android builds."
