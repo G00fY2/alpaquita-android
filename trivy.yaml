@@ -1,5 +1,6 @@
 format: table
 exit-code: 1
+ignorefile: ".trivyignore.yaml"
 severity:
   - CRITICAL
   - HIGH
