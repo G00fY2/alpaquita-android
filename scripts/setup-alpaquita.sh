@@ -25,8 +25,3 @@ else
     echo "Error: mimalloc validation failed! The library was found but not initialized." >&2
     exit 1
 fi
-
-# Summary
-echo "---BEGIN_APK_PACKAGES---"
-apk info -v | sort
-echo "---END_APK_PACKAGES---"
