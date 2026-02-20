@@ -25,6 +25,7 @@ LABEL org.opencontainers.image.title="Alpaquita Android" \
       org.opencontainers.image.licenses="MIT"
 
 ENV ANDROID_HOME="/opt/android/sdk"
+ENV ANDROID_SDK_ROOT=${ANDROID_HOME}
 ENV ANDROID_USER_HOME="${ANDROID_HOME}/.android-home"
 ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
