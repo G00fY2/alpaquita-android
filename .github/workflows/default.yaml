@@ -111,15 +111,22 @@ jobs:
         env:
           DIVE_VERSION: v0.13.1
         with:
-          image: alpaquita-android-image:latest
+          image-ref: alpaquita-android-image:latest
           dive-version: ${{ env.DIVE_VERSION }}
 
       - name: "Run Trivy"
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          scan-type: image
           image-ref: alpaquita-android-image:latest
+          scan-type: image
           trivy-config: trivy.yaml
+
+      - name: "Run image and generate Manifest"
+        uses: ./.github/actions/generate-manifest
+        with:
+          image-ref: alpaquita-android-image:latest
+          jdk_version: ${{ matrix.jdk_version }}
+          android_api: ${{ matrix.platform_version }}
 
       - name: "Build Docker Image and conditionally push images"
         uses: docker/build-push-action@v6

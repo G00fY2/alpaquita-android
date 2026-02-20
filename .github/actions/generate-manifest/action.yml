@@ -1,0 +1,24 @@
+name: "Run Image & Generate Manifest"
+description: "Validates the Android image and generates a markdown manifest"
+
+inputs:
+  image-ref:
+    description: 'The image to analyze'
+    required: true
+  jdk_version:
+    description: 'Image jdk version'
+    required: true
+  android_api:
+    description: 'Image android api version'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - id: generate-manifest
+      shell: bash
+      run: |
+        "${{ github.action_path }}/scripts/generate-manifest.sh" \
+          "${{ inputs.image-ref }}" \
+          "${{ inputs.jdk_version }}" \
+          "${{ inputs.android_api }}"
