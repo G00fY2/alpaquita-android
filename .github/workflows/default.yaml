@@ -71,6 +71,7 @@ jobs:
         platform_version: ${{ fromJson(needs.setup.outputs.platform_versions) }}
 
     env:
+      DOCKER_COMPRESSION: "compression=zstd,compression-level=${{ needs.setup.outputs.dry_run == 'true' && '1' || '9' }},force-compression=true"
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=${{ matrix.jdk_version }}
         IMAGE_VERSION=0.0.1
@@ -83,6 +84,9 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v6
+
+      - name: "Set up QEMU"
+        uses: docker/setup-qemu-action@v3
 
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
@@ -97,11 +101,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          load: true
           platforms: linux/amd64
           tags: alpaquita-android-image:latest
-          cache-from: type=gha
+          cache-from: |
+            type=gha
+            type=gha,scope=${{ github.ref_name }}
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
-          outputs: type=docker,push=false,compression=zstd,compression-level=9,force-compression=true
 
       - name: "Run Dive"
         id: dive-analyze
@@ -119,17 +125,21 @@ jobs:
           image-ref: alpaquita-android-image:latest
           trivy-config: trivy.yaml
 
-      - name: "Build Docker Image and push images"
-        if: needs.setup.outputs.dry_run == 'false'
+      - name: "Build Docker Image and conditionally push images"
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           tags: alpaquita-android-image:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=gha
+            type=gha,scope=${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
-          outputs: type=registry,compression=zstd,compression-level=9,force-compression=true
+          outputs: |
+            type=image
+            push=${{ needs.setup.outputs.dry_run == 'true' && 'false' || 'true' }}
+            ${{ env.DOCKER_COMPRESSION }}
 
   build-summary:
     name: "🏁 Build Matrix Complete"
