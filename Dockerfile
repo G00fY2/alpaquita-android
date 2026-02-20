@@ -1,10 +1,10 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:b6afd42430b15f2d2a4c5a02b919e98a525b785b1aaff16747d2f623364e39b6
 # check=experimental=all;error=true
 
 ARG BASE_IMAGE=jdk25
 
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-21-glibc AS jdk21
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25-glibc AS jdk25
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-21-glibc@sha256:e820a6ecc71d404c224d123160ef3b229ee44690fa78eec87f7fde11c177df9c AS jdk21
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25-glibc@sha256:96d9be84078ddfd88a927c5194decf5a2f648f884457d4024afd577930317def AS jdk25
 
 FROM ${BASE_IMAGE}
 
