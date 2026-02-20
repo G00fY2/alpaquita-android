@@ -136,7 +136,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
           outputs: |
-            type=image
+            type=${{ needs.setup.outputs.dry_run == 'true' && 'cacheonly' || 'image' }}
             push=${{ needs.setup.outputs.dry_run == 'false' }}
             compression=zstd
             compression-level=${{ needs.setup.outputs.dry_run == 'true' && '1' || '9' }}
