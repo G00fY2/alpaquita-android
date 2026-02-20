@@ -71,7 +71,6 @@ jobs:
         platform_version: ${{ fromJson(needs.setup.outputs.platform_versions) }}
 
     env:
-      DOCKER_COMPRESSION: "compression=zstd,compression-level=${{ needs.setup.outputs.dry_run == 'true' && '1' || '9' }},force-compression=true"
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=${{ matrix.jdk_version }}
         IMAGE_VERSION=0.0.1
@@ -138,8 +137,10 @@ jobs:
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
           outputs: |
             type=image
-            push=${{ needs.setup.outputs.dry_run == 'true' && 'false' || 'true' }}
-            ${{ env.DOCKER_COMPRESSION }}
+            push=${{ needs.setup.outputs.dry_run == 'false' }}
+            compression=zstd
+            compression-level=${{ needs.setup.outputs.dry_run == 'true' && '1' || '9' }}
+            force-compression=true
 
   build-summary:
     name: "🏁 Build Matrix Complete"
