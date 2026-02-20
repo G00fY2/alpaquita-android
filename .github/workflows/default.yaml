@@ -63,16 +63,29 @@ jobs:
     needs: setup
     runs-on: ubuntu-24.04
     name: >
-      ${{ needs.setup.outputs.dry_run == 'true' && '🧪 Validate' || '📦 Build' }}
+      ${{ needs.setup.outputs.dry_run == 'true' && '🔬 Validate' || '📦 Build' }}
       (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     strategy:
       matrix:
         jdk_version: ${{ fromJson(needs.setup.outputs.jdk_versions) }}
         platform_version: ${{ fromJson(needs.setup.outputs.platform_versions) }}
 
+    env:
+      DOCKER_BUILD_ARGS: |
+        BASE_IMAGE=${{ matrix.jdk_version }}
+        IMAGE_VERSION=0.0.1
+        GIT_HASH=${{ needs.setup.outputs.sha_short }}
+        ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
+        ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
+        ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
+        ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
+
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: "Set up QEMU"
+        uses: docker/setup-qemu-action@v3
 
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
@@ -83,36 +96,51 @@ jobs:
           version: ${{ env.DOCKER_BUILDX_VERSION }}
           driver-opts: image=moby/buildkit:${{ env.DOCKER_BUILDKIT_VERSION }}
 
-      - name: "Build Docker Image"
+      - name: "Build Docker Image without pushing"
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
-          push: ${{ needs.setup.outputs.dry_run == 'false' }}
-          platforms: ${{ needs.setup.outputs.dry_run == 'true' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+          load: true
+          platforms: linux/amd64
           tags: alpaquita-android-image:latest
-          build-args: |
-            BASE_IMAGE=${{ matrix.jdk_version }}
-            IMAGE_VERSION=0.0.1
-            GIT_HASH=${{ needs.setup.outputs.sha_short }}
-            ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
-            ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
-            ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
-            ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
-          outputs: >-
-            ${{ needs.setup.outputs.dry_run == 'true'
-              && 'type=docker,push=false,compression=zstd,compression-level=1,force-compression=true'
-              || 'type=registry,compression=zstd,compression-level=9,force-compression=true'
-            }}
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
 
       - name: "Run Dive"
-        if: needs.setup.outputs.dry_run == 'true'
         id: dive-analyze
         uses: ./.github/actions/dive-analyze
         env:
           DIVE_VERSION: v0.13.1
         with:
-          image: alpaquita-android-image:latest
+          image-ref: alpaquita-android-image:latest
           dive-version: ${{ env.DIVE_VERSION }}
+
+      - name: "Run Trivy"
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: alpaquita-android-image:latest
+          scan-type: image
+          trivy-config: trivy.yaml
+
+      - name: "Run image and generate Manifest"
+        uses: ./.github/actions/generate-manifest
+        with:
+          image-ref: alpaquita-android-image:latest
+          jdk_version: ${{ matrix.jdk_version }}
+          android_api: ${{ matrix.platform_version }}
+
+      - name: "Build Docker Image and conditionally push images"
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          tags: alpaquita-android-image:latest
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
+          outputs: |
+            type=${{ needs.setup.outputs.dry_run == 'true' && 'cacheonly' || 'image' }}
+            push=${{ needs.setup.outputs.dry_run == 'false' }}
+            compression=zstd
+            compression-level=${{ needs.setup.outputs.dry_run == 'true' && '1' || '9' }}
+            force-compression=true
 
   build-summary:
     name: "🏁 Build Matrix Complete"

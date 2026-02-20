@@ -51,11 +51,6 @@ sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_ver
 # Install Android SDK Platform with specified version
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${platform_version}"
 
-# Summary
-echo "---BEGIN_SDK_PACKAGES---"
-sdkmanager --list_installed --verbose
-echo "---END_SDK_PACKAGES---"
-
 # Cleanup
 rm -rf "${ANDROID_HOME}/.temp"
 rm -rf "${ANDROID_HOME}/.patches"
