@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: "Run sh-checker"
-        uses: luizm/action-sh-checker@v0.10.0
+        uses: luizm/action-sh-checker@883217215b11c1fabbf00eb1a9a041f62d74c744 # v0.10.0
         with:
           sh_checker_checkbashisms_enable: true
 
@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: "Run Yamllint"
-        uses: karancode/yamllint-github-action@v3.0.0
+        uses: karancode/yamllint-github-action@4052d365f09b8d34eb552c363d1141fd60e2aeb2 # v3.0.0
         with:
           yamllint_strict: true
           yamllint_config_datapath: '{"extends":"relaxed","rules":{"line-length":{"max":120}}}'
@@ -36,10 +36,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: "Run actionlint"
-        uses: reviewdog/action-actionlint@v1.71.0
+        uses: reviewdog/action-actionlint@0d952c597ef8459f634d7145b0b044a9699e5e43 # v1.71.0
         with:
           reporter: github-annotations
           level: info
@@ -51,10 +51,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: "Run Hadolint"
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
           verbose: true
 
@@ -67,10 +67,10 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: "Set up Docker Buildx"
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
         env:
           DOCKER_BUILDX_VERSION: v0.31.1
           DOCKER_BUILDKIT_VERSION: v0.27.1
@@ -79,7 +79,7 @@ jobs:
           driver-opts: image=moby/buildkit:${{ env.DOCKER_BUILDKIT_VERSION }}
 
       - name: "Run Buildx Checks"
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           call: check
