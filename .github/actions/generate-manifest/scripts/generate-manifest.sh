@@ -4,7 +4,7 @@ set -euo pipefail
 image=$1
 jdk_version=$2
 android_api=$3
-report_file="build_report.md"
+report_file=$4
 
 : >"$report_file"
 
@@ -49,8 +49,3 @@ report_file="build_report.md"
     echo "</details>" # End Matrix-Slot details
     echo ""
 } >>"$report_file"
-
-# Add to GitHub Summary if running in CI
-if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
-    cat "$report_file" >>"$GITHUB_STEP_SUMMARY"
-fi

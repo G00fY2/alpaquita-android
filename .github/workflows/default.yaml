@@ -116,6 +116,7 @@ jobs:
           DIVE_VERSION: v0.13.1
         with:
           image-ref: alpaquita-android-image:latest
+          dive-ci-config: .github/.dive-ci
           dive-version: ${{ env.DIVE_VERSION }}
 
       - name: "Run Trivy"
@@ -123,7 +124,7 @@ jobs:
         with:
           image-ref: alpaquita-android-image:latest
           scan-type: image
-          trivy-config: trivy.yaml
+          trivy-config: .github/trivy.yaml
 
       - name: "Run image and generate Manifest"
         uses: ./.github/actions/generate-manifest

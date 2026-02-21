@@ -33,7 +33,7 @@ jobs:
         uses: karancode/yamllint-github-action@4052d365f09b8d34eb552c363d1141fd60e2aeb2 # v3.0.0
         with:
           yamllint_strict: true
-          yamllint_config_datapath: '{"extends":"relaxed","rules":{"line-length":{"max":120}}}'
+          yamllint_config_filepath: .github/.yamllint.yaml
 
   actionlint:
     name: "Actionlint"

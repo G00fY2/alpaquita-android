@@ -5,6 +5,9 @@ inputs:
   image-ref:
     description: 'The image to analyze'
     required: true
+  dive-ci-config:
+    description: 'Path to .dive-ci config'
+    required: true
   dive-version:
     description: 'The version of dive to use (normalizes leading v)'
     required: true
@@ -21,5 +24,6 @@ runs:
       id: analyze
       shell: bash
       run: |
-        analysis_result=$("${{ github.action_path }}/scripts/analyze-image.sh" "${{ inputs.image-ref }}")
-        echo "Result: $analysis_result"
+        "${{ github.action_path }}/scripts/analyze-image.sh" \
+          "${{ inputs.image-ref }}" \
+          "${{ inputs.dive-ci-config }}"
