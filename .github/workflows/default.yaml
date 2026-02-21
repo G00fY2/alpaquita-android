@@ -132,19 +132,16 @@ jobs:
           jdk_version: ${{ matrix.jdk_version }}
           android_api: ${{ matrix.platform_version }}
 
-      - name: "Build Docker Image and conditionally push images"
+      - name: "Build and push Docker Images"
+        if: ${{ needs.setup.outputs.dry_run == 'false' }}
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
-          platforms: ${{ needs.setup.outputs.dry_run == 'true' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+          push: true
+          platforms: linux/amd64,linux/arm64
           tags: alpaquita-android-image:latest
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
-          outputs: |
-            type=${{ needs.setup.outputs.dry_run == 'true' && 'cacheonly' || 'image' }}
-            push=${{ needs.setup.outputs.dry_run == 'false' }}
-            compression=zstd
-            compression-level=${{ needs.setup.outputs.dry_run == 'true' && '1' || '9' }}
-            force-compression=true
+          outputs: type=registry,compression=zstd,compression-level=9,force-compression=true
 
   build-summary:
     name: "🏁 Build Matrix Complete"
