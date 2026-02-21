@@ -5,8 +5,14 @@ This repository maintains a specialized, high-performance Docker image designed 
 
 ### Core Technical Pillars:
 * **Minimal Footprint:** Reduce image pull latency through aggressive layer optimization and zstandard (zstd) compression.
-* **Maximum Build Speed:** Integration of `mimalloc` to accelerate memory-intensive processes.
+* **Maximum Build Speed:** Integration of `mimalloc` to accelerate memory-intensive processes (Gradle, Kotlin compiler).
+* **Tooling Excellence:** Ensure the latest stable Android SDKs, build tools, and essential CLI utilities are provided in a pre-configured state.
 * **Autonomous Maintenance:** Fully self-updating lifecycle via Renovate and Automerge.
+
+### Runtime Environment
+The image is designed to run on **Kubernetes** orchestrated by a **Jenkins Controller** using **Jenkins Agents**.
+* **Compatibility:** The image must be compatible with the Jenkins Kubernetes Plugin.
+* **Permissions:** Designs must account for restricted security contexts. Avoid hardcoding specific non-root users if they interfere with Kubernetes' ability to inject random UIDs. Ensure critical directories (e.g., Android SDK, Gradle cache) have appropriate group permissions (GID 0) to allow for arbitrary UIDs.
 
 # !!! WORK IN PROGRESS (WIP) - REMOVE ONCE FINALIZED !!!
 The following features are currently under development and may contain placeholders:
@@ -31,8 +37,8 @@ The following features are currently under development and may contain placehold
 * **Language:** All code, comments, and documentation must be in English.
 
 ### Docker Architecture
-* **Reproducible Builds:** Builds must be as reproducible as possible to ensure consistency across environments.
-* **Version Pinning:** Explicitly pin versions for all base images, packages, and tools (e.g., `alpine:3.18.4`). Avoid "latest" tags.
+* **Reproducible Builds:** Ensure consistency across environments through deterministic build steps.
+* **Version & Digest Pinning:** Explicitly pin versions and SHA-256 digests for all base images to ensure immutability (e.g., `image:tag@sha256:...`). This is enforced by Renovate as configured in `.github/renovate.json5`.
 * **Allocators:** `mimalloc` must be preloaded via `LD_PRELOAD` to optimize tool performance.
 * **Compression:** Use `zstd` (level 9) with `force-compression=true` for registry exports.
 
@@ -41,7 +47,7 @@ The following features are currently under development and may contain placehold
 * **Linters & Formatters:** * `shfmt`: Mandatory for formatting shell scripts. Use settings that respect `.editorconfig`.
   * `shellcheck`: Mandatory for static analysis of `.sh` and `.bash` files.
   * `hadolint`: Mandatory for Dockerfile best practices.
-  * `yamllint`: Mandatory for YAML files. The CI must use the configuration located at `.github/.yamllint.yaml`.
+  * `yamllint`: Mandatory for YAML files using `.github/.yamllint.yaml`.
 * **Analysis:** Every build must be verified by `dive` for layer efficiency.
 
 # CI/CD Strategy
