@@ -9,10 +9,10 @@ This repository maintains a specialized, high-performance Docker image designed 
 * **Tooling Excellence:** Ensure the latest stable Android SDKs, build tools, and essential CLI utilities are provided in a pre-configured state.
 * **Autonomous Maintenance:** Fully self-updating lifecycle via Renovate and Automerge.
 
-### Runtime Environment
-The image is designed to run on **Kubernetes** orchestrated by a **Jenkins Controller** using **Jenkins Agents**.
-* **Compatibility:** The image must be compatible with the Jenkins Kubernetes Plugin.
-* **Permissions:** Designs must account for restricted security contexts. Avoid hardcoding specific non-root users if they interfere with Kubernetes' ability to inject random UIDs. Ensure critical directories (e.g., Android SDK, Gradle cache) have appropriate group permissions (GID 0) to allow for arbitrary UIDs.
+### Runtime & Orchestration
+* **CI/CD Platform:** The entire pipeline, from validation to deployment, is powered by **GitHub Actions**. Use Composite Actions to encapsulate modular logic and maintain clean workflow YAMLs.
+* **Execution Environment:** The resulting image is designed to run on **Kubernetes** orchestrated by a **Jenkins Controller** using **Jenkins Agents**.
+* **Permissions:** Ensure critical directories (e.g., Android SDK, Gradle cache) have group permissions (GID 0) to allow for arbitrary UIDs in restricted Kubernetes security contexts.
 
 # !!! WORK IN PROGRESS (WIP) - REMOVE ONCE FINALIZED !!!
 The following features are currently under development and may contain placeholders:
@@ -25,7 +25,7 @@ The following features are currently under development and may contain placehold
 # Autonomous Maintenance (Renovate)
 * **Automerge:** PRs from Renovate are automatically merged if the CI pipeline (Dry-Run) passes.
 * **Validation:** Automated validation (Trivy, Dive) is mandatory to replace human intervention.
-* **Release Trigger:** Merges to main trigger an automated release and registry push.
+* **Release Trigger:** Merges to main trigger an automated release and registry push via GitHub Actions.
 
 # Technical Standards
 ### Scripting
@@ -50,7 +50,7 @@ The following features are currently under development and may contain placehold
   * `yamllint`: Mandatory for YAML files using `.github/.yamllint.yaml`.
 * **Analysis:** Every build must be verified by `dive` for layer efficiency.
 
-# CI/CD Strategy
+# CI/CD Strategy (GitHub Actions)
 * **Dry-Run:** Build `linux/amd64` only for rapid feedback and security scanning.
 * **Release:** Full multi-arch build (`amd64`, `arm64`) with registry push.
-* **Concurrency:** `cancel-in-progress: true` is mandatory for all workflows.
+* **Concurrency:** `cancel-in-progress: true` is mandatory for all workflows to optimize runner usage.
