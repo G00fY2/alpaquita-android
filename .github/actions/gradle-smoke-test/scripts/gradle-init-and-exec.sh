@@ -30,8 +30,7 @@ echo "--- Container: Initializing project via $gradle_bin ---"
     --dsl kotlin \
     --package com.example \
     --project-name smoke-test-app \
-    --no-daemon \
-    --non-interactive
+    --no-daemon
 
 echo "--- Container: Verifying via generated ./gradlew help ---"
 ./gradlew help --no-daemon
