@@ -25,7 +25,7 @@ gradle_bin="../$install_dir/gradle-${gradle_version}/bin/gradle"
 mkdir -p "$test_dir" && cd "$test_dir"
 
 echo "--- Container: Initializing project via $gradle_bin ---"
-"$gradle_bin" init \
+LD_PRELOAD="" "$gradle_bin" init \
     --type java-application \
     --dsl kotlin \
     --package com.example \
