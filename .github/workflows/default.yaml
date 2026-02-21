@@ -133,6 +133,11 @@ jobs:
           jdk_version: ${{ matrix.jdk_version }}
           android_api: ${{ matrix.platform_version }}
 
+      - name: "Run Gradle smoke test"
+        uses: ./.github/actions/gradle-smoke-test
+        with:
+          image-ref: alpaquita-android-image:latest
+
       - name: "Build and push Docker Images"
         if: ${{ needs.setup.outputs.dry_run == 'false' }}
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
