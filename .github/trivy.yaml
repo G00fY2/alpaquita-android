@@ -1,6 +1,6 @@
 format: table
 exit-code: 1
-ignorefile: .github/trivyignore.yaml
+ignorefile: .github/.trivyignore.yaml
 severity:
   - CRITICAL
   - HIGH
