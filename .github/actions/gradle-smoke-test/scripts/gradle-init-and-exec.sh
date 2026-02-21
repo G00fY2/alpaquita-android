@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-test_dir="integration-test-project"
-install_dir="gradle-dist"
+install_dir=$1
+test_dir=$2
 
 echo "--- Container: Fetching latest stable Gradle version ---"
 
