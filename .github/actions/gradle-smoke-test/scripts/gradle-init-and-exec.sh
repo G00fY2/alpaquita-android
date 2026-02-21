@@ -7,7 +7,7 @@ install_dir="gradle-dist"
 echo "--- Container: Fetching latest stable Gradle version ---"
 
 json_response=$(curl -s https://services.gradle.org/versions/current)
-gradle_version=$(echo "$json_response" | grep -o '"version":"[^"]*' | cut -d'"' -f4)
+gradle_version=$(echo "$json_response" | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*' | cut -d'"' -f4)
 
 if [ -z "$gradle_version" ]; then
     echo "Error: Could not determine Gradle version."
