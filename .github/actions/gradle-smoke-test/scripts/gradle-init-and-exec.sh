@@ -5,7 +5,15 @@ test_dir="integration-test-project"
 install_dir="gradle-dist"
 
 echo "--- Container: Fetching latest stable Gradle version ---"
-gradle_version=$(curl -s https://services.gradle.org/versions/current | jq -r '.version')
+
+json_response=$(curl -s https://services.gradle.org/versions/current)
+gradle_version=$(echo "$json_response" | grep -o '"version":"[^"]*' | cut -d'"' -f4)
+
+if [ -z "$gradle_version" ]; then
+    echo "Error: Could not determine Gradle version."
+    exit 1
+fi
+
 echo "--- Container: Testing with Gradle $gradle_version ---"
 
 mkdir -p "$install_dir"
@@ -22,7 +30,8 @@ echo "--- Container: Initializing project via $gradle_bin ---"
     --dsl kotlin \
     --package com.example \
     --project-name smoke-test-app \
-    --no-daemon
+    --no-daemon \
+    --non-interactive
 
 echo "--- Container: Verifying via generated ./gradlew help ---"
 ./gradlew help --no-daemon
