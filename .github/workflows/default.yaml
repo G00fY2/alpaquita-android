@@ -63,6 +63,17 @@ jobs:
         with:
           max_version: ${{ env.ANDROID_PLATFORM_LATEST_VERSION }}
 
+      - name: "Filter Matrix (Dry Run only)"
+        id: filter-matrix
+        if: steps.set-build-mode.outputs.dry_run == 'true'
+        shell: bash
+        run: |
+          jdk_reduced=$(echo '${{ steps.jdk-versions-extractor.outputs.versions_json }}' | jq -c '[.[0]]')
+          platform_reduced=$(echo '${{ steps.android-platform-versions-fetcher.outputs.versions_json }}' | jq -c '[.[0]]')
+
+          echo "jdk_versions=$jdk_reduced" >> "$GITHUB_OUTPUT"
+          echo "platform_versions=$platform_reduced" >> "$GITHUB_OUTPUT"
+
   build:
     needs: setup
     runs-on: ubuntu-24.04
