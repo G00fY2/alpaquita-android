@@ -68,7 +68,7 @@ jobs:
         with:
           max_version: ${{ env.ANDROID_PLATFORM_LATEST_VERSION }}
 
-      - name: "Filter Matrix"
+      - name: "Reduce Matrix for Dry Run"
         id: filter-matrix
         shell: bash
         env:
