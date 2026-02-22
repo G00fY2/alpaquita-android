@@ -40,6 +40,17 @@
         {
             customType: 'regex',
             managerFilePatterns: [
+                '.github/workflows/*.yaml',
+            ],
+            matchStrings: [
+                'YAMLLINT_VERSION:\\s*(?<currentValue>.*)',
+            ],
+            depNameTemplate: 'yamllint',
+            datasourceTemplate: 'pypi',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
                 '/versions\\.env$/',
             ],
             matchStrings: [

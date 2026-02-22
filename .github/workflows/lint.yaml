@@ -25,15 +25,17 @@ jobs:
   yamllint:
     name: "Yamllint"
     runs-on: ubuntu-24.04
+    env:
+      YAMLLINT_VERSION: 1.38.0
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: "Run Yamllint"
-        uses: karancode/yamllint-github-action@4052d365f09b8d34eb552c363d1141fd60e2aeb2 # v3.0.0
-        with:
-          yamllint_strict: true
-          yamllint_config_filepath: .github/.yamllint.yaml
+      - name: "Install yamllint"
+        run: pip install yamllint==${{ env.YAMLLINT_VERSION }}
+
+      - name: "Run yamllint"
+        run: yamllint -c .github/.yamllint.yaml .
 
   actionlint:
     name: "Actionlint"
