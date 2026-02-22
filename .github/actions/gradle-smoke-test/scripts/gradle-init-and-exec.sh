@@ -11,7 +11,7 @@ echo "--- Target Project Directory: $target_dir ---"
 
 echo "--- Container: Fetching latest stable Gradle version ---"
 
-json_response=$(curl -s https://services.gradle.org/versions/current)
+json_response=$(curl -fsSL https://services.gradle.org/versions/current)
 gradle_version=$(echo "$json_response" | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*' | cut -d'"' -f4)
 
 if [ -z "$gradle_version" ]; then
@@ -22,7 +22,7 @@ fi
 echo "--- Container: Testing with Gradle $gradle_version ---"
 
 mkdir -p "$install_dir"
-curl -sSL "https://services.gradle.org/distributions/gradle-${gradle_version}-bin.zip" -o "$install_dir/gradle.zip"
+curl -fsSL "https://services.gradle.org/distributions/gradle-${gradle_version}-bin.zip" -o "$install_dir/gradle.zip"
 unzip -q "$install_dir/gradle.zip" -d "$install_dir"
 
 gradle_bin="$install_dir/gradle-${gradle_version}/bin/gradle"
