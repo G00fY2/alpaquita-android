@@ -38,6 +38,7 @@ echo "--- Container: Initializing project via $gradle_bin ---"
     --no-daemon
 
 echo "--- Container: Verifying with generated gradlew wrapper ---"
+./gradlew --version --no-daemon
 ./gradlew tasks --no-daemon
 
 echo "--- Container: Smoke test completed successfully ---"
