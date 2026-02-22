@@ -4,17 +4,19 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'versions.env'
-      - 'Dockerfile'
-      - 'scripts/**'
+    tags:
+      - 'v*'
   pull_request:
     branches:
-      - main
+      - '**'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Tags get a unique run_id to prevent cancellation during release.
+  # Other events (main/PRs) use the branch name to allow canceling outdated builds.
+  group: >-
+    ${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.workflow }}-${{ github.head_ref || github.ref }}
+  # Only cancel running jobs if the current event is NOT a tag push
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   setup:
@@ -22,7 +24,9 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
+      jdk_versions_dry_run: ${{ steps.filter-matrix.outputs.jdk_versions_filtered_json }}
       platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
+      platform_versions_dry_run: ${{ steps.filter-matrix.outputs.platform_versions_filtered_json }}
       cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_tools_id }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
@@ -34,11 +38,14 @@ jobs:
 
       - name: "Set build mode"
         id: set-build-mode
-        # TODO remove second if condition for final setup
-        if: |
-          github.event_name == 'pull_request' ||
-          github.ref == 'refs/heads/main'
-        run: echo "dry_run=true" >> "$GITHUB_OUTPUT"
+        shell: bash
+        run: |
+          # TODO remove second if condition for final setup
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "dry_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: "Prepare environment variables"
         run: |
@@ -63,6 +70,19 @@ jobs:
         with:
           max_version: ${{ env.ANDROID_PLATFORM_LATEST_VERSION }}
 
+      - name: "Reduce Matrix for Dry Run"
+        id: filter-matrix
+        shell: bash
+        env:
+          JDK_RAW: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
+          PLAT_RAW: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
+        run: |
+          jdk_filtered=$(echo "$JDK_RAW" | jq -c '[.[0]]')
+          plat_filtered=$(echo "$PLAT_RAW" | jq -c '[.[0]]')
+
+          echo "jdk_versions_filtered_json=$jdk_filtered" >> "$GITHUB_OUTPUT"
+          echo "platform_versions_filtered_json=$plat_filtered" >> "$GITHUB_OUTPUT"
+
   build:
     needs: setup
     runs-on: ubuntu-24.04
@@ -71,8 +91,18 @@ jobs:
       (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     strategy:
       matrix:
-        jdk_version: ${{ fromJson(needs.setup.outputs.jdk_versions) }}
-        platform_version: ${{ fromJson(needs.setup.outputs.platform_versions) }}
+        jdk_version: ${{
+          fromJson(
+          needs.setup.outputs.dry_run == 'true' &&
+          needs.setup.outputs.jdk_versions_dry_run ||
+          needs.setup.outputs.jdk_versions
+          ) }}
+        platform_version: ${{
+          fromJson(
+          needs.setup.outputs.dry_run == 'true' &&
+          needs.setup.outputs.platform_versions_dry_run ||
+          needs.setup.outputs.platform_versions
+          ) }}
 
     env:
       DOCKER_BUILD_ARGS: |
@@ -132,6 +162,11 @@ jobs:
           image-ref: alpaquita-android-image:latest
           jdk_version: ${{ matrix.jdk_version }}
           android_api: ${{ matrix.platform_version }}
+
+      - name: "Run Gradle smoke test"
+        uses: ./.github/actions/gradle-smoke-test
+        with:
+          image-ref: alpaquita-android-image:latest
 
       - name: "Build and push Docker Images"
         if: ${{ needs.setup.outputs.dry_run == 'false' }}

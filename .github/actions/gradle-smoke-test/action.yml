@@ -1,0 +1,25 @@
+name: 'Gradle Integration Smoke Test'
+description: 'Orchestrates the Docker-based Gradle integration test'
+
+inputs:
+  image-ref:
+    description: 'Docker Image Tag to be tested'
+    required: true
+  run-as-uid:
+    description: 'The UID to run the container as'
+    default: '1000'
+  run-as-gid:
+    description: 'The GID to run the container as'
+    default: '1000'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Orchestrator Script
+      shell: bash
+      run: |
+        ${{ github.action_path }}/scripts/run-integration-test.sh \
+          "${{ inputs.image-ref }}" \
+          "${{ github.action_path }}" \
+          "${{ inputs.run-as-uid }}" \
+          "${{ inputs.run-as-gid }}"

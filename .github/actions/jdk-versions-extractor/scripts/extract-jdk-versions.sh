@@ -5,7 +5,7 @@ set -o pipefail
 dockerfile=$1
 
 # Extract stage aliases starting with 'jdk' from the Dockerfile's FROM instructions.
-jdk_list=$(grep -iE "^FROM.*[[:space:]]AS[[:space:]]jdk" "$dockerfile" | awk '{print $NF}')
+jdk_list=$(grep -iE "^FROM.*[[:space:]]AS[[:space:]]jdk" "$dockerfile" | awk '{print $NF}' | sort -rV)
 
 # Validate result
 if [[ -z "$jdk_list" ]]; then

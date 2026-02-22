@@ -6,28 +6,35 @@ jdk_version=$2
 android_api=$3
 report_file=$4
 
-: >"$report_file"
+get_sdk_components() {
+    docker run --rm "$image" sdkmanager --list_installed 2>/dev/null |
+        awk -F '|' '/^[[:space:]]+[a-zA-Z0-9.;_-]+[[:space:]]+\|/ {
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $1);
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2);
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $3);
+        printf "| %s | %s | %s |\n", $1, $2, $3
+    }' | sort
+}
 
-{
-    # Main collapsible section for this specific image
+get_apk_packages() {
+    docker run --rm "$image" apk info -v 2>/dev/null |
+        awk '
+        /^WARNING:/ { next }
+        /^[a-zA-Z0-9]/ {
+            full=$0; pkg=$0;
+            sub(/-[0-9].*$/, "", pkg);
+            ver=substr(full, length(pkg) + 2);
+            printf "| %s | %s |\n", pkg, ver
+        }' | sort
+}
+
+generate_markdown_body() {
     echo "<details><summary><b>📦 Build Configuration: JDK $jdk_version | Android API $android_api</b></summary>"
     echo ""
     echo "#### 🤖 Android SDK Components"
     echo "| Component | Version | Description |"
     echo "| :--- | :--- | :--- |"
-
-    # Parse sdkmanager output
-    docker run --rm "$image" sdkmanager --list_installed --verbose 2>/dev/null |
-        awk '
-    /^[a-zA-Z0-9.;_-]+$/ && !/^-+$/ { path=$1 }
-    /[Dd]escription:/ { sub(/^[ \t]*[Dd]escription:[ \t]*/, ""); desc=$0 }
-    /[Vv]ersion:/ {
-        sub(/^[ \t]*[Vv]ersion:[ \t]*/, ""); ver=$0;
-        if (path != "") {
-            print "| " path " | " ver " | " desc " |";
-            path=""; desc=""; ver="";
-        }
-    }' | sort
+    get_sdk_components
 
     echo ""
     echo "#### 📦 Installed OS Packages (apk)"
@@ -35,17 +42,12 @@ report_file=$4
     echo ""
     echo "| Package | Version |"
     echo "| :--- | :--- |"
+    get_apk_packages
 
-    # Parse apk info and suppress warnings
-    docker run --rm "$image" apk info -v 2>/dev/null | sort |
-        awk '/^[a-zA-Z0-9]/ && !/[Ww]arning/ {
-      full=$0; pkg=$0;
-      sub(/-[0-9].*$/, "", pkg);
-      ver=substr(full, length(pkg) + 2);
-      print "| " pkg " | " ver " |"
-    }'
     echo ""
     echo "</details>" # End APK details
     echo "</details>" # End Matrix-Slot details
     echo ""
-} >>"$report_file"
+}
+
+generate_markdown_body >>"$report_file"
