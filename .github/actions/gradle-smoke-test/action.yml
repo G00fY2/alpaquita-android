@@ -6,11 +6,11 @@ inputs:
     description: 'Docker Image Tag to be tested'
     required: true
   run-as-uid:
-    description: 'UID for the container process'
-    default: '1234'
+    description: 'The UID to run the container as'
+    default: '1000'
   run-as-gid:
-    description: 'GID for the container process'
-    default: '0'
+    description: 'The GID to run the container as'
+    default: '1000'
 
 runs:
   using: 'composite'
@@ -18,8 +18,8 @@ runs:
     - name: Run Orchestrator Script
       shell: bash
       run: |
-        "${{ github.action_path }}/scripts/run-integration-test.sh" \
+        ${{ github.action_path }}/scripts/run-integration-test.sh \
           "${{ inputs.image-ref }}" \
+          "${{ github.action_path }}" \
           "${{ inputs.run-as-uid }}" \
-          "${{ inputs.run-as-gid }}" \
-          "${{ github.action_path }}"
+          "${{ inputs.run-as-gid }}"
