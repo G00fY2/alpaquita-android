@@ -4,17 +4,19 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'versions.env'
-      - 'Dockerfile'
-      - 'scripts/**'
+    tags:
+      - 'v*'
   pull_request:
     branches:
-      - main
+      - '**'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Tags get a unique run_id to prevent cancellation during release.
+  # Other events (main/PRs) use the branch name to allow canceling outdated builds.
+  group: >-
+    ${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.workflow }}-${{ github.head_ref || github.ref }}
+  # Only cancel running jobs if the current event is NOT a tag push
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   setup:
