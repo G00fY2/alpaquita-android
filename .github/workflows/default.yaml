@@ -22,6 +22,8 @@ jobs:
   setup:
     name: "🛠️ Prepare Build Matrix"
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     outputs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
       jdk_versions_dry_run: ${{ steps.filter-matrix.outputs.jdk_versions_filtered_json }}
@@ -86,6 +88,8 @@ jobs:
   build:
     needs: setup
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     name: >
       ${{ needs.setup.outputs.dry_run == 'true' && '🔬 Validate' || '📦 Build' }}
       (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
@@ -182,6 +186,8 @@ jobs:
   build-summary:
     name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     if: always()
     needs: build
     steps:
