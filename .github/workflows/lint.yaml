@@ -9,6 +9,13 @@ concurrency:
   group: ${{ github.workflow  }}-${{ github.head_ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   sh-checker:
     name: "Shell Checker (shellcheck, shfmt, checkbashisms)"
@@ -27,8 +34,6 @@ jobs:
   yamllint:
     name: "Yamllint"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     env:
       YAMLLINT_VERSION: 1.38.0
     steps:
@@ -44,8 +49,6 @@ jobs:
   actionlint:
     name: "Actionlint"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -61,8 +64,6 @@ jobs:
   hadolint:
     name: "Hadolint"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -79,8 +80,6 @@ jobs:
   docker-build-checks:
     name: "Docker Buildx Checks"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
