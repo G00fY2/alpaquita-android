@@ -3,6 +3,7 @@
     extends: [
         'config:best-practices',
     ],
+    automerge: true,
     customManagers: [
         {
             customType: 'regex',
@@ -142,4 +143,54 @@
             ],
         },
     },
+    packageRules: [
+        {
+            description: 'Group Android SDK updates and wait for minimumReleaseAge to update in sync (Minor Release)',
+            matchPackageNames: [
+                'android_cmdline_tools',
+                'android_platform_tools',
+                'android_build_tools',
+                'android_platform_version',
+            ],
+            groupName: 'android sdk components',
+            minimumReleaseAge: '1 days',
+            prCreation: 'not-pending',
+            semanticCommitType: 'feat',
+        },
+        {
+            description: 'Group Liberica JDK images and wait for minimumReleaseAge to update in sync (Patch Release)',
+            matchPackageNames: [
+                'ghcr.io/bell-sw/liberica-runtime-container',
+            ],
+            groupName: 'liberica jdk container',
+            minimumReleaseAge: '7 days',
+            prCreation: 'not-pending',
+            semanticCommitType: 'fix',
+        },
+        {
+            description: 'Dockerfile Syntax updates (No Release)',
+            matchPackageNames: [
+                'docker/dockerfile',
+            ],
+            semanticCommitType: 'ci',
+        },
+        {
+            description: 'CI & Linter updates (No Release)',
+            matchManagers: [
+                'github-actions',
+            ],
+            semanticCommitType: 'ci',
+        },
+        {
+            description: 'Linter updates from Workflows (No Release)',
+            matchPackageNames: [
+                'docker/buildx',
+                'moby/buildkit',
+                'wagoodman/dive',
+                'rhysd/actionlint',
+                'yamllint',
+            ],
+            semanticCommitType: 'ci',
+        },
+    ],
 }
