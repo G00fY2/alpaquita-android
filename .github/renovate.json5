@@ -43,6 +43,17 @@
                 '.github/workflows/*.yaml',
             ],
             matchStrings: [
+                'ACTIONLINT_VERSION:\\s*(?<currentValue>.*)',
+            ],
+            depNameTemplate: 'rhysd/actionlint',
+            datasourceTemplate: 'github-releases',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
+                '.github/workflows/*.yaml',
+            ],
+            matchStrings: [
                 'YAMLLINT_VERSION:\\s*(?<currentValue>.*)',
             ],
             depNameTemplate: 'yamllint',
