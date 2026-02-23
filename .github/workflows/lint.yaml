@@ -9,6 +9,13 @@ concurrency:
   group: ${{ github.workflow  }}-${{ github.head_ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   sh-checker:
     name: "Shell Checker (shellcheck, shfmt, checkbashisms)"
@@ -40,17 +47,20 @@ jobs:
   actionlint:
     name: "Actionlint"
     runs-on: ubuntu-24.04
+    env:
+      ACTIONLINT_VERSION: 1.7.11
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
+      - name: "Install actionlint"
+        id: install-actionlint
+        run: |
+          bash <(curl -sL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) \
+          ${{ env.ACTIONLINT_VERSION }}
+
       - name: "Run actionlint"
-        uses: reviewdog/action-actionlint@0d952c597ef8459f634d7145b0b044a9699e5e43 # v1.71.0
-        with:
-          reporter: github-annotations
-          level: info
-          fail_level: info
-          filter_mode: nofilter
+        run: ${{ steps.install-actionlint.outputs.executable }} -color
 
   hadolint:
     name: "Hadolint"

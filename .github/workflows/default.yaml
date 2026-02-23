@@ -18,6 +18,13 @@ concurrency:
   # Only cancel running jobs if the current event is NOT a tag push
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   setup:
     name: "🛠️ Prepare Build Matrix"
@@ -38,7 +45,6 @@ jobs:
 
       - name: "Set build mode"
         id: set-build-mode
-        shell: bash
         run: |
           # TODO remove second if condition for final setup
           if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.ref }}" == "refs/heads/main" ]]; then
@@ -72,7 +78,6 @@ jobs:
 
       - name: "Reduce Matrix for Dry Run"
         id: filter-matrix
-        shell: bash
         env:
           JDK_RAW: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
           PLAT_RAW: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
