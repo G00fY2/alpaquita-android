@@ -146,13 +146,17 @@
     },
     packageRules: [
         {
-            description: 'Group all Android SDK updates (feat for major/minor)',
+            description: 'Group all Android SDK updates',
             matchPackageNames: [
                 'android_cmdline_tools',
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
             ],
+            groupName: 'android sdk components',
+        },
+        {
+            description: 'Use "feat" for major/minor Android SDK updates',
             groupName: 'android sdk components',
             matchUpdateTypes: [
                 'major',
@@ -161,13 +165,7 @@
             semanticCommitType: 'feat',
         },
         {
-            description: 'Group all Android SDK updates (fix for patches)',
-            matchPackageNames: [
-                'android_cmdline_tools',
-                'android_platform_tools',
-                'android_build_tools',
-                'android_platform_version',
-            ],
+            description: 'Use "fix" for patch Android SDK updates',
             groupName: 'android sdk components',
             matchUpdateTypes: [
                 'patch',
