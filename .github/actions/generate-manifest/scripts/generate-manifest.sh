@@ -26,26 +26,7 @@ get_apk_packages() {
             full=$0; pkg=$0;
             sub(/-[0-9].*$/, "", pkg);
             ver=substr(full, length(pkg) + 2);
-
-            split(pkg, parts, "-");
-            base=parts[1];
-
-            if (base in last_base && ver == version[base]) {
-                if (index(packages[base], pkg) == 0) {
-                    packages[base] = packages[base] ", " pkg
-                }
-            } else {
-                base_list[++count] = base;
-                packages[base] = pkg;
-                version[base] = ver;
-                last_base[base] = base;
-            }
-        }
-        END {
-            for (i=1; i<=count; i++) {
-                b = base_list[i];
-                printf "| %s | %s |\n", packages[b], version[b]
-            }
+            printf "| %s | %s |\n", pkg, ver
         }' | sort
 }
 
