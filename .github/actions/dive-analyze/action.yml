@@ -6,7 +6,7 @@ inputs:
     description: 'The image to analyze'
     required: true
   dive-ci-config:
-    description: 'Path to .dive-ci config'
+    description: 'Path to .dive-ci.yaml config'
     required: true
   dive-version:
     description: 'The version of dive to use (normalizes leading v)'
