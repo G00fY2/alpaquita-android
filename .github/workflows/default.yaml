@@ -74,7 +74,7 @@ jobs:
         id: android-platform-versions-fetcher
         uses: ./.github/actions/android-platform-versions-fetcher
         with:
-          max_version: ${{ env.ANDROID_PLATFORM_LATEST_VERSION }}
+          max_version: ${{ env.ANDROID_PLATFORM_MAX_VERSION }}
 
       - name: "Reduce Matrix for Dry Run"
         id: filter-matrix

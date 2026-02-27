@@ -100,7 +100,7 @@
                 '/versions\\.env$/',
             ],
             matchStrings: [
-                'ANDROID_PLATFORM_LATEST_VERSION=(?<currentValue>.*)',
+                'ANDROID_PLATFORM_MAX_VERSION=(?<currentValue>.*)',
             ],
             depNameTemplate: 'android_platform_version',
             datasourceTemplate: 'custom.android_platform_version',
