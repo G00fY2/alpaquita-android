@@ -151,7 +151,7 @@ jobs:
           DIVE_VERSION: v0.13.1
         with:
           image-ref: alpaquita-android-image:latest
-          dive-ci-config: .github/.dive-ci
+          dive-ci-config: .github/.dive-ci.yaml
           dive-version: ${{ env.DIVE_VERSION }}
 
       - name: "Run Trivy"
