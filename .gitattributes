@@ -14,3 +14,4 @@ Dockerfile      text eol=lf
 # Meta-configs
 .editorconfig   text eol=lf
 .gitattributes  text eol=lf
+.dockerignore   text eol=lf
