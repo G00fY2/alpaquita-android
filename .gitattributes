@@ -9,7 +9,6 @@ Dockerfile      text eol=lf
 
 # Explicit LF for config files to ensure cross-platform consistency
 *.yaml          text eol=lf
-*.yml           text eol=lf
 *.json5         text eol=lf
 
 # Meta-configs

@@ -38,6 +38,10 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
+      - name: "Check for .yml extensions"
+        run: |
+          find . -type f -name "*.yml" | grep . && { echo "Error: Use .yaml instead of .yml"; exit 1; } || exit 0
+
       - name: "Install yamllint"
         run: pip install yamllint==${{ env.YAMLLINT_VERSION }}
 
