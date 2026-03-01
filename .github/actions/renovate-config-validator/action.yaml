@@ -1,10 +1,5 @@
 name: 'Renovate Config Validator'
-description: 'Validates a Renovate configuration file using npx.'
-
-inputs:
-  config_file:
-    description: 'Path to the Renovate configuration file'
-    required: true
+description: 'Validates all Renovate config files found inside default locations using npx.'
 
 runs:
   using: 'composite'
@@ -13,8 +8,7 @@ runs:
       with:
         node-version: 'lts/*'
 
-    - name: Validate Renovate Config
+    - name: 'Validate Renovate config'
       shell: bash
       run: |
-        "${{ github.action_path }}/scripts/run-renovate-config-validator.sh" \
-          "${{ inputs.config_file }}"
+        "${{ github.action_path }}/scripts/run-renovate-config-validator.sh"

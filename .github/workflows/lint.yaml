@@ -57,8 +57,6 @@ jobs:
 
       - name: "Run Renovate config validator"
         uses: ./.github/actions/renovate-config-validator
-        with:
-          config_file: '.github/renovate.json5'
 
   actionlint:
     name: "Actionlint"
