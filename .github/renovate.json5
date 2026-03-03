@@ -2,9 +2,12 @@
     $schema: 'https://docs.renovatebot.com/renovate-schema.json',
     extends: [
         'config:best-practices',
+        ':semanticCommits',
         ':semanticCommitTypeAll(ci)',
+        ':disableRateLimiting',
+        ':automergeAll',
+        ':timezone(America/Los_Angeles)',
     ],
-    automerge: true,
     customManagers: [
         {
             customType: 'regex',
@@ -154,6 +157,16 @@
                 'android_platform_version',
             ],
             groupName: 'android sdk components',
+            /* Two Daily Batches after US lunch and after-hours (relative to timezone above):
+               Minute: * (Every minute)
+               Hour:   13-15, 20-22 (01:00 PM - 03:59 PM and 08:00 PM - 10:59 PM PST)
+               Days:   * (Every day)
+               Month:  * (Every month)
+               DayWk:  * (Every day)
+            */
+            schedule: [
+                '* 13-15,20-22 * * *',
+            ]
         },
         {
             description: 'Use "feat" for major/minor Android SDK updates',
@@ -177,10 +190,18 @@
             matchPackageNames: [
                 'ghcr.io/bell-sw/liberica-runtime-container',
             ],
+            versioning: 'regex:^jdk-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
             groupName: 'liberica jdk container',
-            minimumReleaseAge: '7 days',
-            internalChecksFilter: 'strict',
-            prCreation: 'not-pending',
+            /* Bi-weekly Batching after Tuesday releases (relative to timezone above):
+               Minute: * (Every minute)
+               Hour:   4-6 (04:00 AM - 06:59 AM - Catch-all after Tuesday releases)
+               Days:   1-7, 15-21 (1st and 3rd week of month)
+               Month:  * (Every month)
+               DayWk:  3 (Wednesday)
+            */
+            schedule: [
+                '* 4-6 1-7,15-21 * 3',
+            ],
             semanticCommitType: 'fix',
         },
     ],
