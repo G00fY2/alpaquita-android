@@ -13,13 +13,13 @@ get_sdk_components() {
             gsub(/Version/, "Version / Revision", $0);
             print $0; next
         }
-        /^[[:space:]]*(---)/ { print $0; next }
+        /^[[:space:]]*---/ { print $0; next }
         /^[[:space:]]+[a-zA-Z0-9.;_-]+[[:space:]]+\|/ {
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", $1);
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2);
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", $3);
             printf "| %s | %s | %s |\n", $1, $2, $3
-        }' | sort
+        }'
 }
 
 get_apk_packages() {
