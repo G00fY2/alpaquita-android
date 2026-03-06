@@ -9,7 +9,11 @@ report_file=$4
 get_sdk_components() {
     docker run --rm "$image" sdkmanager --list_installed 2>/dev/null |
         awk -F '|' '
-        /^[[:space:]]*(Path|---)/ { next }
+        /^[[:space:]]*Path/ {
+            gsub(/Version/, "Version / Revision", $0);
+            print $0; next
+        }
+        /^[[:space:]]*(---)/ { print $0; next }
         /^[[:space:]]+[a-zA-Z0-9.;_-]+[[:space:]]+\|/ {
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", $1);
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2);
