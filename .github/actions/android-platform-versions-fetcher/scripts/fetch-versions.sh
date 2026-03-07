@@ -2,7 +2,8 @@
 set -e
 set -o pipefail
 
-max_version=$1
+# Strip everything after the first hyphen (e.g. '36.1-r1' -> '36.1')
+max_version=${1%%-*}
 max_major_versions_count=$2
 xml_url="https://dl.google.com/android/repository/repository2-3.xml"
 
