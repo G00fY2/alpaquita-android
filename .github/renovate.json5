@@ -141,8 +141,11 @@
             defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-3.xml',
             format: 'plain',
             transformTemplates: [
-                'releases[$contains(version, "platforms;android-")].version',
-                '$map($, function($v) { $replace($v, /.*platforms;android-([^"]+).*/, "$1") })',
+                'releases[($contains(version, "platforms;android-") or $contains(version, "<major>"))].version',
+                '$map($, function($v) { $replace($v, /.*platforms;android-([^"]+).*/, "v:$1") })',
+                '$map($, function($v) { $replace($v, /.*<major>([0-9]+)<.*/, "r:$1") })',
+                '$map($, function($v, $i) { $contains($v, /^v:/) ? $replace($v, "v:", "") & "-r" & ($contains($[$i+1], /^r:/) ? $replace($[$i+1], "r:", "") : "0") : null })',
+                '$filter($, function($v) { $v != null })',
                 '{"releases": $map($, function($v) { {"version": $v} })}',
             ],
         },
@@ -157,16 +160,7 @@
                 'android_platform_version',
             ],
             groupName: 'android sdk components',
-            /* Two Daily Batches after US lunch and after-hours (relative to timezone above):
-               Minute: * (Every minute)
-               Hour:   13-15, 20-22 (01:00 PM - 03:59 PM and 08:00 PM - 10:59 PM PST)
-               Days:   * (Every day)
-               Month:  * (Every month)
-               DayWk:  * (Every day)
-            */
-            schedule: [
-                '* 13-15,20-22 * * *',
-            ]
+            versioning: 'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+))?(?:\\.(?<patch>\\d+))?(-r(?<build>\\d+))?$'
         },
         {
             description: 'Use "feat" for major/minor Android SDK updates',
