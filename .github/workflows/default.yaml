@@ -31,9 +31,9 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
-      latest_jdk_version: ${{ steps.jdk-versions-extractor.outputs.latest }}
+      latest_jdk_version: ${{ steps.jdk-versions-extractor.outputs.latest_version }}
       platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
-      latest_platform_version: ${{ steps.android-platform-versions-fetcher.outputs.latest }}
+      latest_platform_version: ${{ steps.android-platform-versions-fetcher.outputs.latest_version }}
       cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_tools_id }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
