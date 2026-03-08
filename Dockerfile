@@ -8,8 +8,6 @@ FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25.0.2_12-glibc@sha256:4440d
 
 FROM ${BASE_IMAGE}
 
-ARG IMAGE_VERSION
-ARG GIT_HASH
 ARG ANDROID_CMDLINE_TOOLS_ID
 ARG ANDROID_PLATFORM_TOOLS_VERSION
 ARG ANDROID_BUILD_TOOLS_VERSION
@@ -19,8 +17,6 @@ ARG MIMALLOC_PATH=/usr/lib/libmimalloc_stable.so
 
 LABEL org.opencontainers.image.title="Alpaquita Android" \
       org.opencontainers.image.description="Optimized Android CI Image based on Alpaquita and mimalloc" \
-      org.opencontainers.image.version="${IMAGE_VERSION}" \
-      org.opencontainers.image.revision="${GIT_HASH}" \
       org.opencontainers.image.source="https://github.com/G00fY2/alpaquita-android" \
       org.opencontainers.image.licenses="MIT"
 

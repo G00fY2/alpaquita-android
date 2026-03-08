@@ -31,13 +31,12 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
-      jdk_versions_dry_run: ${{ steps.filter-matrix.outputs.jdk_versions_filtered_json }}
+      latest_jdk_version: ${{ steps.jdk-versions-extractor.outputs.latest }}
       platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
-      platform_versions_dry_run: ${{ steps.filter-matrix.outputs.platform_versions_filtered_json }}
+      latest_platform_version: ${{ steps.android-platform-versions-fetcher.outputs.latest }}
       cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_tools_id }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
-      sha_short: ${{ env.SHA_SHORT }}
       dry_run: ${{ steps.set-build-mode.outputs.dry_run || 'false' }}
     steps:
       - name: "Checkout repository"
@@ -46,17 +45,15 @@ jobs:
       - name: "Set build mode"
         id: set-build-mode
         run: |
-          # TODO remove second if condition for final setup
-          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "dry_run=true" >> "$GITHUB_OUTPUT"
-          else
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
             echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "dry_run=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: "Prepare environment variables"
         run: |
           grep -v '^#' versions.env >> "$GITHUB_ENV"
-          echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: "Get supported jdk versions from Dockerfile"
         id: jdk-versions-extractor
@@ -76,18 +73,6 @@ jobs:
         with:
           max_version: ${{ env.ANDROID_PLATFORM_MAX_VERSION }}
 
-      - name: "Reduce Matrix for Dry Run"
-        id: filter-matrix
-        env:
-          JDK_RAW: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
-          PLAT_RAW: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
-        run: |
-          jdk_filtered=$(echo "$JDK_RAW" | jq -c '[.[0]]')
-          plat_filtered=$(echo "$PLAT_RAW" | jq -c '[.[0]]')
-
-          echo "jdk_versions_filtered_json=$jdk_filtered" >> "$GITHUB_OUTPUT"
-          echo "platform_versions_filtered_json=$plat_filtered" >> "$GITHUB_OUTPUT"
-
   build:
     needs: setup
     runs-on: ubuntu-24.04
@@ -99,21 +84,19 @@ jobs:
         jdk_version: ${{
           fromJson(
           needs.setup.outputs.dry_run == 'true' &&
-          needs.setup.outputs.jdk_versions_dry_run ||
+          format('["{0}"]', needs.setup.outputs.latest_jdk_version) ||
           needs.setup.outputs.jdk_versions
           ) }}
         platform_version: ${{
           fromJson(
           needs.setup.outputs.dry_run == 'true' &&
-          needs.setup.outputs.platform_versions_dry_run ||
+          format('["{0}"]', needs.setup.outputs.latest_platform_version) ||
           needs.setup.outputs.platform_versions
           ) }}
 
     env:
       DOCKER_BUILD_ARGS: |
-        BASE_IMAGE=${{ matrix.jdk_version }}
-        IMAGE_VERSION=0.0.1
-        GIT_HASH=${{ needs.setup.outputs.sha_short }}
+        BASE_IMAGE=jdk${{ matrix.jdk_version }}
         ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
         ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
         ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
@@ -122,6 +105,19 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: "Docker metadata"
+        id: docker-metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: g00fy2/alpaquita-android
+          tags: |
+            type=raw,value=latest
+#            type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
+#            type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}-${{ github.ref_name }},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+#            type=raw,value=android-${{ matrix.platform_version }},enable=${{ matrix.jdk_version == env.DEFAULT_JDK_VERSION }}
+#            type=raw,value=latest-jdk${{ matrix.jdk_version }},enable=${{ matrix.platform_version == env.LATEST_STABLE_API }}
+#            type=raw,value=latest,enable=${{ matrix.platform_version == needs.setup.outputs.latest_platform_version && matrix.jdk_version == needs.setup.outputs.latest_jdk_version }}
 
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4
@@ -141,7 +137,8 @@ jobs:
           context: .
           load: true
           platforms: linux/amd64
-          tags: alpaquita-android-image:latest
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          labels: ${{ steps.docker-metadata.outputs.labels }}
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
 
       - name: "Run Dive"
@@ -180,7 +177,8 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: alpaquita-android-image:latest
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          labels: ${{ steps.docker-metadata.outputs.labels }}
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
           outputs: type=registry,compression=zstd,compression-level=9,force-compression=true
 

@@ -9,8 +9,11 @@ inputs:
 
 outputs:
   versions_json:
-    description: 'JSON array of jdk names'
+    description: 'JSON array of jdk versions'
     value: ${{ steps.extract-jdk-versions.outputs.json }}
+  latest_version:
+    description: 'Latest jdk version of the list'
+    value: ${{ steps.extract-jdk-versions.outputs.latest }}
 
 runs:
   using: 'composite'
@@ -18,6 +21,12 @@ runs:
     - id: extract-jdk-versions
       shell: bash
       run: |
-        json_result=$("${{ github.action_path }}/scripts/extract-jdk-versions.sh" "${{ inputs.dockerfile_path }}")
-        echo "Result: $json_result"
+        raw_list=$("${{ github.action_path }}/scripts/extract-jdk-versions.sh" "${{ inputs.dockerfile_path }}")
+
+        json_result=$(echo "$raw_list" | jq -R . | jq -s -c .)
+        echo "List: $json_result"
         echo "json=$json_result" >> "$GITHUB_OUTPUT"
+
+        latest=$(echo "$raw_list" | head -n 1)
+        echo "Latest: $latest"
+        echo "latest=$latest" >> "$GITHUB_OUTPUT"
