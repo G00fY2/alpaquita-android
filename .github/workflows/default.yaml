@@ -95,6 +95,7 @@ jobs:
           ) }}
 
     env:
+      DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=jdk${{ matrix.jdk_version }}
         ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
@@ -110,7 +111,8 @@ jobs:
         id: docker-metadata
         uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6
         with:
-          images: g00fy2/alpaquita-android
+          images: |
+            ${{ env.DOCKER_HUB_IMAGE_NAME }}
           tags: |
             type=raw,value=latest
 #            type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
@@ -118,6 +120,12 @@ jobs:
 #            type=raw,value=android-${{ matrix.platform_version }},enable=${{ matrix.jdk_version == env.DEFAULT_JDK_VERSION }}
 #            type=raw,value=latest-jdk${{ matrix.jdk_version }},enable=${{ matrix.platform_version == env.LATEST_STABLE_API }}
 #            type=raw,value=latest,enable=${{ matrix.platform_version == needs.setup.outputs.latest_platform_version && matrix.jdk_version == needs.setup.outputs.latest_jdk_version }}
+
+      - name: "Set Docker image reference"
+        id: set-image-ref
+        run: |
+          tag=$(echo "${{ steps.docker-metadata.outputs.tag-names }}" | head -n 1)
+          echo "image=${{ env.DOCKER_HUB_IMAGE_NAME }}:$tag" >> "$GITHUB_OUTPUT"
 
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4
@@ -147,28 +155,28 @@ jobs:
         env:
           DIVE_VERSION: v0.13.1
         with:
-          image-ref: alpaquita-android-image:latest
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
           dive-ci-config: .github/.dive-ci.yaml
           dive-version: ${{ env.DIVE_VERSION }}
 
       - name: "Run Trivy"
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
-          image-ref: alpaquita-android-image:latest
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
           scan-type: image
           trivy-config: .github/trivy.yaml
 
       - name: "Run image and generate Manifest"
         uses: ./.github/actions/generate-manifest
         with:
-          image-ref: alpaquita-android-image:latest
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
           jdk_version: ${{ matrix.jdk_version }}
           android_api: ${{ matrix.platform_version }}
 
       - name: "Run Gradle smoke test"
         uses: ./.github/actions/gradle-smoke-test
         with:
-          image-ref: alpaquita-android-image:latest
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
 
       - name: "Build and push Docker Images"
         if: ${{ needs.setup.outputs.dry_run == 'false' }}
