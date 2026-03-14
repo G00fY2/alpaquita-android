@@ -95,6 +95,7 @@ jobs:
           ) }}
 
     env:
+      IMAGE_VERSION: 2026.1.0
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=jdk${{ matrix.jdk_version }}
@@ -114,12 +115,12 @@ jobs:
           images: |
             ${{ env.DOCKER_HUB_IMAGE_NAME }}
           tags: |
-            type=raw,value=latest
-#            type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
-#            type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}-${{ github.ref_name }},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-#            type=raw,value=android-${{ matrix.platform_version }},enable=${{ matrix.jdk_version == env.DEFAULT_JDK_VERSION }}
-#            type=raw,value=latest-jdk${{ matrix.jdk_version }},enable=${{ matrix.platform_version == env.LATEST_STABLE_API }}
-#            type=raw,value=latest,enable=${{ matrix.platform_version == needs.setup.outputs.latest_platform_version && matrix.jdk_version == needs.setup.outputs.latest_jdk_version }}
+            type=raw,value=${{ env.IMAGE_VERSION }}-android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
+            type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
+            type=raw,value=latest,enable=${{
+              matrix.platform_version == needs.setup.outputs.latest_platform_version &&
+              matrix.jdk_version == needs.setup.outputs.latest_jdk_version
+            }}
 
       - name: "Set Docker image reference"
         id: set-image-ref
