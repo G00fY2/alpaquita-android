@@ -39,5 +39,4 @@ if [ "$(echo "$filtered_versions" | cut -d. -f1 | uniq | grep -c '^')" -lt "$max
     exit 1
 fi
 
-# Convert to JSON array and print to stdout
-echo "$filtered_versions" | jq -R . | jq -s -c .
+echo "$filtered_versions"

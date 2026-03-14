@@ -12,8 +12,11 @@ inputs:
 
 outputs:
   versions_json:
-    description: 'The latest platform versions as a JSON array'
+    description: 'JSON array of platform versions'
     value: ${{ steps.fetch-versions.outputs.json }}
+  latest_version:
+    description: 'Latest platform version of the list'
+    value: ${{ steps.fetch-versions.outputs.latest }}
 
 runs:
   using: 'composite'
@@ -21,8 +24,14 @@ runs:
     - id: fetch-versions
       shell: bash
       run: |
-        json_result=$("${{ github.action_path }}/scripts/fetch-versions.sh" \
+        raw_list=$("${{ github.action_path }}/scripts/fetch-versions.sh" \
           "${{ inputs.max_version }}" \
           "${{ inputs.max_major_versions_count }}")
-        echo "Result: $json_result"
+
+        json_result=$(echo "$raw_list" | jq -R . | jq -s -c .)
+        echo "List: $json_result"
         echo "json=$json_result" >> "$GITHUB_OUTPUT"
+
+        latest=$(echo "$raw_list" | head -n 1)
+        echo "Latest: $latest"
+        echo "latest=$latest" >> "$GITHUB_OUTPUT"

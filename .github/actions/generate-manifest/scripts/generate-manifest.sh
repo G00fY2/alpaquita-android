@@ -31,7 +31,7 @@ get_apk_packages() {
 }
 
 generate_markdown_body() {
-    echo "<details><summary><b>🐳 Docker Image Content: JDK ${jdk_version#jdk} | Android API $android_api</b></summary>"
+    echo "<details><summary><b>🐳 Docker Image Content: JDK ${jdk_version} | Android API $android_api</b></summary>"
     echo ""
     echo "#### 🤖 Android SDK Components"
     echo "| Component | Version | Description |"
