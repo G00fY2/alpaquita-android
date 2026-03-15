@@ -11,7 +11,7 @@ patch_regex=$(prepare_regex_list "$2")
 current_year=$(date +%Y)
 version_prefix="v$current_year."
 
-latest_tag=$(git tag --list "v*" | tail -n 1 || true)
+latest_tag=$(git tag --list "v*" --sort=v:refname | tail -n 1 || true)
 is_new_year=false
 if [[ ! "$latest_tag" == v"$current_year".* ]]; then
     is_new_year=true
