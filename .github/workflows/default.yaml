@@ -73,6 +73,25 @@ jobs:
         with:
           max_version: ${{ env.ANDROID_PLATFORM_MAX_VERSION }}
 
+  versioning:
+    name: "🏷️ Versioning"
+    runs-on: ubuntu-24.04
+    if: github.ref_type != 'tag'
+    outputs:
+      next_version: ${{ steps.generate-version.outputs.next_version }}
+      bumped: ${{ steps.generate-version.outputs.bumped }}
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: ./.github/actions/generate-version
+        id: generate-version
+        with:
+          minor_types: 'feat'
+          patch_types: 'fix'
+
   build:
     needs: setup
     runs-on: ubuntu-24.04
