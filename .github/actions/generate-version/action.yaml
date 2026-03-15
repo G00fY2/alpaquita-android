@@ -12,13 +12,13 @@ inputs:
 outputs:
   next_version:
     description: 'The calculated next version string (e.g. v2026.1.0)'
-    value: ${{ steps.calc.outputs.next_version }}
+    value: ${{ steps.generate-version.outputs.next_version }}
   reason:
     description: 'The reason for the version bump'
-    value: ${{ steps.calc.outputs.reason }}
+    value: ${{ steps.generate-version.outputs.reason }}
   bumped:
     description: 'Boolean flag indicating if a version bump occurred'
-    value: ${{ steps.calc.outputs.bumped }}
+    value: ${{ steps.generate-version.outputs.bumped }}
 
 runs:
   using: 'composite'
@@ -30,7 +30,7 @@ runs:
           "${{ inputs.minor_types }}" \
           "${{ inputs.patch_types }}")
 
-        echo "Result: json_output"
+        echo "Result: $json_output"
 
         echo "next_version=$(echo "$json_output" | jq -r '.version')" >> "$GITHUB_OUTPUT"
         echo "reason=$(echo "$json_output" | jq -r '.reason')" >> "$GITHUB_OUTPUT"
