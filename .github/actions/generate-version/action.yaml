@@ -1,0 +1,37 @@
+name: 'Generate Version'
+description: 'Calculates the next version string based on CalVer and Conventional Commits'
+
+inputs:
+  minor_types:
+    description: 'Comma separated list of commit types for minor bumps (e.g. feat,perf)'
+    required: true
+  patch_types:
+    description: 'Comma separated list of commit types for patch bumps (e.g. fix,refactor,style,test)'
+    required: true
+
+outputs:
+  next_version:
+    description: 'The calculated next version string (e.g. v2026.1.0)'
+    value: ${{ steps.calc.outputs.next_version }}
+  reason:
+    description: 'The reason for the version bump'
+    value: ${{ steps.calc.outputs.reason }}
+  bumped:
+    description: 'Boolean flag indicating if a version bump occurred'
+    value: ${{ steps.calc.outputs.bumped }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: generate-version
+      shell: bash
+      run: |
+        json_output=$("${{ github.action_path }}/scripts/generate-version.sh" \
+          "${{ inputs.minor_types//,/| }}" \
+          "${{ inputs.patch_types//,/| }}")
+
+        echo "Result: json_output"
+
+        echo "next_version=$(echo "$json_output" | jq -r '.version')" >> "$GITHUB_OUTPUT"
+        echo "reason=$(echo "$json_output" | jq -r '.reason')" >> "$GITHUB_OUTPUT"
+        echo "bumped=$(echo "$json_output" | jq -r '.bumped')" >> "$GITHUB_OUTPUT"
