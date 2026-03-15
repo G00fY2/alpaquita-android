@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-minor_regex=$1
-patch_regex=$2
+prepare_regex_list() {
+    echo "$1" | tr '[:space:],\n' '\n' | grep -v '^$' | paste -sd '|' -
+}
+
+minor_regex=$(prepare_regex_list "$1")
+patch_regex=$(prepare_regex_list "$2")
 
 current_year=$(date +%Y)
 version_prefix="v$current_year."

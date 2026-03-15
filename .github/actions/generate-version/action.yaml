@@ -3,10 +3,10 @@ description: 'Calculates the next version string based on CalVer and Conventiona
 
 inputs:
   minor_types:
-    description: 'Comma separated list of commit types for minor bumps (e.g. feat,perf)'
+    description: 'List of commit types for minor bumps (comma or newline separated, e.g. feat, perf)'
     required: true
   patch_types:
-    description: 'Comma separated list of commit types for patch bumps (e.g. fix,refactor,style,test)'
+    description: 'List of commit types for patch bumps (comma or newline separated, e.g. fix, refactor, style, test)'
     required: true
 
 outputs:
@@ -27,8 +27,8 @@ runs:
       shell: bash
       run: |
         json_output=$("${{ github.action_path }}/scripts/generate-version.sh" \
-          "${{ inputs.minor_types//,/| }}" \
-          "${{ inputs.patch_types//,/| }}")
+          "${{ inputs.minor_types }}" \
+          "${{ inputs.patch_types }}")
 
         echo "Result: json_output"
 
