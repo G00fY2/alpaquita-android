@@ -15,19 +15,19 @@ inputs:
 outputs:
   version:
     description: 'The (current or next) version string (e.g. v2026.1.0)'
-    value: ${{ steps.generate-version.outputs.version }}
+    value: ${{ steps.tag-version.outputs.version || steps.generated-version.outputs.version }}
   reason:
     description: 'The reason for the version bump'
-    value: ${{ steps.generate-version.outputs.reason }}
+    value: ${{ steps.tag-version.outputs.version || steps.generated-version.outputs.version }}
   bumped:
     description: 'Boolean flag indicating if a version bump occurred'
-    value: ${{ steps.generate-version.outputs.bumped }}
+    value: ${{ steps.tag-version.outputs.version || steps.generated-version.outputs.version }}
 
 runs:
   using: 'composite'
   steps:
     - name: 'Take version from tag push'
-      id: generate-version
+      id: tag-version
       if: ${{ inputs.version_tag != '' }}
       shell: bash
       run: |
@@ -35,7 +35,7 @@ runs:
         echo "reason=tag-trigger" >> "$GITHUB_OUTPUT"
         echo "bumped=false" >> "$GITHUB_OUTPUT"
     - name: 'Generate version based on new commits'
-      id: generate-version
+      id: generated-version
       if: ${{ inputs.version_tag == '' }}
       shell: bash
       run: |
