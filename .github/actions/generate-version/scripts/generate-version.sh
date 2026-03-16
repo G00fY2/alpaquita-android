@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Helper function to convert list into regex pipe-delimited format
+# Helper function to convert list into pipe-delimited regex format
 prepare_regex_list() {
     echo "$1" | tr '[:space:],\n' '\n' | grep -v '^$' | paste -sd '|' -
 }
@@ -19,7 +19,7 @@ if [[ ! "$latest_tag" == v"$current_year".* ]]; then
     is_new_year=true
 fi
 
-# Define the Conventional Commit structure
+# Define the Conventional Commit structure for the subject line
 conv_pattern="[a-z]+(\(.+\))?(!)?: "
 minor_bump_pattern="^($minor_regex)$conv_pattern"
 patch_bump_pattern="^($patch_regex)$conv_pattern"
@@ -29,8 +29,15 @@ commit_range="${latest_tag:-HEAD~1}..HEAD"
 commits=$(git log "$commit_range" --format=%s 2>/dev/null || echo "")
 
 # Analyze commits for bump triggers
-has_minor_bump=$(echo "$commits" | grep -qE "$minor_bump_pattern" && echo true || echo false)
-has_patch_bump=$(echo "$commits" | grep -qE "$patch_bump_pattern" && echo true || echo false)
+has_minor_bump=false
+if echo "$commits" | grep -qE "$minor_bump_pattern"; then
+    has_minor_bump=true
+fi
+
+has_patch_bump=false
+if echo "$commits" | grep -qE "$patch_bump_pattern"; then
+    has_patch_bump=true
+fi
 
 # Determine the new version
 bumped=false
