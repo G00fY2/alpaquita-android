@@ -26,14 +26,16 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - id: tag-trigger
+    - name: 'Take version from tag push'
+      id: generate-version
       if: ${{ inputs.version_tag != '' }}
       shell: bash
       run: |
         echo "version=${{ inputs.version_tag }}" >> "$GITHUB_OUTPUT"
         echo "reason=tag-trigger" >> "$GITHUB_OUTPUT"
         echo "bumped=false" >> "$GITHUB_OUTPUT"
-    - id: generate-version
+    - name: 'Generate version based on new commits'
+      id: generate-version
       if: ${{ inputs.version_tag == '' }}
       shell: bash
       run: |
