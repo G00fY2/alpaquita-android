@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Helper function to convert list into pipe-delimited regex format
 prepare_regex_list() {
     echo "$1" | tr '[:space:],\n' '\n' | grep -v '^$' | paste -sd '|' -
 }
@@ -11,22 +12,34 @@ patch_regex=$(prepare_regex_list "$2")
 current_year=$(date +%Y)
 version_prefix="v$current_year."
 
+# Find the latest version tag, fallback to empty string if none exist
 latest_tag=$(git tag --list "v*" --sort=v:refname | tail -n 1 || true)
 is_new_year=false
 if [[ ! "$latest_tag" == v"$current_year".* ]]; then
     is_new_year=true
 fi
 
+# Define the Conventional Commit structure for the subject line
 conv_pattern="[a-z]+(\(.+\))?(!)?: "
-full_minor_regex="^($minor_regex)$conv_pattern|\* ($minor_regex)$conv_pattern"
-full_patch_regex="^($patch_regex)$conv_pattern|\* ($patch_regex)$conv_pattern"
+minor_bump_pattern="^($minor_regex)$conv_pattern"
+patch_bump_pattern="^($patch_regex)$conv_pattern"
 
+# Get commit subjects from the range
 commit_range="${latest_tag:-HEAD~1}..HEAD"
-commits=$(git log "$commit_range" --format=%B 2>/dev/null || echo "")
+commits=$(git log "$commit_range" --format=%s 2>/dev/null || echo "")
 
-has_minor_bump=$(echo "$commits" | grep -qE "$full_minor_regex" && echo true || echo false)
-has_patch_bump=$(echo "$commits" | grep -qE "$full_patch_regex" && echo true || echo false)
+# Analyze commits for bump triggers
+has_minor_bump=false
+if echo "$commits" | grep -qE "$minor_bump_pattern"; then
+    has_minor_bump=true
+fi
 
+has_patch_bump=false
+if echo "$commits" | grep -qE "$patch_bump_pattern"; then
+    has_patch_bump=true
+fi
+
+# Determine the new version
 bumped=false
 if [ "$is_new_year" = true ]; then
     version="${version_prefix}1.0"
@@ -51,4 +64,11 @@ else
     bumped=false
 fi
 
+# Validate the generated version format (vYYYY.M.P)
+if [[ ! "$version" =~ ^v[0-9]{4}\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Error: Calculated version '$version' does not match the required 'vYYYY.M.P' format." >&2
+    exit 1
+fi
+
+# Output result as JSON
 printf '{"version": "%s", "reason": "%s", "bumped": %s}\n' "$version" "$reason" "$bumped"
