@@ -41,7 +41,7 @@ fi
 
 # Determine the new version
 bumped=false
-if [ "$is_new_year" = true ]; then
+if [[ "$is_new_year" == true && ("$has_minor_bump" == true || "$has_patch_bump" == true) ]]; then
     version="${version_prefix}1.0"
     reason="new-year-reset"
     bumped=true
@@ -57,6 +57,10 @@ elif [ "$has_patch_bump" = true ]; then
     patch=$(echo "$version_num" | cut -d. -f2)
     version="${version_prefix}${minor}.$((patch + 1))"
     reason="patch-bump"
+    bumped=true
+elif [ -z "$latest_tag" ]; then
+    version="${version_prefix}1.0"
+    reason="initial-release"
     bumped=true
 else
     version="$latest_tag"

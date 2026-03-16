@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - 'v*.*.*'
   pull_request:
     branches:
       - '**'
@@ -76,9 +76,8 @@ jobs:
   versioning:
     name: "🏷️ Versioning"
     runs-on: ubuntu-24.04
-    if: github.ref_type != 'tag'
     outputs:
-      next_version: ${{ steps.generate-version.outputs.next_version }}
+      version: ${{ steps.generate-version.outputs.version }}
       bumped: ${{ steps.generate-version.outputs.bumped }}
     steps:
       - name: "Checkout repository"
@@ -89,15 +88,16 @@ jobs:
       - uses: ./.github/actions/generate-version
         id: generate-version
         with:
+          version_tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
           minor_types: 'feat'
           patch_types: 'fix'
 
   build:
-    needs: setup
+    needs: [ setup, versioning ]
     runs-on: ubuntu-24.04
     name: >
       ${{ needs.setup.outputs.dry_run == 'true' && '🔬 Validate' || '📦 Build' }}
-      (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
+      (JDK ${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     strategy:
       matrix:
         jdk_version: ${{
@@ -114,7 +114,7 @@ jobs:
           ) }}
 
     env:
-      IMAGE_VERSION: 2026.1.0
+      IMAGE_VERSION: ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.dry_run == 'true' && '-dev' || '' }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=jdk${{ matrix.jdk_version }}
