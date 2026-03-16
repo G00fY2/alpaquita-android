@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: >
       ${{ needs.setup.outputs.dry_run == 'true' && '🔬 Validate' || '📦 Build' }}
-      (${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
+      (JDK ${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     strategy:
       matrix:
         jdk_version: ${{
