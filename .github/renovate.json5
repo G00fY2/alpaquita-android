@@ -164,6 +164,12 @@
         },
         {
             description: 'Use "feat" for major/minor Android SDK updates',
+            matchPackageNames: [
+                'android_cmdline_tools',
+                'android_platform_tools',
+                'android_build_tools',
+                'android_platform_version',
+            ],
             groupName: 'android sdk components',
             matchUpdateTypes: [
                 'major',
@@ -173,6 +179,12 @@
         },
         {
             description: 'Use "fix" for patch Android SDK updates',
+            matchPackageNames: [
+                'android_cmdline_tools',
+                'android_platform_tools',
+                'android_build_tools',
+                'android_platform_version',
+            ],
             groupName: 'android sdk components',
             matchUpdateTypes: [
                 'patch',
