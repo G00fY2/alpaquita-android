@@ -144,7 +144,7 @@
                 'releases[($contains(version, "platforms;android-") or $contains(version, "<major>"))].version',
                 '$map($, function($v) { $replace($v, /.*platforms;android-([^"]+).*/, "v:$1") })',
                 '$map($, function($v) { $replace($v, /.*<major>([0-9]+)<.*/, "r:$1") })',
-                '$map($, function($v, $i) { $contains($v, /^v:/) ? $replace($v, "v:", "") & "-r" & ($contains($[$i+1], /^r:/) ? $replace($[$i+1], "r:", "") : "0") : null })',
+                '$map($, function($v, $i) { $contains($v, /^v:/) ? $replace($v, "v:", "") & "-rev" & ($contains($[$i+1], /^r:/) ? $replace($[$i+1], "r:", "") : "0") : null })',
                 '$filter($, function($v) { $v != null })',
                 '{"releases": $map($, function($v) { {"version": $v} })}',
             ],
@@ -160,7 +160,7 @@
                 'android_platform_version',
             ],
             groupName: 'android sdk components',
-            versioning: 'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+))?(?:\\.(?<patch>\\d+))?(-r(?<build>\\d+))?$'
+            versioning: 'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+))?(?:\\.(?<patch>\\d+))?(-rev(?<build>\\d+))?$'
         },
         {
             description: 'Use "feat" for major/minor Android SDK updates',
