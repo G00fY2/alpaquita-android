@@ -1,12 +1,18 @@
 format: table
 exit-code: 1
 ignorefile: .github/.trivyignore.yaml
+scan:
+  distro: alpine/3.23
+  scanners:
+    - vuln
+  show-suppressed: true
 severity:
   - CRITICAL
   - HIGH
 vulnerability:
   ignore-unfixed: true
 db:
+  no-progress: true
   java-repository:
     - public.ecr.aws/aquasecurity/trivy-java-db:1
     - mirror.gcr.io/aquasec/trivy-java-db:1
@@ -15,3 +21,6 @@ db:
     - public.ecr.aws/aquasecurity/trivy-db:2
     - mirror.gcr.io/aquasec/trivy-db:2
     - ghcr.io/aquasecurity/trivy-db:2
+image:
+  image-config-scanners:
+    - misconfig
