@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-user_uid=$1
-cmdline_tools_id=$2
-platform_tools_version=$3
-build_tools_version=$4
-platform_version=$5
+cmdline_tools_id=$1
+platform_tools_version=$2
+build_tools_version=$3
+platform_version=$4
 
 # Prepare Android SDK directories and configuration
 mkdir -p "${ANDROID_HOME}/cmdline-tools"
@@ -56,11 +55,8 @@ sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_ver
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${platform_version}"
 
 # Cleanup
-rm -rf "${ANDROID_HOME}/.temp"
-rm -rf "${ANDROID_HOME}/.patches"
-rm -rf "${ANDROID_HOME}/.downloadIntermediates"
-rm -rf "${ANDROID_USER_HOME}/cache"
-rm -rf "${ANDROID_USER_HOME}/build-cache"
-
-# Set ownership of ANDROID_HOME including ANDROID_USER_HOME to target user
-chown -R "${user_uid}:${user_uid}" "${ANDROID_HOME}"
+rm -rf "${ANDROID_HOME}/.temp" \
+    "${ANDROID_HOME}/.patches" \
+    "${ANDROID_HOME}/.downloadIntermediates" \
+    "${ANDROID_USER_HOME}/cache" \
+    "${ANDROID_USER_HOME}/build-cache"

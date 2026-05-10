@@ -12,7 +12,10 @@ ARG ANDROID_CMDLINE_TOOLS_ID
 ARG ANDROID_PLATFORM_TOOLS_VERSION
 ARG ANDROID_BUILD_TOOLS_VERSION
 ARG ANDROID_PLATFORM_VERSION
-ARG USER_UID=1000
+ARG DEFAULT_USER_UID=1000
+ARG USER_NAME=androiduser
+ARG USER_GROUP=androidgroup
+ARG USER_HOME=/home/androiduser
 ARG MIMALLOC_PATH=/usr/lib/libmimalloc_stable.so
 
 LABEL org.opencontainers.image.title="Alpaquita Android" \
@@ -20,25 +23,34 @@ LABEL org.opencontainers.image.title="Alpaquita Android" \
       org.opencontainers.image.source="https://github.com/G00fY2/alpaquita-android" \
       org.opencontainers.image.licenses="MIT"
 
-ENV ANDROID_HOME="/opt/android/sdk"
+ENV DEFAULT_USER_UID=${DEFAULT_USER_UID}
+ENV USER_NAME=${USER_NAME}
+ENV USER_HOME=${USER_HOME}
+ENV ANDROID_HOME=/opt/android/sdk
 ENV ANDROID_SDK_ROOT=${ANDROID_HOME}
-ENV ANDROID_USER_HOME="${ANDROID_HOME}/.android-home"
+ENV ANDROID_USER_HOME=${USER_HOME}/.android
+ENV ANDROID_SDK_HOME=${USER_HOME}
+ENV GRADLE_USER_HOME=${USER_HOME}/.gradle
+
 ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
     --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
-    addgroup -g "${USER_UID}" androidgroup && \
-    adduser -D -u "${USER_UID}" -G androidgroup androiduser && \
+    --mount=type=bind,source=scripts/entrypoint.sh,target=/tmp/entrypoint.sh \
+    addgroup -g "${DEFAULT_USER_UID}" "${USER_GROUP}" && \
+    adduser -D -u "${DEFAULT_USER_UID}" -G "${USER_GROUP}" -h "${USER_HOME}" "${USER_NAME}" && \
     /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
     /bin/bash /tmp/setup-android.sh \
-    "${USER_UID}" \
     "${ANDROID_CMDLINE_TOOLS_ID}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \
     "${ANDROID_BUILD_TOOLS_VERSION}" \
-    "${ANDROID_PLATFORM_VERSION}"
+    "${ANDROID_PLATFORM_VERSION}" && \
+    mkdir -p "$GRADLE_USER_HOME" && \
+    cp /tmp/entrypoint.sh /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh && \
+    chown -R "${USER_NAME}":"${USER_GROUP}" "${USER_HOME}" "${ANDROID_HOME}"
 
 ENV LD_PRELOAD=$MIMALLOC_PATH
 
-USER ${USER_UID}
-
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/bin/bash"]
