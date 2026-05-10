@@ -6,6 +6,7 @@ scan:
   distro: alpine/3.23
   scanners:
     - vuln
+    - misconfig
   show-suppressed: true
 severity:
   - CRITICAL
