@@ -123,7 +123,7 @@
             defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml',
             format: 'plain',
             transformTemplates: [
-                'releases[$contains(version, "platform-tools_r")].version',
+                'releases[$contains(version, "platform-tools_r") and $contains(version, "-linux.zip")].version',
                 '$map($, function($v) { $replace($v, /.*platform-tools_r([^-]+)-linux.*/, "$1") })',
                 '{"releases": $map($, function($v) { {"version": $v} })}',
             ],
