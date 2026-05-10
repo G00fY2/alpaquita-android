@@ -1,9 +1,7 @@
-debug: true
 format: table
 exit-code: 1
 ignorefile: .github/.trivyignore.yaml
 scan:
-  distro: alpine/3.23
   scanners:
     - vuln
     - misconfig
