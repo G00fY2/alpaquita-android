@@ -35,7 +35,8 @@ RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaqu
     "${ANDROID_BUILD_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_VERSION}" && \
     mkdir -p "${ANDROID_USER_HOME}" "${GRADLE_USER_HOME}" && \
-    chmod -R 777 "${ANDROID_HOME}" "${ANDROID_SDK_HOME}"
+    chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_SDK_HOME}" && \
+    chmod -R g=u "${ANDROID_HOME}" "${ANDROID_SDK_HOME}"
 
 ENV LD_PRELOAD=$MIMALLOC_PATH
 
