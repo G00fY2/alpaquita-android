@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-user_uid=$1
-cmdline_tools_id=$2
-platform_tools_version=$3
-build_tools_version=$4
-platform_version=$5
+cmdline_tools_id=$1
+platform_tools_version=$2
+build_tools_version=$3
+platform_version=$4
 
 # Prepare Android SDK directories and configuration
 mkdir -p "${ANDROID_HOME}/cmdline-tools"
@@ -62,6 +61,3 @@ rm -rf \
     "${ANDROID_HOME}/.temp" \
     "${ANDROID_USER_HOME}/build-cache" \
     "${ANDROID_USER_HOME}/cache"
-
-# Set ownership of ANDROID_HOME including ANDROID_USER_HOME to target user
-chown -R "${user_uid}:${user_uid}" "${ANDROID_HOME}"
