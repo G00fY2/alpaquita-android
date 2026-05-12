@@ -12,7 +12,11 @@ This repository maintains a specialized, high-performance Docker image designed 
 ### Runtime & Orchestration
 * **CI/CD Platform:** The entire pipeline, from validation to deployment, is powered by **GitHub Actions**. Use Composite Actions to encapsulate modular logic and maintain clean workflow YAMLs.
 * **Execution Environment:** The resulting image is designed to run on **Kubernetes** orchestrated by a **Jenkins Controller** using **Jenkins Agents**.
-* **Permissions:** Ensure critical directories (e.g., Android SDK, Gradle cache) have group permissions (GID 0) to allow for arbitrary UIDs in restricted Kubernetes security contexts.
+
+### Permissions & UID Agnosticism
+* **Arbitrary UID Support:** The image must be executable by any arbitrary UID to support restricted Kubernetes environments (e.g., `runAsNonRoot: true` or specific `runAsUser` contexts).
+* **GID 0 Strategy:** Adhere to the **OpenShift/Kubernetes GID 0 pattern**. All tool and cache directories must be owned by the root group (`chgrp -R 0`) with group permissions mirroring owner permissions (`chmod -R g=u`).
+* **Agnostic Home:** Redirect all stateful data (Gradle caches, Android configs) to a neutral path (`/opt/android/user`) instead of the standard `/root` or `/home`. This ensures portability and simplifies volume mounting for persistent CI caching.
 
 # !!! WORK IN PROGRESS (WIP) - REMOVE ONCE FINALIZED !!!
 The following features are currently under development and may contain placeholders:
