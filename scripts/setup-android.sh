@@ -56,11 +56,12 @@ sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_ver
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${platform_version}"
 
 # Cleanup
-rm -rf "${ANDROID_HOME}/.temp"
-rm -rf "${ANDROID_HOME}/.patches"
-rm -rf "${ANDROID_HOME}/.downloadIntermediates"
-rm -rf "${ANDROID_USER_HOME}/cache"
-rm -rf "${ANDROID_USER_HOME}/build-cache"
+rm -rf \
+    "${ANDROID_HOME}/.downloadIntermediates" \
+    "${ANDROID_HOME}/.patches" \
+    "${ANDROID_HOME}/.temp" \
+    "${ANDROID_USER_HOME}/build-cache" \
+    "${ANDROID_USER_HOME}/cache"
 
 # Set ownership of ANDROID_HOME including ANDROID_USER_HOME to target user
 chown -R "${user_uid}:${user_uid}" "${ANDROID_HOME}"

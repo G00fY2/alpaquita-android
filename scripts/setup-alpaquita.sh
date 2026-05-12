@@ -6,13 +6,13 @@ mimalloc_path=$1
 # Install system packages
 apk add --no-cache \
     bash \
-    curl \
-    unzip \
-    git \
     coreutils \
-    openssh-client-default \
+    curl \
+    git \
     libstdc++ \
-    mimalloc-global
+    mimalloc-global \
+    openssh-client-default \
+    unzip
 
 # Create symlink for mimalloc shared library
 mimalloc_real_path=$(apk info -L mimalloc | grep -m1 'libmimalloc\.so\.[0-9]$')
