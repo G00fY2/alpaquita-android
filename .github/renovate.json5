@@ -116,16 +116,16 @@
             transformTemplates: [
                 'releases[$contains(version, "cmdline-tools;")].version',
                 '$map($, function($v) { $replace($v, /.*cmdline-tools;([^"]+).*/, "$1") })',
-                '{"releases": $map($, function($v) { {"version": $v} })}',
+                '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
             ],
         },
         android_platform_tools: {
             defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-1.xml',
             format: 'plain',
             transformTemplates: [
-                'releases[$contains(version, "platform-tools_r") and $contains(version, "-linux.zip")].version',
+                'releases[($contains(version, "platform-tools_r") and $contains(version, "-linux.zip"))].version',
                 '$map($, function($v) { $replace($v, /.*platform-tools_r([^-]+)-linux.*/, "$1") })',
-                '{"releases": $map($, function($v) { {"version": $v} })}',
+                '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
             ],
         },
         android_build_tools: {
@@ -134,7 +134,7 @@
             transformTemplates: [
                 'releases[$contains(version, "build-tools;")].version',
                 '$map($, function($v) { $replace($v, /.*build-tools;([^"]+).*/, "$1") })',
-                '{"releases": $map($, function($v) { {"version": $v} })}',
+                '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
             ],
         },
         android_platform_version: {
@@ -146,7 +146,7 @@
                 '$map($, function($v) { $replace($v, /.*<major>([0-9]+)<.*/, "r:$1") })',
                 '$map($, function($v, $i) { $contains($v, /^v:/) ? $replace($v, "v:", "") & "-rev" & ($contains($[$i+1], /^r:/) ? $replace($[$i+1], "r:", "") : "0") : null })',
                 '$filter($, function($v) { $v != null })',
-                '{"releases": $map($, function($v) { {"version": $v} })}',
+                '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
             ],
         },
     },
