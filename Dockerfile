@@ -12,7 +12,6 @@ ARG ANDROID_CMDLINE_TOOLS_ID
 ARG ANDROID_PLATFORM_TOOLS_VERSION
 ARG ANDROID_BUILD_TOOLS_VERSION
 ARG ANDROID_PLATFORM_VERSION
-ARG USER_UID=1000
 ARG MIMALLOC_PATH=/usr/lib/libmimalloc_stable.so
 
 LABEL org.opencontainers.image.title="Alpaquita Android" \
@@ -20,25 +19,25 @@ LABEL org.opencontainers.image.title="Alpaquita Android" \
       org.opencontainers.image.source="https://github.com/G00fY2/alpaquita-android" \
       org.opencontainers.image.licenses="MIT"
 
-ENV ANDROID_HOME="/opt/android/sdk"
+ENV ANDROID_HOME=/opt/android/sdk
 ENV ANDROID_SDK_ROOT=${ANDROID_HOME}
-ENV ANDROID_USER_HOME="${ANDROID_HOME}/.android-home"
+ENV ANDROID_SDK_HOME=/opt/android/user
+ENV ANDROID_USER_HOME=${ANDROID_SDK_HOME}/.android
+ENV GRADLE_USER_HOME=${ANDROID_SDK_HOME}/.gradle
 ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
     --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
-    addgroup -g "${USER_UID}" androidgroup && \
-    adduser -D -u "${USER_UID}" -G androidgroup androiduser && \
     /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
     /bin/bash /tmp/setup-android.sh \
-    "${USER_UID}" \
     "${ANDROID_CMDLINE_TOOLS_ID}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \
     "${ANDROID_BUILD_TOOLS_VERSION}" \
-    "${ANDROID_PLATFORM_VERSION}"
+    "${ANDROID_PLATFORM_VERSION}" && \
+    mkdir -p "${ANDROID_USER_HOME}" "${GRADLE_USER_HOME}" && \
+    chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_SDK_HOME}" && \
+    chmod -R g=u "${ANDROID_HOME}" "${ANDROID_SDK_HOME}"
 
 ENV LD_PRELOAD=$MIMALLOC_PATH
-
-USER ${USER_UID}
 
 CMD ["/bin/bash"]

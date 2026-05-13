@@ -30,35 +30,35 @@ commits=$(git log "$commit_range" --format=%s 2>/dev/null || echo "")
 
 # Analyze commits for bump triggers
 has_minor_bump=false
-if echo "$commits" | grep -qE "$minor_bump_pattern"; then
+if echo "$commits" | grep -qE "$minor_bump_pattern" >/dev/null 2>&1; then
     has_minor_bump=true
 fi
 
 has_patch_bump=false
-if echo "$commits" | grep -qE "$patch_bump_pattern"; then
+if echo "$commits" | grep -qE "$patch_bump_pattern" >/dev/null 2>&1; then
     has_patch_bump=true
 fi
 
 # Determine the new version
 bumped=false
-if [[ "$is_new_year" == true && ("$has_minor_bump" == true || "$has_patch_bump" == true) ]]; then
+if [[ "$is_new_year" == "true" && ("$has_minor_bump" == "true" || "$has_patch_bump" == "true") ]]; then
     version="${version_prefix}1.0"
     reason="new-year-reset"
     bumped=true
-elif [ "$has_minor_bump" = true ]; then
+elif [[ "$has_minor_bump" == "true" ]]; then
     version_num=${latest_tag#"$version_prefix"}
     minor=$(echo "$version_num" | cut -d. -f1)
     version="${version_prefix}$((minor + 1)).0"
     reason="minor-bump"
     bumped=true
-elif [ "$has_patch_bump" = true ]; then
+elif [[ "$has_patch_bump" == "true" ]]; then
     version_num=${latest_tag#"$version_prefix"}
     minor=$(echo "$version_num" | cut -d. -f1)
     patch=$(echo "$version_num" | cut -d. -f2)
     version="${version_prefix}${minor}.$((patch + 1))"
     reason="patch-bump"
     bumped=true
-elif [ -z "$latest_tag" ]; then
+elif [[ -z "$latest_tag" ]]; then
     version="${version_prefix}1.0"
     reason="initial-release"
     bumped=true

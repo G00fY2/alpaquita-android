@@ -1,11 +1,10 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-user_uid=$1
-cmdline_tools_id=$2
-platform_tools_version=$3
-build_tools_version=$4
-platform_version=$5
+cmdline_tools_id=$1
+platform_tools_version=$2
+build_tools_version=$3
+platform_version=$4
 
 # Prepare Android SDK directories and configuration
 mkdir -p "${ANDROID_HOME}/cmdline-tools"
@@ -31,7 +30,7 @@ rm /tmp/commandline-tools.zip
 full_version=$(grep "Pkg.Revision" "${ANDROID_HOME}/cmdline-tools/latest/source.properties" | cut -d'=' -f2)
 major=$(echo "$full_version" | cut -d'.' -f1)
 minor=$(echo "$full_version" | cut -d'.' -s -f2)
-[ -z "$minor" ] && minor=0
+minor=${minor:-0}
 cat <<EOF >"${ANDROID_HOME}/cmdline-tools/latest/package.xml"
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:repository xmlns:ns2="http://schemas.android.com/repository/android/common/02" xmlns:ns5="http://schemas.android.com/repository/android/generic/02">
@@ -47,7 +46,7 @@ cat <<EOF >"${ANDROID_HOME}/cmdline-tools/latest/package.xml"
 EOF
 
 # Accept all Android SDK licenses
-yes | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses >/dev/null
+(yes || true) | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses >/dev/null
 
 # Install Android SDK Build-Tools with specified version
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_version}"
@@ -56,11 +55,9 @@ sdkmanager --sdk_root="${ANDROID_HOME}" --install "build-tools;${build_tools_ver
 sdkmanager --sdk_root="${ANDROID_HOME}" --install "platforms;android-${platform_version}"
 
 # Cleanup
-rm -rf "${ANDROID_HOME}/.temp"
-rm -rf "${ANDROID_HOME}/.patches"
-rm -rf "${ANDROID_HOME}/.downloadIntermediates"
-rm -rf "${ANDROID_USER_HOME}/cache"
-rm -rf "${ANDROID_USER_HOME}/build-cache"
-
-# Set ownership of ANDROID_HOME including ANDROID_USER_HOME to target user
-chown -R "${user_uid}:${user_uid}" "${ANDROID_HOME}"
+rm -rf \
+    "${ANDROID_HOME}/.downloadIntermediates" \
+    "${ANDROID_HOME}/.patches" \
+    "${ANDROID_HOME}/.temp" \
+    "${ANDROID_USER_HOME}/build-cache" \
+    "${ANDROID_USER_HOME}/cache"

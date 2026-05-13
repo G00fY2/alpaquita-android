@@ -12,7 +12,11 @@ This repository maintains a specialized, high-performance Docker image designed 
 ### Runtime & Orchestration
 * **CI/CD Platform:** The entire pipeline, from validation to deployment, is powered by **GitHub Actions**. Use Composite Actions to encapsulate modular logic and maintain clean workflow YAMLs.
 * **Execution Environment:** The resulting image is designed to run on **Kubernetes** orchestrated by a **Jenkins Controller** using **Jenkins Agents**.
-* **Permissions:** Ensure critical directories (e.g., Android SDK, Gradle cache) have group permissions (GID 0) to allow for arbitrary UIDs in restricted Kubernetes security contexts.
+
+### Permissions & UID Agnosticism
+* **Arbitrary UID Support:** The image must be executable by any arbitrary UID to support restricted Kubernetes environments (e.g., `runAsNonRoot: true` or specific `runAsUser` contexts).
+* **GID 0 Strategy:** Adhere to the **OpenShift/Kubernetes GID 0 pattern**. All tool and cache directories must be owned by the root group (`chgrp -R 0`) with group permissions mirroring owner permissions (`chmod -R g=u`).
+* **Agnostic Home:** Redirect all stateful data (Gradle caches, Android configs) to a neutral path (`/opt/android/user`) instead of the standard `/root` or `/home`. This ensures portability and simplifies volume mounting for persistent CI caching.
 
 # !!! WORK IN PROGRESS (WIP) - REMOVE ONCE FINALIZED !!!
 The following features are currently under development and may contain placeholders:
@@ -39,12 +43,22 @@ The following features are currently under development and may contain placehold
 ### Docker Architecture
 * **Reproducible Builds:** Ensure consistency across environments through deterministic build steps.
 * **Version & Digest Pinning:** Explicitly pin versions and SHA-256 digests for all base images to ensure immutability (e.g., `image:tag@sha256:...`). This is enforced by Renovate as configured in `.github/renovate.json5`.
-* **Allocators:** `mimalloc` must be preloaded via `LD_PRELOAD` to optimize tool performance.
+* **Layer Optimization:**
+  * **Alphanumeric Sorting:** Sort multi-line arguments (e.g., packages in `apt-get install`, labels, or environment variables) alphanumerically to avoid duplicates and improve PR readability.
+  * **Atomic RUN Commands:** Always combine `update` and `install` instructions (e.g., `apt-get update && apt-get install -y --no-install-recommends ...`) to prevent caching issues.
+  * **Minimalism:** Use `--no-install-recommends` for all package managers and clean up caches (e.g., `rm -rf /var/lib/apt/lists/*`) within the same `RUN` layer.
+* **Robust Execution:**
+  * **Pipefail:** Prepend `set -o pipefail` to all `RUN` instructions involving pipes (`|`) to ensure build failures if any command in the chain fails.
+  * **Exec Form:** Use the **JSON Array/Exec Form** (`["executable", "param"]`) for `ENTRYPOINT` and `CMD` to ensure proper signal handling (PID 1).
+* **Environment & Pathing:**
+  * **Workdir:** Always use absolute paths for `WORKDIR`. Avoid using `RUN cd ...`.
+  * **Allocators:** `mimalloc` must be preloaded via `LD_PRELOAD` to optimize tool performance.
 * **Compression:** Use `zstd` (level 9) with `force-compression=true` for registry exports.
 
 # Formatting & Tooling
 * **EditorConfig:** Source of truth for indentation and line endings (enforced via `.editorconfig`).
-* **Linters & Formatters:** * `shfmt`: Mandatory for formatting shell scripts. Use settings that respect `.editorconfig`.
+* **Linters & Formatters:**
+  * `shfmt`: Mandatory for formatting shell scripts. Use settings that respect `.editorconfig`.
   * `shellcheck`: Mandatory for static analysis of `.sh` and `.bash` files.
   * `hadolint`: Mandatory for Dockerfile best practices.
   * `yamllint`: Mandatory for YAML files using `.github/.yamllint.yaml`.

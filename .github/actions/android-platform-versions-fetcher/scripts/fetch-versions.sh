@@ -1,6 +1,5 @@
-#!/bin/bash
-set -e
-set -o pipefail
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Strip everything after the first hyphen (e.g. '36.1-r1' -> '36.1')
 max_version=${1%%-*}
@@ -33,7 +32,7 @@ filtered_versions=$(echo "$all_versions" | awk -v start_ver="$max_version" -v ma
 ')
 
 # Validate result
-if [ "$(echo "$filtered_versions" | cut -d. -f1 | uniq | grep -c '^')" -lt "$max_major_versions_count" ]; then
+if [[ "$(echo "$filtered_versions" | cut -d. -f1 | uniq | grep -c '^')" -lt "$max_major_versions_count" ]]; then
     echo "ERROR: Not enough distinct major versions ($max_major_versions_count) found for $max_version:" >&2
     echo "$filtered_versions" >&2
     exit 1

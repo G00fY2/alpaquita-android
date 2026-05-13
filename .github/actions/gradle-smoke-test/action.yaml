@@ -10,7 +10,7 @@ inputs:
     default: '1000'
   run-as-gid:
     description: 'The GID to run the container as'
-    default: '1000'
+    default: '0'
 
 runs:
   using: 'composite'

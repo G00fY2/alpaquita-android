@@ -14,7 +14,7 @@ echo "--- Container: Fetching latest stable Gradle version ---"
 json_response=$(curl -fsSL https://services.gradle.org/versions/current)
 gradle_version=$(echo "$json_response" | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*' | cut -d'"' -f4)
 
-if [ -z "$gradle_version" ]; then
+if [[ -z "$gradle_version" ]]; then
     echo "Error: Could not determine Gradle version."
     exit 1
 fi
