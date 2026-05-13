@@ -25,7 +25,7 @@ fi
 ln -s "/${mimalloc_real_path#/}" "$mimalloc_path"
 
 # Validate mimalloc
-if LD_PRELOAD="$mimalloc_path" MIMALLOC_VERBOSE=1 sh -c true 2>&1 | grep -q "mimalloc: process init"; then
+if LD_PRELOAD="$mimalloc_path" MIMALLOC_VERBOSE=1 sh -c true 2>&1 | grep "mimalloc: process init" >/dev/null 2>&1; then
     echo "Success: mimalloc is active and working!"
 else
     echo "Error: mimalloc validation failed! The library was found but not initialized." >&2
