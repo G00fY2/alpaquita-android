@@ -2,7 +2,7 @@
 set -euo pipefail
 
 target_dir=$1
-install_dir="$HOME/.local/bin"
+expected_install_dir="${ANDROID_SDK_HOME:-/opt/android/user}/.local/bin"
 
 echo "--- Container: Environment Check ---"
 echo "--- User UID: $(id -u) ---"
@@ -10,12 +10,12 @@ echo "--- Working Directory: $(pwd) ---"
 echo "--- Target Project Directory: $target_dir ---"
 
 echo "--- Container: Installing Android CLI ---"
-curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash -s -- --yes >/dev/null
+HOME="${ANDROID_SDK_HOME:-/opt/android/user}" curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash -s -- --yes >/dev/null
 
-export PATH="$PATH:$install_dir"
+export PATH="$PATH:$expected_install_dir"
 
-if [[ -d "$HOME/.android/cli/bin" ]]; then
-    export PATH="$PATH:$HOME/.android/cli/bin"
+if [[ -d "${ANDROID_SDK_HOME:-/opt/android/user}/.android/cli/bin" ]]; then
+    export PATH="$PATH:${ANDROID_SDK_HOME:-/opt/android/user}/.android/cli/bin"
 fi
 
 if ! command -v android &>/dev/null; then
