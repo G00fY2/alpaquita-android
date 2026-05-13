@@ -195,8 +195,8 @@ jobs:
           jdk_version: ${{ matrix.jdk_version }}
           android_api: ${{ matrix.platform_version }}
 
-      - name: "Run Gradle smoke test"
-        uses: ./.github/actions/gradle-smoke-test
+      - name: "Run Android Gradle Build smoke test"
+        uses: ./.github/actions/android-build-smoke-test
         with:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
 

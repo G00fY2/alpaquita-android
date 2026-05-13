@@ -1,5 +1,5 @@
-name: 'Gradle Integration Smoke Test'
-description: 'Orchestrates the Docker-based Gradle integration test'
+name: 'Android Build Smoke Test'
+description: 'Orchestrates the Docker-based Android Gradle Build integration test'
 
 inputs:
   image-ref:
