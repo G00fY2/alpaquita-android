@@ -30,13 +30,13 @@ fi
 echo "--- Container: Android CLI Version ---"
 android --version
 
-echo "--- Container: Initialize a new project ---"
+echo "--- Container: Initialize a new default Android Gradle project ---"
 android create --name="SmokeTestApp" --output="$target_dir"
 
 cd "$target_dir"
 
-echo "--- Container: Verifying with generated gradlew wrapper ---"
+echo "--- Container: Actually build the Android project using gradlew wrapper ---"
 ./gradlew --version --no-daemon
-./gradlew tasks --no-daemon
+./gradlew assembleDebug --no-daemon
 
 echo "--- Container: Smoke test completed successfully ---"
