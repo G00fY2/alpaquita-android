@@ -1,5 +1,5 @@
-#!/bin/bash
-set -eo pipefail
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Normalize version (strip leading 'v')
 version="${1#v}"

@@ -1,6 +1,5 @@
-#!/bin/bash
-set -e
-set -o pipefail
+#!/usr/bin/env bash
+set -euo pipefail
 
 target_version=$1
 xml_url="https://dl.google.com/android/repository/repository2-3.xml"

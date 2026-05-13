@@ -1,9 +1,9 @@
 #!/bin/sh
-set -e
+set -eu
 
 mimalloc_path=$1
 
-# Install system packages
+# Install system packages (alphanumerically sorted)
 apk add --no-cache \
     bash \
     coreutils \
@@ -16,6 +16,12 @@ apk add --no-cache \
 
 # Create symlink for mimalloc shared library
 mimalloc_real_path=$(apk info -L mimalloc | grep -m1 'libmimalloc\.so\.[0-9]$')
+
+if [ -z "$mimalloc_real_path" ]; then
+    echo "Error: Could not find libmimalloc shared library." >&2
+    exit 1
+fi
+
 ln -s "/${mimalloc_real_path#/}" "$mimalloc_path"
 
 # Validate mimalloc

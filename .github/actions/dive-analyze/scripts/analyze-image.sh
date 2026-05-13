@@ -1,6 +1,5 @@
-#!/bin/bash
-set -e
-set -o pipefail
+#!/usr/bin/env bash
+set -euo pipefail
 
 image=$1
 config=$2
