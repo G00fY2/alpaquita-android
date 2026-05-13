@@ -18,7 +18,7 @@ if [[ -d "$HOME/.android/cli/bin" ]]; then
     export PATH="$PATH:$HOME/.android/cli/bin"
 fi
 
-if ! command -v android &> /dev/null; then
+if ! command -v android &>/dev/null; then
     echo "ERROR: 'android' command still not found after installation and PATH update."
     exit 1
 fi
