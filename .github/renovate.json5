@@ -213,5 +213,13 @@
             ],
             semanticCommitType: 'fix',
         },
+        {
+            "description": 'Group Docker build tool updates',
+            "matchPackageNames": [
+                'docker/buildx',
+                'moby/buildkit',
+            ],
+            "groupName": 'docker build tools',
+        },
     ],
 }
