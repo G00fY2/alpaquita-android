@@ -26,6 +26,6 @@ docker run --rm \
     -v "$action_path/scripts":/scripts:ro \
     -w /workspace \
     "$image" \
-    bash /scripts/gradle-init-and-exec.sh "/workspace"
+    bash /scripts/android-project-init-and-sync.sh "/workspace"
 
 echo "### Host: Integration Test Finished Successfully ###"
