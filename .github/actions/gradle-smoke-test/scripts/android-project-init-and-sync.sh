@@ -2,21 +2,25 @@
 set -euo pipefail
 
 target_dir=$1
-expected_install_dir="${ANDROID_SDK_HOME:-/opt/android/user}/.local/bin"
+
+if [[ -z "${ANDROID_SDK_HOME:-}" ]]; then
+    echo "ERROR: The environment variable ANDROID_SDK_HOME is not set or empty."
+    exit 1
+fi
+
+export HOME="$ANDROID_SDK_HOME"
+expected_install_dir="$HOME/.local/bin"
 
 echo "--- Container: Environment Check ---"
 echo "--- User UID: $(id -u) ---"
+echo "--- HOME Directory: $HOME ---"
 echo "--- Working Directory: $(pwd) ---"
 echo "--- Target Project Directory: $target_dir ---"
 
 echo "--- Container: Installing Android CLI ---"
-HOME="${ANDROID_SDK_HOME:-/opt/android/user}" curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash -s -- --yes >/dev/null
+curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash -s -- --yes >/dev/null
 
 export PATH="$PATH:$expected_install_dir"
-
-if [[ -d "${ANDROID_SDK_HOME:-/opt/android/user}/.android/cli/bin" ]]; then
-    export PATH="$PATH:${ANDROID_SDK_HOME:-/opt/android/user}/.android/cli/bin"
-fi
 
 if ! command -v android &>/dev/null; then
     echo "ERROR: 'android' command still not found after installation and PATH update."
@@ -26,7 +30,7 @@ fi
 echo "--- Container: Android CLI Version ---"
 android --version
 
-echo "--- Container:  Initialize a new project ---"
+echo "--- Container: Initialize a new project ---"
 android create --name="SmokeTestApp" --output="$target_dir"
 
 cd "$target_dir"
