@@ -1,11 +1,11 @@
 name: "Android Image Pipeline"
 
 on:
+  release:
+    types: [ created ]
   push:
     branches:
       - main
-    tags:
-      - 'v*.*.*'
   pull_request:
     branches:
       - '**'
@@ -262,6 +262,7 @@ jobs:
     if: >-
       ${{ success() && (needs.versioning.outputs.create_release_tag == 'true' ||
       needs.setup.outputs.environment == 'release') }}
+    environment: ${{ needs.setup.outputs.environment }}
     permissions:
       contents: write
     steps:
@@ -274,12 +275,12 @@ jobs:
         with:
           version: ${{ env.IMAGE_VERSION }}
 
-      - name: "Create or Publish GitHub release"
+      - name: "Create GitHub release"
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
           allowUpdates: true
-          updateOnlyUnreleased: true
           bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
           prerelease: ${{ needs.setup.outputs.environment != 'release' }}
           generateReleaseNotes: true
           tag: ${{ needs.versioning.outputs.version }}
+          token: ${{ secrets.GH_PAT_TOKEN }}
