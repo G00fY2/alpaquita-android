@@ -79,6 +79,7 @@ jobs:
     outputs:
       version: ${{ steps.generate-version.outputs.version }}
       bumped: ${{ steps.generate-version.outputs.bumped }}
+      create_release_tag: ${{ steps.generate-version.outputs.create_release_tag }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -246,12 +247,7 @@ jobs:
     name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-24.04
     if: always()
-    needs: [ setup, versioning, build ]
-    permissions:
-      contents: write
-    env:
-      IMAGE_VERSION: >-
-        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release' && '' || '-dev' }}
+    needs: build
     steps:
       - name: "Consolidate build status"
         run: |
@@ -259,6 +255,17 @@ jobs:
             exit 1
           fi
 
+  create-tag-or-github-release:
+    name: >-
+      🚀 ${{ needs.setup.outputs.environment == 'release' && 'Publish Final' || 'Create Draft' }} Release
+    runs-on: ubuntu-24.04
+    needs: [ setup, versioning, build-summary ]
+    if: >-
+      ${{ success() && (needs.versioning.outputs.create_release_tag == 'true' ||
+      needs.setup.outputs.environment == 'release') }}
+    permissions:
+      contents: write
+    steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -268,8 +275,7 @@ jobs:
         with:
           version: ${{ env.IMAGE_VERSION }}
 
-      - name: "Create GitHub release"
-        if: ${{ needs.versioning.outputs.create_release_tag == 'true' || needs.setup.outputs.environment == 'release' }}
+      - name: "Create or Publish GitHub release"
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
           allowUpdates: true
