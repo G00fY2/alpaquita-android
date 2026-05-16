@@ -17,10 +17,13 @@ runs:
     - id: generate-manifest
       shell: bash
       run: |
-        report_name="manifest_$(echo "${{ inputs.image-ref }}" | tr ':/' '_').md"
+        image_ref="${{ inputs.image-ref }}"
+        image_tag="${image_ref#*:}"
+        report_name="manifest_${image_tag}.md"
 
         "${{ github.action_path }}/scripts/generate-manifest.sh" \
-          "${{ inputs.image-ref }}" \
+          "$image_ref" \
+          "$image_tag" \
           "$report_name"
 
         cat "$report_name" >> "$GITHUB_STEP_SUMMARY"

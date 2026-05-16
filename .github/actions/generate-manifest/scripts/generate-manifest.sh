@@ -2,8 +2,8 @@
 set -euo pipefail
 
 image=$1
-report_file=$2
-image_tag="${image#*:}"
+image_tag=$2
+report_file=$3
 
 get_sdk_components() {
     docker run --rm "$image" sdkmanager --list_installed 2>/dev/null |
