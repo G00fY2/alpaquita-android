@@ -256,8 +256,7 @@ jobs:
           fi
 
   create-tag-or-github-release:
-    name: >-
-      🚀 ${{ needs.setup.outputs.environment == 'release' && 'Publish Final' || 'Create Draft' }} Release
+    name: "🚀 Conditionally create tag or GitHub release"
     runs-on: ubuntu-24.04
     needs: [ setup, versioning, build-summary ]
     if: >-
