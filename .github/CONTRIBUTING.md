@@ -30,7 +30,15 @@ Before opening a Pull Request, your changes **must** pass our local linters and 
 ### Key Technical Rule for Docker Changes:
 This image runs in restricted Kubernetes environments. Any directory or cache path you add **must follow the GID 0 strategy** (owned by root group `chgrp -R 0` with `chmod -R g=u`) and support arbitrary UIDs (`runAsNonRoot: true`).
 
----
+### Commit Messages & Git Hooks
+This project strictly enforces **Conventional Commits** (e.g., `feat: add JDK 21 support` or `fix: resolve permission issue`). This formatting is required because our automated release pipeline uses these messages to calculate version bumps and generate release notes.
+
+To help you validate your commit messages locally before pushing, this repository includes a custom Git hook. **You must configure Git to use our local hooks directory** by running the following command in your terminal after cloning:
+
+```bash
+git config core.hooksPath .githooks
+```
+Once configured, the `commit-msg` hook under `.githooks/` will automatically check your message every time you run `git commit` and block the commit if the format is invalid.
 
 ## How to Contribute
 
