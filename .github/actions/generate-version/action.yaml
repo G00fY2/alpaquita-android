@@ -16,9 +16,6 @@ outputs:
   version:
     description: 'The (current or next) version string (e.g. v2026.1.0)'
     value: ${{ steps.tag-version.outputs.version || steps.generated-version.outputs.version }}
-  bumped:
-    description: 'Boolean flag indicating if a version bump occurred'
-    value: ${{ steps.tag-version.outputs.bumped || steps.generated-version.outputs.bumped }}
   create_release_tag:
     description: 'Boolean flag indicating if a new git tag should be created'
     value: ${{ steps.evaluate-tag-creation.outputs.create_release_tag || 'false' }}
@@ -32,7 +29,7 @@ runs:
       shell: bash
       run: |
         echo "version=${{ inputs.version_tag }}" >> "$GITHUB_OUTPUT"
-        echo "bumped=false" >> "$GITHUB_OUTPUT"
+
     - name: 'Generate version based on new commits'
       id: generated-version
       if: ${{ inputs.version_tag == '' }}
@@ -46,6 +43,7 @@ runs:
 
         echo "version=$(echo "$json_output" | jq -r '.version')" >> "$GITHUB_OUTPUT"
         echo "bumped=$(echo "$json_output" | jq -r '.bumped')" >> "$GITHUB_OUTPUT"
+
     - name: 'Evaluate Tag Creation'
       id: evaluate-tag-creation
       if: ${{ github.ref_name == 'main' && inputs.version_tag == '' }}
