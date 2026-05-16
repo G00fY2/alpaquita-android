@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-24.04
     environment: ${{ needs.setup.outputs.environment }}
     name: >
-      ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' && '📦 Build' || '🔬 Validate' }}
+      ${{ needs.setup.outputs.environment == 'release' && '📦 Build' || '🔬 Validate' }}
       (JDK ${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     permissions:
       contents: read
@@ -107,20 +107,20 @@ jobs:
       matrix:
         jdk_version: ${{
           fromJson(
-          needs.setup.outputs.environment == 'release-REMOVE-ME' &&
+          needs.setup.outputs.environment == 'release' &&
           needs.setup.outputs.jdk_versions ||
           format('["{0}"]', needs.setup.outputs.latest_jdk_version)
           ) }}
         platform_version: ${{
           fromJson(
-          needs.setup.outputs.environment == 'release-REMOVE-ME' &&
+          needs.setup.outputs.environment == 'release' &&
           needs.setup.outputs.platform_versions ||
           format('["{0}"]', needs.setup.outputs.latest_platform_version)
           ) }}
 
     env:
       IMAGE_VERSION: >-
-        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release-REMOVE-ME' && '' || '-dev' }}
+        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release' && '' || '-dev' }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_HUB_USERNAME: g00fy2
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android
@@ -217,14 +217,14 @@ jobs:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
 
       - name: "Login to Docker Hub"
-        if: ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' }}
+        if: ${{ needs.setup.outputs.environment == 'release' }}
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           username: ${{ env.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: "Login to GitHub Container Registry"
-        if: ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' }}
+        if: ${{ needs.setup.outputs.environment == 'release' }}
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           registry: ghcr.io
@@ -232,7 +232,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Build and push Docker Images"
-        if: ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' }}
+        if: ${{ needs.setup.outputs.environment == 'release' }}
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
         with:
           context: .

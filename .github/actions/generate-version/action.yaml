@@ -48,7 +48,7 @@ runs:
         echo "bumped=$(echo "$json_output" | jq -r '.bumped')" >> "$GITHUB_OUTPUT"
     - name: 'Evaluate Tag Creation'
       id: evaluate-tag-creation
-      #REMOE ME if: ${{ github.ref_name == 'main' && inputs.version_tag == '' }}
+      if: ${{ github.ref_name == 'main' && inputs.version_tag == '' }}
       shell: bash
       run: |
         echo "create_release_tag=${{ steps.generated-version.outputs.bumped }}" >> "$GITHUB_OUTPUT"
