@@ -26,7 +26,7 @@ runs:
       run: |
         output_path="merged_manifests.md"
 
-        "${{ github.action_path }}/scripts/merge-manifests.sh" \
+        "${{ github.action_path }}/scripts/merge-matrix-manifests.sh" \
           "${{ inputs.version }}" \
           "${{ steps.download-manifests.outputs.download-path }}" \
           "$output_path"
