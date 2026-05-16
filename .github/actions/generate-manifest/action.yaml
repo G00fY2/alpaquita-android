@@ -5,12 +5,6 @@ inputs:
   image-ref:
     description: 'The image to analyze'
     required: true
-  jdk_version:
-    description: 'Image jdk version'
-    required: true
-  android_api:
-    description: 'Image android api version'
-    required: true
 
 outputs:
   manifest_path:
@@ -27,8 +21,6 @@ runs:
 
         "${{ github.action_path }}/scripts/generate-manifest.sh" \
           "${{ inputs.image-ref }}" \
-          "${{ inputs.jdk_version }}" \
-          "${{ inputs.android_api }}" \
           "$report_name"
 
         cat "$report_name" >> "$GITHUB_STEP_SUMMARY"
