@@ -256,7 +256,7 @@ jobs:
           fi
 
   create-tag-or-github-release:
-    name: "🚀 Conditionally create Tag or GitHub Release"
+    name: "🚀 Create or update GitHub Release"
     runs-on: ubuntu-24.04
     needs: [ setup, versioning, build-summary ]
     if: >-
@@ -269,9 +269,9 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: "Merge matrix manifests"
+      - name: "Merge build manifests"
         id: merge-manifests
-        uses: ./.github/actions/merge-matrix-manifests
+        uses: ./.github/actions/merge-build-manifests
         with:
           version: ${{ env.IMAGE_VERSION }}
 

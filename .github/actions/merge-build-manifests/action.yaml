@@ -1,5 +1,5 @@
-name: 'Merge matrix manifests'
-description: 'Downloads matrix manifests, merges them into a single file, and updates the step summary.'
+name: 'Merge build manifests'
+description: 'Downloads build manifests, merges them into a single file, and updates the step summary.'
 
 inputs:
   version:
@@ -14,7 +14,7 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: 'Download all matrix manifests'
+    - name: 'Download all build manifests'
       id: download-manifests
       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
       with:
@@ -26,7 +26,7 @@ runs:
       run: |
         output_path="merged_manifests_${{ inputs.version }}.md"
 
-        "${{ github.action_path }}/scripts/merge-matrix-manifests.sh" \
+        "${{ github.action_path }}/scripts/merge-build-manifests.sh" \
           "${{ inputs.version }}" \
           "${{ steps.download-manifests.outputs.download-path }}" \
           "$output_path"
