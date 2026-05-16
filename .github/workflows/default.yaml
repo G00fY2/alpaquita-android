@@ -271,7 +271,7 @@ jobs:
         with:
           version: ${{ env.IMAGE_VERSION }}
       - name: "Create GitHub release"
-        #if: ${{ needs.setup.outputs.environment == 'release' }}
+        if: ${{ needs.setup.outputs.environment == 'release' }}
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         with:
           body_path: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
