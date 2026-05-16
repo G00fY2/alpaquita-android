@@ -256,7 +256,7 @@ jobs:
           fi
 
   create-tag-or-github-release:
-    name: "🚀 Conditionally create tag or GitHub release"
+    name: "🚀 Conditionally create Tag or GitHub Release"
     runs-on: ubuntu-24.04
     needs: [ setup, versioning, build-summary ]
     if: >-
@@ -281,5 +281,5 @@ jobs:
           updateOnlyUnreleased: true
           bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
           draft: ${{ needs.setup.outputs.environment != 'release' }}
-          generate_release_notes: true
+          generateReleaseNotes: true
           tag: ${{ needs.versioning.outputs.version }}
