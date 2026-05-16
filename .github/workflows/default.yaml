@@ -38,6 +38,7 @@ jobs:
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
       environment: ${{ steps.set-environment.outputs.environment }}
+      version_suffix: ${{ steps.set-environment.outputs.version_suffix }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -45,10 +46,12 @@ jobs:
       - name: "Set GitHub Deployment Environment"
         id: set-environment
         run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          if [[ "${{ github.event_name }}" == "release" ]]; then
             echo "environment=release" >> "$GITHUB_OUTPUT"
+            echo "version_suffix=" >> "$GITHUB_OUTPUT"
           else
             echo "environment=preview" >> "$GITHUB_OUTPUT"
+            echo "version_suffix=-dev" >> "$GITHUB_OUTPUT"
           fi
 
       - name: "Prepare environment variables"
@@ -119,8 +122,7 @@ jobs:
           ) }}
 
     env:
-      IMAGE_VERSION: >-
-        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release' && '' || '-dev' }}
+      IMAGE_VERSION: ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.version_suffix }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_HUB_USERNAME: g00fy2
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android

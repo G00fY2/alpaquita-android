@@ -16,7 +16,7 @@ if [[ -d "$manifests_dir" ]]; then
         echo ""
         cat "$manifest"
         echo ""
-    done < <(find "$manifests_dir" -type f -name "*.md" | sort) >>"$output_file"
+    done < <(find "$manifests_dir" -type f -name "*.md" | sort -r) >>"$output_file"
 else
     echo "Error: Directory '$manifests_dir' does not exist. No manifests found to consolidate!" >&2
     exit 1
