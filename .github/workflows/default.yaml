@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-24.04
     environment: ${{ needs.setup.outputs.environment }}
     name: >
-      ${{ needs.setup.outputs.environment == 'release' && '📦 Build' || '🔬 Validate' }}
+      ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' && '📦 Build' || '🔬 Validate' }}
       (JDK ${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
     permissions:
       contents: read
@@ -106,20 +106,20 @@ jobs:
       matrix:
         jdk_version: ${{
           fromJson(
-          needs.setup.outputs.environment == 'release' &&
+          needs.setup.outputs.environment == 'release-REMOVE-ME' &&
           needs.setup.outputs.jdk_versions ||
           format('["{0}"]', needs.setup.outputs.latest_jdk_version)
           ) }}
         platform_version: ${{
           fromJson(
-          needs.setup.outputs.environment == 'release' &&
+          needs.setup.outputs.environment == 'release-REMOVE-ME' &&
           needs.setup.outputs.platform_versions ||
           format('["{0}"]', needs.setup.outputs.latest_platform_version)
           ) }}
 
     env:
       IMAGE_VERSION: >-
-        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release' && '' || '-dev' }}
+        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release-REMOVE-ME' && '' || '-dev' }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_HUB_USERNAME: g00fy2
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android
@@ -216,14 +216,14 @@ jobs:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
 
       - name: "Login to Docker Hub"
-        if: ${{ needs.setup.outputs.environment == 'release' }}
+        if: ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' }}
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           username: ${{ env.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: "Login to GitHub Container Registry"
-        if: ${{ needs.setup.outputs.environment == 'release' }}
+        if: ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' }}
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           registry: ghcr.io
@@ -231,7 +231,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Build and push Docker Images"
-        if: ${{ needs.setup.outputs.environment == 'release' }}
+        if: ${{ needs.setup.outputs.environment == 'release-REMOVE-ME' }}
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
         with:
           context: .
@@ -249,33 +249,32 @@ jobs:
     needs: [ setup, versioning, build ]
     permissions:
       contents: write
-
     env:
       IMAGE_VERSION: >-
         ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release' && '' || '-dev' }}
-
     steps:
       - name: "Consolidate build status"
         run: |
           if [ "${{ needs.build.result }}" != "success" ]; then
             exit 1
           fi
-      - name: "Checkout only composite actions"
+
+      - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          sparse-checkout: .github/actions
-          filter: blob:none
+
       - name: "Merge matrix manifests"
         id: merge-manifests
         uses: ./.github/actions/merge-matrix-manifests
         with:
           version: ${{ env.IMAGE_VERSION }}
+
       - name: "Create GitHub release"
-        if: ${{ needs.setup.outputs.environment == 'release' }}
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        if: ${{ needs.versioning.outputs.create_release_tag == 'true' || needs.setup.outputs.environment == 'release' }}
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
-          body_path: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
+          draft: ${{ needs.setup.outputs.environment != 'release' }}
           generate_release_notes: true
-          draft: true
-          tag_name: "test"
-          name: "Test"
+          tag: ${{ needs.versioning.outputs.version }}
