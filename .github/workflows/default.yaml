@@ -1,11 +1,11 @@
 name: "Android Image Pipeline"
 
 on:
+  release:
+    types: [ created ]
   push:
     branches:
       - main
-    tags:
-      - 'v*.*.*'
   pull_request:
     branches:
       - '**'
@@ -37,18 +37,18 @@ jobs:
       cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_tools_id }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
-      dry_run: ${{ steps.set-build-mode.outputs.dry_run || 'false' }}
+      environment: ${{ steps.set-environment.outputs.environment }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: "Set build mode"
-        id: set-build-mode
+      - name: "Set GitHub Deployment Environment"
+        id: set-environment
         run: |
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+            echo "environment=release" >> "$GITHUB_OUTPUT"
           else
-            echo "dry_run=true" >> "$GITHUB_OUTPUT"
+            echo "environment=preview" >> "$GITHUB_OUTPUT"
           fi
 
       - name: "Prepare environment variables"
@@ -79,6 +79,7 @@ jobs:
     outputs:
       version: ${{ steps.generate-version.outputs.version }}
       bumped: ${{ steps.generate-version.outputs.bumped }}
+      create_release_tag: ${{ steps.generate-version.outputs.create_release_tag }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -95,27 +96,34 @@ jobs:
   build:
     needs: [ setup, versioning ]
     runs-on: ubuntu-24.04
+    environment: ${{ needs.setup.outputs.environment }}
     name: >
-      ${{ needs.setup.outputs.dry_run == 'true' && '🔬 Validate' || '📦 Build' }}
+      ${{ needs.setup.outputs.environment == 'release' && '📦 Build' || '🔬 Validate' }}
       (JDK ${{ matrix.jdk_version }}, Android ${{ matrix.platform_version }})
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         jdk_version: ${{
           fromJson(
-          needs.setup.outputs.dry_run == 'true' &&
-          format('["{0}"]', needs.setup.outputs.latest_jdk_version) ||
-          needs.setup.outputs.jdk_versions
+          needs.setup.outputs.environment == 'release' &&
+          needs.setup.outputs.jdk_versions ||
+          format('["{0}"]', needs.setup.outputs.latest_jdk_version)
           ) }}
         platform_version: ${{
           fromJson(
-          needs.setup.outputs.dry_run == 'true' &&
-          format('["{0}"]', needs.setup.outputs.latest_platform_version) ||
-          needs.setup.outputs.platform_versions
+          needs.setup.outputs.environment == 'release' &&
+          needs.setup.outputs.platform_versions ||
+          format('["{0}"]', needs.setup.outputs.latest_platform_version)
           ) }}
 
     env:
-      IMAGE_VERSION: ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.dry_run == 'true' && '-dev' || '' }}
+      IMAGE_VERSION: >-
+        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release' && '' || '-dev' }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
+      DOCKER_HUB_USERNAME: g00fy2
+      GHCR_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=jdk${{ matrix.jdk_version }}
         ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
@@ -133,6 +141,7 @@ jobs:
         with:
           images: |
             ${{ env.DOCKER_HUB_IMAGE_NAME }}
+            ghcr.io/${{ env.GHCR_IMAGE_NAME }}
           tags: |
             type=raw,value=${{ env.IMAGE_VERSION }}-android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
             type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
@@ -189,19 +198,41 @@ jobs:
           trivy-config: .github/trivy.yaml
 
       - name: "Run image and generate Manifest"
+        id: generate-manifest
         uses: ./.github/actions/generate-manifest
         with:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
-          jdk_version: ${{ matrix.jdk_version }}
-          android_api: ${{ matrix.platform_version }}
+
+      - name: "Upload manifest artifact"
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: manifest-jdk${{ matrix.jdk_version }}-android${{ matrix.platform_version }}
+          path: ${{ steps.generate-manifest.outputs.manifest_path }}
+          if-no-files-found: error
+          archive: false
 
       - name: "Run Android Gradle Build smoke test"
         uses: ./.github/actions/android-build-smoke-test
         with:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
 
+      - name: "Login to Docker Hub"
+        if: ${{ needs.setup.outputs.environment == 'release' }}
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: "Login to GitHub Container Registry"
+        if: ${{ needs.setup.outputs.environment == 'release' }}
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: "Build and push Docker Images"
-        if: ${{ needs.setup.outputs.dry_run == 'false' }}
+        if: ${{ needs.setup.outputs.environment == 'release' }}
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7
         with:
           context: .
@@ -223,3 +254,33 @@ jobs:
           if [ "${{ needs.build.result }}" != "success" ]; then
             exit 1
           fi
+
+  create-tag-or-github-release:
+    name: "🚀 Create or update GitHub Release"
+    runs-on: ubuntu-24.04
+    needs: [ setup, versioning, build-summary ]
+    if: >-
+      ${{ success() && (needs.versioning.outputs.create_release_tag == 'true' ||
+      needs.setup.outputs.environment == 'release') }}
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: write
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: "Merge build manifests"
+        id: merge-manifests
+        uses: ./.github/actions/merge-build-manifests
+        with:
+          version: ${{ env.IMAGE_VERSION }}
+
+      - name: "Create GitHub release"
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
+        with:
+          allowUpdates: true
+          bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
+          prerelease: ${{ needs.setup.outputs.environment != 'release' }}
+          generateReleaseNotes: true
+          tag: ${{ needs.versioning.outputs.version }}
+          token: ${{ secrets.GH_PAT_TOKEN }}

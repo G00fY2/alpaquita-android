@@ -5,12 +5,11 @@ inputs:
   image-ref:
     description: 'The image to analyze'
     required: true
-  jdk_version:
-    description: 'Image jdk version'
-    required: true
-  android_api:
-    description: 'Image android api version'
-    required: true
+
+outputs:
+  manifest_path:
+    description: 'The path to the generated manifest file'
+    value: ${{ steps.generate-manifest.outputs.manifest_file }}
 
 runs:
   using: 'composite'
@@ -18,12 +17,15 @@ runs:
     - id: generate-manifest
       shell: bash
       run: |
-        report_name="build_manifest.md"
+        image_ref="${{ inputs.image-ref }}"
+        image_tag="${image_ref#*:}"
+        report_name="manifest_${image_tag}.md"
 
         "${{ github.action_path }}/scripts/generate-manifest.sh" \
-          "${{ inputs.image-ref }}" \
-          "${{ inputs.jdk_version }}" \
-          "${{ inputs.android_api }}" \
+          "$image_ref" \
+          "$image_tag" \
           "$report_name"
 
         cat "$report_name" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "manifest_file=$report_name" >> "$GITHUB_OUTPUT"

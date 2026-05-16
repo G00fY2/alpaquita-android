@@ -1,0 +1,36 @@
+name: 'Merge build manifests'
+description: 'Downloads build manifests, merges them into a single file, and updates the step summary.'
+
+inputs:
+  version:
+    description: 'The version string to include in the header'
+    required: true
+
+outputs:
+  merged_manifests_path:
+    description: 'The path to the merged manifest file'
+    value: ${{ steps.merge.outputs.merged_manifests_path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Download all build manifests'
+      id: download-manifests
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+      with:
+        path: merged-manifests
+
+    - name: "Merge manifests"
+      id: merge
+      shell: bash
+      run: |
+        output_path="merged_manifests_${{ inputs.version }}.md"
+
+        "${{ github.action_path }}/scripts/merge-build-manifests.sh" \
+          "${{ inputs.version }}" \
+          "${{ steps.download-manifests.outputs.download-path }}" \
+          "$output_path"
+
+        cat "$output_path" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "merged_manifests_path=$output_path" >> "$GITHUB_OUTPUT"

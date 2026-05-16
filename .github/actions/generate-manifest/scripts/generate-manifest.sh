@@ -2,9 +2,8 @@
 set -euo pipefail
 
 image=$1
-jdk_version=$2
-android_api=$3
-report_file=$4
+image_tag=$2
+report_file=$3
 
 get_sdk_components() {
     docker run --rm "$image" sdkmanager --list_installed 2>/dev/null |
@@ -31,25 +30,25 @@ get_apk_packages() {
 }
 
 generate_markdown_body() {
-    echo "<details><summary><b>🐳 Docker Image Content: JDK ${jdk_version} | Android API $android_api</b></summary>"
-    echo ""
-    echo "#### 🤖 Android SDK Components"
-    echo "| Component | Version | Description |"
-    echo "| :--- | :--- | :--- |"
-    get_sdk_components
+    cat <<EOF
+<details><summary><b>🐳 Docker Image Content: <code>${image_tag}</code></b></summary>
 
-    echo ""
-    echo "#### 📦 Installed OS Packages (apk)"
-    echo "<details><summary>Click to view APK list</summary>"
-    echo ""
-    echo "| Package | Version |"
-    echo "| :--- | :--- |"
-    get_apk_packages
+#### 🤖 Android SDK Components
+| Component | Version | Description |
+| :--- | :--- | :--- |
+$(get_sdk_components)
 
-    echo ""
-    echo "</details>"
-    echo "</details>"
-    echo ""
+#### 📦 Installed OS Packages (apk)
+<details><summary>Click to view APK list</summary>
+
+| Package | Version |
+| :--- | :--- |
+$(get_apk_packages)
+
+</details>
+</details>
+
+EOF
 }
 
 generate_markdown_body >>"$report_file"
