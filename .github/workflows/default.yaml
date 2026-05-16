@@ -280,6 +280,6 @@ jobs:
           allowUpdates: true
           updateOnlyUnreleased: true
           bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
-          draft: ${{ needs.setup.outputs.environment != 'release' }}
+          prerelease: ${{ needs.setup.outputs.environment != 'release' }}
           generateReleaseNotes: true
           tag: ${{ needs.versioning.outputs.version }}
