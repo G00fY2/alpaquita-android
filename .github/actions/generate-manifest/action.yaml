@@ -17,7 +17,7 @@ runs:
     - id: generate-manifest
       shell: bash
       run: |
-        report_name="manifest_jdk${{ inputs.jdk_version }}_android${{ inputs.android_api }}.md"
+        report_name="manifest_$(echo "${{ inputs.image-ref }}" | tr ':/' '_').md"
 
         "${{ github.action_path }}/scripts/generate-manifest.sh" \
           "${{ inputs.image-ref }}" \
