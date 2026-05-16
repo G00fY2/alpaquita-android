@@ -12,6 +12,11 @@ inputs:
     description: 'Image android api version'
     required: true
 
+outputs:
+  manifest_path:
+    description: 'The path to the generated manifest file'
+    value: ${{ steps.generate-manifest.outputs.manifest_file }}
+
 runs:
   using: 'composite'
   steps:
@@ -27,3 +32,5 @@ runs:
           "$report_name"
 
         cat "$report_name" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "manifest_file=$report_name" >> "$GITHUB_OUTPUT"

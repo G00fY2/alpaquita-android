@@ -197,11 +197,20 @@ jobs:
           trivy-config: .github/trivy.yaml
 
       - name: "Run image and generate Manifest"
+        id: generate-manifest
         uses: ./.github/actions/generate-manifest
         with:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
           jdk_version: ${{ matrix.jdk_version }}
           android_api: ${{ matrix.platform_version }}
+
+      - name: "Upload manifest artifact"
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: manifest-jdk${{ matrix.jdk_version }}-android${{ matrix.platform_version }}
+          path: ${{ steps.generate-manifest.outputs.manifest_path }}
+          if-no-files-found: error
+          archive: false
 
       - name: "Run Android Gradle Build smoke test"
         uses: ./.github/actions/android-build-smoke-test
@@ -239,10 +248,21 @@ jobs:
     name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-24.04
     if: always()
-    needs: build
+    needs: [ setup, versioning, build ]
+    permissions:
+      contents: write
+
+    env:
+      IMAGE_VERSION: >-
+        ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.environment == 'release' && '' || '-dev' }}
+
     steps:
       - name: "Consolidate build status"
         run: |
           if [ "${{ needs.build.result }}" != "success" ]; then
             exit 1
           fi
+      - name: "Merge matrix manifests"
+        uses: ./.github/actions/merge-maxtrix-manifests
+        with:
+          version: ${{ env.IMAGE_VERSION }}
