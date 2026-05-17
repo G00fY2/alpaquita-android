@@ -56,11 +56,11 @@ Every image is published with multiple alias tags to support both flexible rolli
 
 ### Dynamic Matrix Lifecycle
 
-This image operates on a self-shifting support window. The moment Google releases a new major Android API level, an official minor platform version, or an in-place SDK component revision, our automated pipeline dynamically adjusts the matrix without manual intervention:
+This image operates on a self-shifting support window. The moment Google releases a new major Android API level, an official minor platform version, or an SDK component revision, our automated pipeline dynamically adjusts the matrix without manual intervention:
 
 1. **Automatic Expansion:** A new stable Android API level is immediately detected, a new set of images is built, and it becomes the new top-tier target in the matrix.
 2. **Rolling Shift:** The previous API levels shift down by one tier, and the oldest API level outside the three-major-version window drops out of the active matrix.
-3. **In-place Revision Updates (Latest API Only):** For the *absolute latest* stable Android platform version in the matrix, the pipeline continuously tracks minor in-place SDK component revisions (e.g., when Google updates the latest platform from revision `1` to revision `2`). Renovate detects these silent upstream updates instantly and rebuilds the corresponding rolling tags (e.g., `android-37.0-jdk25`) to ensure the bleeding-edge toolchain is always up to date.
+3. **Platform Revision Updates (Latest API Only):** For the *absolute latest* stable Android platform version in the matrix, the pipeline continuously tracks SDK component revisions (e.g., when Google updates the latest platform from revision `1` to revision `2`). Renovate detects these silent updates instantly and rebuilds the tags (e.g., `android-37.0-jdk25`) to ensure the toolchain is always up to date.
 
 ## Architecture & Design Decisions (FAQ)
 
@@ -75,7 +75,7 @@ To ensure maximum download speed, minimal disk space usage, and a reduced securi
 ### 3. What is unique about the Renovate auto-update architecture?
 Instead of relying on manual updates, this project features a fully automated "no-touch" architecture via Renovate:
 * **Custom Datasources:** Tracks Google's official Android SDK repository structures directly to detect updates instantly.
-* **Revision Support:** Detects and applies minor in-place SDK platform revisions automatically.
+* **Revision Support:** Detects and applies minor SDK platform revisions automatically.
 * **Automerge:** Updates that pass automated smoke tests are merged and deployed autonomously, keeping the toolchain current without human intervention.
 
 ### 4. How is the quality and size of each release guaranteed?
