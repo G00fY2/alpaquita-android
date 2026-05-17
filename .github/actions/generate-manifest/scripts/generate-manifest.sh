@@ -31,7 +31,7 @@ get_apk_packages() {
 
 generate_markdown_body() {
     cat <<EOF
-<details><summary><b>🐳 Docker Image Content: <code>${image_tag}</code></b></summary>
+<details><summary><b>🐋 Docker Image Content: <code>${image_tag}</code></b></summary>
 
 #### 🤖 Android SDK Components
 | Component | Version | Description |

@@ -1,11 +1,6 @@
 name: 'Merge build manifests'
 description: 'Downloads build manifests, merges them into a single file, and updates the step summary.'
 
-inputs:
-  version:
-    description: 'The version string to include in the header'
-    required: true
-
 outputs:
   merged_manifests_path:
     description: 'The path to the merged manifest file'
@@ -24,10 +19,9 @@ runs:
       id: merge
       shell: bash
       run: |
-        output_path="merged_manifests_${{ inputs.version }}.md"
+        output_path="merged_manifests.md"
 
         "${{ github.action_path }}/scripts/merge-build-manifests.sh" \
-          "${{ inputs.version }}" \
           "${{ steps.download-manifests.outputs.download-path }}" \
           "$output_path"
 

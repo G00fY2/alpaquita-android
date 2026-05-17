@@ -11,11 +11,11 @@ on:
       - '**'
 
 concurrency:
-  # Tags get a unique run_id to prevent cancellation during release.
+  # Git tags and GitHub release events get a unique run_id to prevent cancellation.
   # Other events (main/PRs) use the branch name to allow canceling outdated builds.
   group: >-
     ${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.workflow }}-${{ github.head_ref || github.ref }}
-  # Only cancel running jobs if the current event is NOT a tag push
+  # Only cancel running jobs if the current event is NEITHER a tag push NOR a GitHub release
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 permissions:
@@ -81,7 +81,6 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.generate-version.outputs.version }}
-      bumped: ${{ steps.generate-version.outputs.bumped }}
       create_release_tag: ${{ steps.generate-version.outputs.create_release_tag }}
     steps:
       - name: "Checkout repository"
@@ -257,7 +256,7 @@ jobs:
             exit 1
           fi
 
-  create-tag-or-github-release:
+  create-or-update-github-release:
     name: "🚀 Create or update GitHub Release"
     runs-on: ubuntu-24.04
     needs: [ setup, versioning, build-summary ]
@@ -274,8 +273,6 @@ jobs:
       - name: "Merge build manifests"
         id: merge-manifests
         uses: ./.github/actions/merge-build-manifests
-        with:
-          version: ${{ env.IMAGE_VERSION }}
 
       - name: "Create GitHub release"
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1

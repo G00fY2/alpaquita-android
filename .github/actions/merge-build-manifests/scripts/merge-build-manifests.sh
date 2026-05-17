@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-version=$1
-manifests_dir=$2
-output_file=$3
+manifests_dir=$1
+output_file=$2
 
 {
-    echo "# Android CI Build Image Release - ${version}"
+    echo "# Android CI Build Image Release"
     echo "This release contains the following built image variants:"
     echo ""
 } >"$output_file"
