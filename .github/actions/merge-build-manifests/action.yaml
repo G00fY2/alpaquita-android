@@ -19,7 +19,7 @@ runs:
       id: merge
       shell: bash
       run: |
-        output_path="merged_manifests_${{ inputs.version }}.md"
+        output_path="merged_manifests.md"
 
         "${{ github.action_path }}/scripts/merge-build-manifests.sh" \
           "${{ steps.download-manifests.outputs.download-path }}" \
