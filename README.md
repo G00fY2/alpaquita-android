@@ -1,3 +1,5 @@
+<p align="center"><img width="196" height="196" alt="alpaquita_android_logo" src="https://github.com/user-attachments/assets/072e3c39-6f8f-4de0-b436-1c89b7a0173f" /></p>
+
 # Alpaquita Android CI Docker Images
 
 Minimalist, high-performance Docker images for Android CI/CD pipelines. Based on **Alpaquita Linux** (`glibc`) and BellSoft Liberica JDK. Optimized with `mimalloc` for maximum build speed and reduced memory footprint. Self-updating via Renovate automerge.
