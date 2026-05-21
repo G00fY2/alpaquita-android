@@ -20,7 +20,7 @@ if [[ ! "$latest_tag" == v"$current_year".* ]]; then
 fi
 
 # Define the Conventional Commit structure for the subject line
-conv_pattern="[a-z]+(\(.+\))?(!)?: "
+conv_pattern="(\(.+\))?(!)?: "
 minor_bump_pattern="^($minor_regex)$conv_pattern"
 patch_bump_pattern="^($patch_regex)$conv_pattern"
 
