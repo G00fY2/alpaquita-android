@@ -38,7 +38,7 @@ These images are specifically engineered for development teams and engineers who
 
 The repository maintains a support matrix tracking the last two Java LTS versions alongside a rolling window of the last three stable major Android API levels (including minor versions). While the Java baseline remains stable, all enclosed Android SDK components roll forward fully automatically the moment Google releases a new stable update.
 
-### Matrix Overview example
+### Matrix Overview Example
 
 | Android API Level (Rolling Window) | Platform Version (Minor)    | Supported Java LTS Versions | Rolling Tag Examples                                    |
 |:-----------------------------------|:----------------------------|:----------------------------|:--------------------------------------------------------|
@@ -51,7 +51,7 @@ The repository maintains a support matrix tracking the last two Java LTS version
 Every image is published with multiple alias tags to support both flexible rolling updates and strict, deterministic version pinning:
 
 * **Dynamic / Rolling Tags:** `android-<api>-jdk<java>` (e.g., `android-37.0-jdk25`) - Automatically rolls forward to the latest pipeline release, base image updates, and minor Android platform revisions.
-* **Immutable / Release Tags:** `v<year>.<release>.<patch>-android-<api>-jdk<java>` (e.g., `v2026.1.0-android-37.0-jdk25`) - Hard-pinned build that will never change, ideal for production immutability.
+* **Immutable / Release Tags:** `android-<api>-jdk<java>-v<year>.<release>.<patch>` (e.g., `android-37.0-jdk25-v2026.1.0`) - Hard-pinned build that will never change, ideal for production immutability.
 * **The `latest` Tag:** Points to the highest combination of the newest stable Android API level and the highest supported Java LTS version.
 
 ### Dynamic Matrix Lifecycle
@@ -70,7 +70,7 @@ Standard Alpine images rely on `musl` libc, which introduces performance overhea
 ### 2. Why is this image designed to be "minimalist"?
 To ensure maximum download speed, minimal disk space usage, and a reduced security attack surface, this image pre-installs only the absolute bare minimum of OS packages and Android SDK components required to compile a standard project.
 * **Feature Requests:** If your pipeline requires an additional system package, please open an issue in the repository to discuss the use case.
-* **Future Roadmap:** There are plans to introduce separate, dedicated image variants in the future that include the Android Emulator and necessary hardware acceleration libraries, keeping this main image clean and lightweight.
+* **Future Roadmap:** Dedicated image variants are planned for the future that include the Android Emulator, hardware acceleration libraries, and NDK support, keeping this main image clean and lightweight.
 
 ### 3. What is unique about the Renovate auto-update architecture?
 Instead of relying on manual updates, this project features a fully automated "no-touch" architecture via Renovate:

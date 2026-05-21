@@ -144,7 +144,7 @@ jobs:
             ${{ env.DOCKER_HUB_IMAGE_NAME }}
             ghcr.io/${{ env.GHCR_IMAGE_NAME }}
           tags: |
-            type=raw,value=${{ env.IMAGE_VERSION }}-android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
+            type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}-${{ env.IMAGE_VERSION }}
             type=raw,value=android-${{ matrix.platform_version }}-jdk${{ matrix.jdk_version }}
             type=raw,value=latest,enable=${{
               matrix.platform_version == needs.setup.outputs.latest_platform_version &&
