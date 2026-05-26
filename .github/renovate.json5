@@ -220,7 +220,7 @@
                 'moby/**',
             ],
             groupName: 'docker build tools and actions',
-            schedule: [
+            extends: [
                 'schedule:weekly',
             ],
         },
@@ -230,7 +230,7 @@
                 'actions/**',
             ],
             groupName: 'github core actions',
-            schedule: [
+            extends: [
                 'schedule:weekly',
             ],
         }
