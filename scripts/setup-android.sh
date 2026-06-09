@@ -12,14 +12,14 @@ mkdir -p "${ANDROID_USER_HOME}"
 touch "${ANDROID_USER_HOME}/repositories.cfg"
 
 # Install Android SDK Platform-Tools with specified version
-curl -fsSL "https://dl.google.com/android/repository/platform-tools_r${platform_tools_version}-linux.zip" \
+curl -fsSL --retry 5 --retry-all-errors "https://dl.google.com/android/repository/platform-tools_r${platform_tools_version}-linux.zip" \
     -o /tmp/platform-tools.zip \
     -w "Downloaded: %{url_effective}\n"
 unzip -q /tmp/platform-tools.zip -d "${ANDROID_HOME}"
 rm /tmp/platform-tools.zip
 
 # Install Android SDK Command-line Tools with specified version
-curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${cmdline_tools_id}_latest.zip" \
+curl -fsSL --retry 5 --retry-all-errors "https://dl.google.com/android/repository/commandlinetools-linux-${cmdline_tools_id}_latest.zip" \
     -o /tmp/commandline-tools.zip \
     -w "Downloaded: %{url_effective}\n"
 unzip -q /tmp/commandline-tools.zip -d "${ANDROID_HOME}/cmdline-tools"

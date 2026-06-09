@@ -45,7 +45,7 @@ echo "--- Container: Initialize the Gradle wrapper ---"
 ./gradlew --version --no-daemon
 
 echo "--- Container: Actually build the Android project using gradlew wrapper ---"
-./gradlew assembleDebug --no-daemon
+./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache --no-watch-fs
 
 echo "--- Container: Android CLI Installed SDK packages after build ---"
 android sdk list
