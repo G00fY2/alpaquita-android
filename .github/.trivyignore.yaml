@@ -16,3 +16,13 @@ vulnerabilities:
     purls:
       - "pkg:maven/org.bouncycastle/bcprov-jdk18on"
     statement: "Private key leakage in Bouncy Castle. Bundled by Google in cmdline-tools. Low risk in CI environment."
+
+  - id: GHSA-2r2c-cx56-8933
+    purls:
+      - "pkg:maven/org.jline/jline-remote-telnet"
+    statement: "Internal dependency of the Kotlin compiler. The Telnet server component is never started, used, or exposed during CI builds."
+
+  - id: GHSA-47qp-hqvx-6r3f
+    purls:
+      - "pkg:maven/org.jline/jline-remote-telnet"
+    statement: "Internal dependency of the Kotlin compiler. The Telnet server component is never started, used, or exposed during CI builds."

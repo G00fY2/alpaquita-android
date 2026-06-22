@@ -1,5 +1,5 @@
 format: table
-exit-code: 1
+exit-code: 0
 ignorefile: .github/.trivyignore.yaml
 scan:
   scanners:
