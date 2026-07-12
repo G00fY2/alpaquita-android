@@ -2,26 +2,24 @@
 
 # Alpaquita Android CI Docker Images
 
-Minimalist, high-performance Docker images for Android CI/CD pipelines. Based on **Alpaquita Linux** (`glibc`) and BellSoft Liberica JDK. Optimized with `mimalloc` for maximum build speed and reduced memory footprint. Self-updating via Renovate automerge.
+Minimalist, high-performance Docker images for Android CI/CD pipelines. Based on **Alpaquita Linux**[^1] (`glibc`) and BellSoft Liberica JDK[^2]. Optimized with `mimalloc`[^3] for maximum build speed and reduced memory footprint. Self-updating via Renovate automerge.
 
 ## Registries & Quick Start
 
-The images (`linux/amd64` and `linux/arm64`) are published to both Docker Hub and GitHub Container Registry (GHCR).
+The images are published to both Docker Hub and GitHub Container Registry (GHCR).
 
-#### Docker Hub
+#### [Docker Hub](https://hub.docker.com/r/g00fy2/alpaquita-android)
 ```bash
 docker pull g00fy2/alpaquita-android:latest
 ```
-View on [Docker Hub](https://hub.docker.com/r/g00fy2/alpaquita-android)
 
-#### GitHub Container Registry (GHCR)
+#### [GitHub Container Registry (GHCR)](https://github.com/g00fY2/alpaquita-android/pkgs/container/alpaquita-android/)
 ```bash
 docker pull ghcr.io/g00fy2/alpaquita-android:latest
 ```
-View on [GHCR](https://github.com/G00fY2/alpaquita-android/pkgs/container/alpaquita-android/)
 
 > [!TIP]
-> Current images and their content are listed in the latest [GitHub Release](https://github.com/g00fy2/alpaquita-android/releases/latest).
+> Available images and their content are listed in the latest [GitHub Release](https://github.com/g00fy2/alpaquita-android/releases/latest).
 
 ## Core Features & Focus
 
@@ -36,23 +34,23 @@ These images are specifically engineered for development teams and engineers who
 
 ## Image Matrix & Tagging Strategy
 
-The repository maintains a support matrix tracking the last two Java LTS versions alongside a rolling window of the last three stable major Android API levels (including minor versions). While the Java baseline remains stable, all enclosed Android SDK components roll forward fully automatically the moment Google releases a new stable update.
+The repository maintains a support matrix tracking current Java versions alongside a rolling window of the last three stable major Android API levels (including minor versions). While the Java baseline remains stable, all enclosed Android SDK components roll forward fully automatically the moment Google releases a new stable update.
 
 ### Matrix Overview Example
 
-| Android API Level (Rolling Window) | Platform Version (Minor)    | Supported Java LTS Versions | Rolling Tag Examples                                    |
-|:-----------------------------------|:----------------------------|:----------------------------|:--------------------------------------------------------|
-| **Latest API** (e.g., `37`)        | `37.0` *(Tracks Revisions)* | JDK 21 / JDK 25             | `android-37.0-jdk21`<br>`android-37.0-jdk25` *(latest)* |
-| **Previous API** (e.g., `36`)      | `36.1` / `36.0`             | JDK 21 / JDK 25             | `android-36.1-jdk25`<br>`android-36.0-jdk21`            |
-| **Older Stable API** (e.g., `35`)  | `35.0`                      | JDK 21 / JDK 25             | `android-35.0-jdk21`<br>`android-35.0-jdk25`            |
+| Android API Level (Rolling Window) | Platform Version (Minor)             | Supported Java Versions  | Rolling Tag Examples                                         |
+|:-----------------------------------|:-------------------------------------|:-------------------------|:-------------------------------------------------------------|
+| **Latest API** (e.g., `37`)        | `37.1` *(tracks Revisions)* / `37.0` | JDK 26 / JDK 25 / JDK 21 | `android-37.1-jdk26` *(latest)*<br>…<br>`android-37.0-jdk21` |
+| **Previous API** (e.g., `36`)      | `36.1` / `36.0`                      | JDK 26 / JDK 25 / JDK 21 | `android-36.1-jdk26`<br>…<br>`android-36.0-jdk21`            |
+| **Older Stable API** (e.g., `35`)  | `35.0`                               | JDK 26 / JDK 25 / JDK 21 | `android-35.0-jdk26`<br>…<br>`android-35.0-jdk21`            |
 
 ### Tag Anatomy
 
 Every image is published with multiple alias tags to support both flexible rolling updates and strict, deterministic version pinning:
 
-* **Dynamic / Rolling Tags:** `android-<api>-jdk<java>` (e.g., `android-37.0-jdk25`) - Automatically rolls forward to the latest pipeline release, base image updates, and minor Android platform revisions.
+* **Dynamic / Rolling Tags:** `android-<api>-jdk<java>` (e.g., `android-37.1-jdk26`) - Automatically rolls forward to the latest pipeline release, base image updates, and minor Android platform revisions.
 * **Immutable / Release Tags:** `android-<api>-jdk<java>-v<year>.<release>.<patch>` (e.g., `android-37.0-jdk25-v2026.1.0`) - Hard-pinned build that will never change, ideal for production immutability.
-* **The `latest` Tag:** Points to the highest combination of the newest stable Android API level and the highest supported Java LTS version.
+* **The `latest` Tag:** Points to the highest combination of the newest stable Android API level and the highest supported Java version.
 
 ### Dynamic Matrix Lifecycle
 
@@ -114,4 +112,8 @@ Enterprise platforms often forbid running containers as `root` or using static n
     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
     DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
     OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[^1]: [Alpaquita Linux](https://bell-sw.com/alpaquita-linux/)
+[^2]: [Liberica JDK](https://bell-sw.com/libericajdk/)
+[^3]: [mimalloc on GitHub](https://github.com/microsoft/mimalloc)
 
