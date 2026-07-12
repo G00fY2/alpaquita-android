@@ -13,7 +13,7 @@ The images are published to both Docker Hub and GitHub Container Registry (GHCR)
 docker pull g00fy2/alpaquita-android:latest
 ```
 
-#### [GitHub Container Registry (GHCR)](https://github.com/G00fY2/alpaquita-android/pkgs/container/alpaquita-android/)
+#### [GitHub Container Registry (GHCR)](https://github.com/g00fY2/alpaquita-android/pkgs/container/alpaquita-android/)
 ```bash
 docker pull ghcr.io/g00fy2/alpaquita-android:latest
 ```
