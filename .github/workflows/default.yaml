@@ -191,6 +191,7 @@ jobs:
           dive-version: ${{ env.DIVE_VERSION }}
 
       - name: "Run Trivy"
+        id: trivy
         continue-on-error: true # Non-blocking CVE visibility. Fails softly as we use latest versions.
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         env:
@@ -199,6 +200,11 @@ jobs:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
           scan-type: image
           trivy-config: .github/trivy.yaml
+
+      - name: "Annotate Trivy Failures"
+        if: steps.trivy.outcome == 'failure'
+        run: |
+          echo "::error title=Trivy: Vulnerabilities Found::High or Critical CVEs detected. Check 'Run Trivy' logs."
 
       - name: "Run image and generate Manifest"
         id: generate-manifest
