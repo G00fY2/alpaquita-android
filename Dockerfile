@@ -3,9 +3,9 @@
 
 ARG BASE_IMAGE=jdk25
 
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-21.0.11_11-glibc@sha256:784b7f65a72538082cadd5d8228fe219dab19b6a38fceda9787bc07b9bf22a63 AS jdk21
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25.0.3_11-glibc@sha256:4dec427258850c884b85e8f4b522c5d77302f0c8d67b9792c2738e8476f96a4e AS jdk25
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-26.0.1_10-glibc@sha256:a63abab28050d084dd9a74065d486ee830d052bcc368957f13d7647d7f2da809 AS jdk26
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-21.0.11_11-glibc@sha256:94854dfd7cded5e90438e40224729055f5d40fe00f6a7f79b61d8fcc16224424 AS jdk21
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25.0.3_11-glibc@sha256:8c5860f8c52864fd5517b1591fdb8f4803eb4532d73ea641185ec150e5b5851c AS jdk25
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-26.0.1_10-glibc@sha256:89dc88848a35beb60dc2ea66196d80d9345c0dbf5d15677450355252945c8d1a AS jdk26
 
 FROM ${BASE_IMAGE}
 
