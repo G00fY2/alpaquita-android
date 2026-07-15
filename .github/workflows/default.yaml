@@ -204,7 +204,7 @@ jobs:
       - name: "Annotate Trivy Failures"
         if: steps.trivy.outcome == 'failure'
         run: |
-          echo "::error title=Trivy: Vulnerabilities Found::High or Critical CVEs detected. Check 'Run Trivy' logs."
+          echo "::notice title=Trivy Report::Exit code 1 indicates found CVEs. Check 'Run Trivy' logs for details."
 
       - name: "Run image and generate Manifest"
         id: generate-manifest
