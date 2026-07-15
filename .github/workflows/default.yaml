@@ -182,7 +182,6 @@ jobs:
 
       - name: "Run Dive"
         id: dive-analyze
-        continue-on-error: ${{ matrix.jdk_version == '26' }} # Workaround https://github.com/bell-sw/Liberica/issues/235
         uses: ./.github/actions/dive-analyze
         env:
           DIVE_VERSION: v0.13.1
