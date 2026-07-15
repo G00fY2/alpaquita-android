@@ -15,7 +15,11 @@ This repository maintains a specialized, high-performance Docker image designed 
 
 ## Permissions & UID Agnosticism
 * **Arbitrary UID Support:** The image must be executable by any arbitrary UID to support restricted Kubernetes environments (e.g., `runAsNonRoot: true` or specific `runAsUser` contexts).
-* **GID 0 Strategy:** Adhere to the **OpenShift/Kubernetes GID 0 pattern**. All tool and cache directories must be owned by the root group (`chgrp -R 0`) with group permissions mirroring owner permissions (`chmod -R g=u`).
+* **GID 0 Strategy:** Adhere to the **OpenShift/Kubernetes GID 0 pattern**. All defined Android and Gradle directories must be owned by the root group (`chgrp -R 0`) with group permissions mirroring owner permissions (`chmod -R g=u`). This ensures arbitrary-UID CI containers have full read/write access to the following paths:
+  * **Tooling (`ANDROID_HOME`):** Contains the Android SDK, build tools, and platform tools.
+  * **User State (`ANDROID_SDK_HOME`):** Parent directory for stateful data, including:
+    * `ANDROID_USER_HOME`: Stores Android-specific configurations and keys.
+    * `GRADLE_USER_HOME`: Stores build caches, dependencies, and daemon logs.
 * **Agnostic Home:** Redirect all stateful data (Gradle caches, Android configs) to a neutral path (`/opt/android/user`) instead of the standard `/root` or `/home`. This ensures portability and simplifies volume mounting for persistent CI caching.
 
 # Autonomous Maintenance (Renovate)
@@ -62,4 +66,6 @@ This repository maintains a specialized, high-performance Docker image designed 
 * **Two-Stage Release Logic:**
   1. **Push to main (Version Generation):** Merges to `main` evaluate the git commit history since the last tag. If Conventional Commits contain semantic changes (`feat` or `fix`), a new version tag is automatically generated and pushed. Non-semantic changes (e.g., CI-only dependency updates) will not trigger a new tag.
   2. **Push of a Git Tag (Release Execution):** The workflow switches to the release environment when triggered by a new version tag. It executes the full multi-arch build (`linux/amd64` and `linux/arm64`), pushes the verified images to the designated registries, and automatically generates the GitHub Release.
-* **Concurrency:** `cancel-in-progress: true` is mandatory for all non-release workflows. For tag/release workflows, `cancel-in-progress` must be disabled to ensure atomic release execution.
+* **Concurrency:** Use a conditional grouping strategy:
+  * Tags and releases must use a unique `run_id` group to ensure atomicity and prevent cancellation.
+  * Standard workflows (main/PRs) must use a branch-based group with `cancel-in-progress: true` to optimize runner usage.
