@@ -3,17 +3,17 @@
 # Project Purpose
 This repository maintains a specialized, high-performance Docker image designed exclusively for CI agents to build Android projects.
 
-### Core Technical Pillars:
+## Core Technical Pillars
 * **Minimal Footprint:** Reduce image pull latency through aggressive layer optimization and zstandard (zstd) compression.
 * **Maximum Build Speed:** Integration of `mimalloc` to accelerate memory-intensive processes (Gradle, Kotlin compiler).
 * **Tooling Excellence:** Ensure the latest stable Android SDKs, build tools, and essential CLI utilities are provided in a pre-configured state.
 * **Autonomous Maintenance:** Fully self-updating lifecycle via Renovate and Automerge.
 
-### Runtime & Orchestration
+## Runtime & Orchestration
 * **CI/CD Platform:** The entire pipeline, from validation to deployment, is powered by **GitHub Actions**. Use Composite Actions to encapsulate modular logic and maintain clean workflow YAMLs.
 * **Execution Environment:** The resulting image is designed to run on **Kubernetes** orchestrated by a **Jenkins Controller** using **Jenkins Agents**.
 
-### Permissions & UID Agnosticism
+## Permissions & UID Agnosticism
 * **Arbitrary UID Support:** The image must be executable by any arbitrary UID to support restricted Kubernetes environments (e.g., `runAsNonRoot: true` or specific `runAsUser` contexts).
 * **GID 0 Strategy:** Adhere to the **OpenShift/Kubernetes GID 0 pattern**. All tool and cache directories must be owned by the root group (`chgrp -R 0`) with group permissions mirroring owner permissions (`chmod -R g=u`).
 * **Agnostic Home:** Redirect all stateful data (Gradle caches, Android configs) to a neutral path (`/opt/android/user`) instead of the standard `/root` or `/home`. This ensures portability and simplifies volume mounting for persistent CI caching.
@@ -24,7 +24,7 @@ This repository maintains a specialized, high-performance Docker image designed 
 * **Release Trigger:** Merges to main trigger an automated release and registry push via GitHub Actions.
 
 # Technical Standards
-### Scripting
+## Scripting
 * **POSIX Shell (sh):** Mandatory for bootstrap scripts (e.g., initial setup) before `bash` is available. Use `#!/bin/sh` and `set -eu`.
 * **Bash:** Preferred for all CI orchestration. Use `#!/usr/bin/env bash` with `set -euo pipefail`.
 * **Decoupling:** Scripts must be portable. Pass output paths as parameters; do not rely on CI-specific environment variables for core logic.
@@ -32,7 +32,7 @@ This repository maintains a specialized, high-performance Docker image designed 
 * **Comments:** Use comments sparingly. Only use them to explain the "why" behind complex logic, not the "what".
 * **Language:** All code, comments, and documentation must be in English.
 
-### Docker Architecture
+## Docker Architecture
 * **Reproducible Builds:** Ensure consistency across environments through deterministic build steps.
 * **Version & Digest Pinning:** Explicitly pin versions and SHA-256 digests for all base images to ensure immutability (e.g., `image:tag@sha256:...`). This is enforced by Renovate as configured in `.github/renovate.json5`.
 * **Layer Optimization:**
@@ -62,4 +62,4 @@ This repository maintains a specialized, high-performance Docker image designed 
 * **Two-Stage Release Logic:**
   1. **Push to main (Version Generation):** Merges to `main` evaluate the git commit history since the last tag. If Conventional Commits contain semantic changes (`feat` or `fix`), a new version tag is automatically generated and pushed. Non-semantic changes (e.g., CI-only dependency updates) will not trigger a new tag.
   2. **Push of a Git Tag (Release Execution):** The workflow switches to the release environment when triggered by a new version tag. It executes the full multi-arch build (`linux/amd64` and `linux/arm64`), pushes the verified images to the designated registries, and automatically generates the GitHub Release.
-* **Concurrency:** `cancel-in-progress: true` is mandatory for all workflows to optimize runner usage.
+* **Concurrency:** `cancel-in-progress: true` is mandatory for all non-release workflows. For tag/release workflows, `cancel-in-progress` must be disabled to ensure atomic release execution.
