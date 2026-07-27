@@ -27,7 +27,7 @@ docker pull ghcr.io/g00fy2/alpaquita-android:latest
 - **Always current** - Renovate tracks Google's official Android SDK repositories directly and auto-merges updates (including minor platform revisions) as soon as they're released - no manual lag.
 - **Minimal & secure** - Only the OS packages and SDK components needed to compile a standard Java/Kotlin project are included, keeping the image small (~340 MB compressed) and the attack surface low.
 - **Reproducible** - All core components and base images are strictly pinned for deterministic CI/CD builds.
-- **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern, so the container runs under arbitrary non-root UIDs while keeping full toolchain access.
+- **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under arbitrary non-root UIDs while keeping access to the toolchain.
 
 > [!IMPORTANT]
 > **Not included:** Android NDK and the Android Emulator. This image is focused purely on Java/Kotlin compilation; dedicated NDK/Emulator variants are planned.
@@ -66,7 +66,7 @@ Google's recommended default (letting AGP pick `buildToolsVersion`) causes probl
 Anchoring them to a single, user-agnostic path decouples the toolchain from any specific host user layout, which makes setting up persistent volume mounts (Kubernetes, GitLab CI) and dependency caching a lot simpler.
 
 **How does it handle Kubernetes/OpenShift security contexts?**\
-Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern: all system directories, configs and binaries are readable/writable/executable by the root group (GID 0), so it works under arbitrary, dynamically assigned UIDs.
+Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern for its toolchain paths (`/opt/android/sdk` and `/opt/android/user`): those directories are readable/writable/executable by the root group (GID 0), so the container works under arbitrary, dynamically assigned UIDs.
 
 ## License
     The MIT License (MIT)
@@ -91,4 +91,3 @@ Many enterprise platforms don't allow containers to run as `root` or with a stat
 [^1]: [Alpaquita Linux](https://bell-sw.com/alpaquita-linux/)
 [^2]: [Liberica JDK](https://bell-sw.com/libericajdk/)
 [^3]: [mimalloc](https://github.com/microsoft/mimalloc)
-
