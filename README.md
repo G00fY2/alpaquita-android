@@ -4,9 +4,9 @@
 
 Minimalist, high-performance Docker images for Android CI/CD pipelines. Based on **Alpaquita Linux**[^1] (`glibc`) and BellSoft Liberica JDK[^2]. Optimized with `mimalloc`[^3] for maximum build speed and reduced memory footprint. Self-updating via Renovate automerge.
 
-## Registries & Quick Start
+## Quick Start
 
-The images are published to both Docker Hub and GitHub Container Registry (GHCR).
+Images are published to both Docker Hub and GHCR:
 
 #### [Docker Hub](https://hub.docker.com/r/g00fy2/alpaquita-android)
 ```bash
@@ -21,77 +21,52 @@ docker pull ghcr.io/g00fy2/alpaquita-android:latest
 > [!TIP]
 > Available images and their content are listed in the latest [GitHub Release](https://github.com/g00fy2/alpaquita-android/releases/latest).
 
-## Core Features & Focus
+## Why this image?
 
-These images are specifically engineered for development teams and engineers who prioritize **modern, bleeding-edge Android toolchains**. If your project targets the latest stable **Android Gradle Plugin (AGP)** releases, and relies on up-to-date dependencies, this image provides the ideal runtime environment.
-
-* **Performance Optimized:** Built on Alpaquita Linux using native `glibc` and Microsoft's `mimalloc` allocator to drastically reduce Gradle compile and garbage collection times.
-* **Fully Automated Maintenance:** Driven by a proactive, "no-touch" Renovate architecture that detects and merges official Google Android SDK updates autonomously - eliminating the typical lag found in traditional CI images to ensure your pipeline is always as modern as your local development setup.
-* **Immutable and Reproducible:** Offers strict pinning of all core components and base images to guarantee absolute determinism across your CI/CD pipelines.
+- **Faster builds** - `glibc` (via Alpaquita Linux) avoids the performance overhead of Alpine's `musl`, and Microsoft's `mimalloc` allocator speeds up the Kotlin Daemon and parallel Gradle workers.
+- **Always current** - Renovate tracks Google's official Android SDK repositories directly and auto-merges updates (including minor platform revisions) as soon as they're released - no manual lag.
+- **Minimal & secure** - Only the OS packages and SDK components needed to compile a standard Java/Kotlin project are included, keeping the image small (~340 MB compressed) and the attack surface low.
+- **Reproducible** - All core components and base images are strictly pinned for deterministic CI/CD builds.
+- **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern, so the container runs under arbitrary non-root UIDs while keeping full toolchain access.
 
 > [!IMPORTANT]
-> **Streamlined & Focused (No NDK / Emulator):** To maintain a minimal footprint and maximum execution speed, this image currently excludes the Android NDK (C/C++ toolchains) and the Android Emulator. It is strictly optimized for pure Java/Kotlin Android compilation. *(Dedicated image variants for NDK and Emulator workflows are planned for the future).*
+> **Not included:** Android NDK and the Android Emulator. This image is focused purely on Java/Kotlin compilation; dedicated NDK/Emulator variants are planned.
 
-## Image Matrix & Tagging Strategy
+## Image Matrix & Tagging
 
-The repository maintains a support matrix tracking current Java versions alongside a rolling window of the last three stable major Android API levels (including minor versions). While the Java baseline remains stable, all enclosed Android SDK components roll forward fully automatically the moment Google releases a new stable update.
+The matrix covers the current Java baseline alongside the three most recent stable major Android API levels (with minor versions). SDK components roll forward automatically as Google ships updates - no separate action needed on the Java side.
 
-### Matrix Overview Example
+| Android API (rolling window) | Platform version | Java versions | Example tags |
+|---|---|---|---|
+| Latest (e.g. `37`) | `37.1` / `37.0` | JDK 26 / 25 / 21 | `android-37.1-jdk26` … `android-37.0-jdk21` |
+| Previous (e.g. `36`) | `36.1` / `36.0` | JDK 26 / 25 / 21 | `android-36.1-jdk26` … `android-36.0-jdk21` |
+| Older (e.g. `35`) | `35.0` | JDK 26 / 25 / 21 | `android-35.0-jdk26` … `android-35.0-jdk21` |
 
-| Android API Level (Rolling Window) | Platform Version (Minor)             | Supported Java Versions  | Rolling Tag Examples                                         |
-|:-----------------------------------|:-------------------------------------|:-------------------------|:-------------------------------------------------------------|
-| **Latest API** (e.g., `37`)        | `37.1` *(tracks Revisions)* / `37.0` | JDK 26 / JDK 25 / JDK 21 | `android-37.1-jdk26` *(latest)*<br>…<br>`android-37.0-jdk21` |
-| **Previous API** (e.g., `36`)      | `36.1` / `36.0`                      | JDK 26 / JDK 25 / JDK 21 | `android-36.1-jdk26`<br>…<br>`android-36.0-jdk21`            |
-| **Older Stable API** (e.g., `35`)  | `35.0`                               | JDK 26 / JDK 25 / JDK 21 | `android-35.0-jdk26`<br>…<br>`android-35.0-jdk21`            |
+- **Rolling tags** - `android-<api>-jdk<java>` - always point to the latest build for that API/JDK combo.
+- **Immutable tags** - `android-<api>-jdk<java>-v<year>.<release>.<patch>` - pinned forever, for production use.
+- **`latest`** - newest stable API level combined with the highest supported Java version.
 
-### Tag Anatomy
+When Google ships a new major API level, it's added at the top of the matrix and the oldest one drops out. Minor SDK revisions for the current top API are picked up automatically as they're published.
 
-Every image is published with multiple alias tags to support both flexible rolling updates and strict, deterministic version pinning:
+## FAQ
 
-* **Dynamic / Rolling Tags:** `android-<api>-jdk<java>` (e.g., `android-37.1-jdk26`) - Automatically rolls forward to the latest pipeline release, base image updates, and minor Android platform revisions.
-* **Immutable / Release Tags:** `android-<api>-jdk<java>-v<year>.<release>.<patch>` (e.g., `android-37.0-jdk25-v2026.1.0`) - Hard-pinned build that will never change, ideal for production immutability.
-* **The `latest` Tag:** Points to the highest combination of the newest stable Android API level and the highest supported Java version.
+**Why is it "minimalist"?**\
+Only the bare minimum of OS packages and SDK components needed to compile a standard project are pre-installed, to keep download size, disk usage and attack surface as small as possible. Emulator, hardware acceleration libs and NDK support are planned as separate, dedicated variants rather than being bundled in. Missing a package your pipeline needs? Open an issue.
 
-### Dynamic Matrix Lifecycle
+**What's special about the Renovate auto-update setup?**\
+It uses custom datasources that track Google's official Android SDK repo structure directly (including minor revision bumps), and automerges any update that passes the automated smoke tests, without manual intervention.
 
-This image operates on a self-shifting support window. The moment Google releases a new major Android API level, an official minor platform version, or an SDK component revision, our automated pipeline dynamically adjusts the matrix without manual intervention:
+**How is release quality and size guaranteed?**\
+Every image runs a smoke test (assembling a real Android test project inside the container), then gets scanned for vulnerabilities with `Trivy` and audited layer-by-layer with `Dive`. Compressed size lands around 340 MB (zstd level 9).
 
-1. **Automatic Expansion:** A new stable Android API level is immediately detected, a new set of images is built, and it becomes the new top-tier target in the matrix.
-2. **Rolling Shift:** The previous API levels shift down by one tier, and the oldest API level outside the three-major-version window drops out of the active matrix.
-3. **Platform Revision Updates (Latest API Only):** For the *absolute latest* stable Android platform version in the matrix, the pipeline continuously tracks SDK component revisions (e.g., when Google updates the latest platform from revision `1` to revision `2`). Renovate detects these silent updates instantly and rebuilds the tags (e.g., `android-37.0-jdk25`) to ensure the toolchain is always up to date.
+**Why does every API-level image ship the newest Build-Tools version?**\
+Google's recommended default (letting AGP pick `buildToolsVersion`) causes problems in CI: the default is hardcoded into AGP and often lags behind, you miss recent compiler bugfixes, and without an explicit version AGP scans the local runner environment, which can behave unpredictably. Pinning the latest version avoids all of that.
 
-## Architecture & Design Decisions (FAQ)
+**Why are `ANDROID_HOME` and `GRADLE_USER_HOME` under `/opt/android/user`?**\
+Anchoring them to a single, user-agnostic path decouples the toolchain from any specific host user layout, which makes setting up persistent volume mounts (Kubernetes, GitLab CI) and dependency caching a lot simpler.
 
-### 1. What makes this image "optimized" compared to standard Alpine images?
-Standard Alpine images rely on `musl` libc, which introduces performance overhead when running the pre-compiled Android SDK binaries. This image uses BellSoft's Alpaquita Linux with a native, optimized `glibc` implementation. Additionally, it integrates Microsoft's `mimalloc` allocator to maximize heap performance and throughput for the Kotlin Daemon and parallel Gradle workers.
-
-### 2. Why is this image designed to be "minimalist"?
-To ensure maximum download speed, minimal disk space usage, and a reduced security attack surface, this image pre-installs only the absolute bare minimum of OS packages and Android SDK components required to compile a standard project.
-* **Feature Requests:** If your pipeline requires an additional system package, please open an issue in the repository to discuss the use case.
-* **Future Roadmap:** Dedicated image variants are planned for the future that include the Android Emulator, hardware acceleration libraries, and NDK support, keeping this main image clean and lightweight.
-
-### 3. What is unique about the Renovate auto-update architecture?
-Instead of relying on manual updates, this project features a fully automated "no-touch" architecture via Renovate:
-* **Custom Datasources:** Tracks Google's official Android SDK repository structures directly to detect updates instantly.
-* **Revision Support:** Detects and applies minor SDK platform revisions automatically.
-* **Automerge:** Updates that pass automated smoke tests are merged and deployed autonomously, keeping the toolchain current without human intervention.
-
-### 4. How is the quality and size of each release guaranteed?
-Before any image is pushed to public registries, it undergoes a strict verification pipeline:
-1. **Smoke Test:** Assembles a real Android test project inside the container to verify compiler and runtime stability.
-2. **Audit:** Scans for vulnerabilities via `Trivy` and audits layers via `Dive` to maintain a minimal footprint (~340MB compressed using `zstd` level 9).
-
-### 5. Why does every API level image include the absolute latest Build-Tools version?
-Google recommends omitting `buildToolsVersion`, letting the Android Gradle Plugin (AGP) choose a default. This introduces critical issues for CI/CD:
-* **AGP Hardcoding:** Default versions are hardcoded inside AGP, meaning it often lags behind and forces the use of older Build-Tools even if you upgrade your `compileSdk`.
-* **Lagging Bugfixes:** You miss out on crucial compiler bugfixes unless you explicitly override the version.
-* **Deterministic Builds:** Without an explicit version, AGP scans the local runner environment dynamically, which can lead to unpredictable behavior or accidental fallback to preview versions.
-
-### 6. Why are Android Home and Gradle Home isolated under `/opt/android/user`?
-Anchoring `ANDROID_HOME` and `GRADLE_USER_HOME` in a single, user-agnostic path decouples the toolchain from specific host user layouts. This simplifies the setup of persistent volume mounts in Kubernetes or GitLab CI, enabling efficient dependency caching and optimal I/O throughput.
-
-### 7. How does the image handle Kubernetes and OpenShift security contexts?
-Enterprise platforms often forbid running containers as `root` or using static non-root UIDs. This image implements the OpenShift GID 0 pattern: all system directories, configurations, and binaries grant read/write/execute permissions to the root group (`GID 0`). This allows the container to run under arbitrary, dynamically assigned UIDs while maintaining full toolchain access.
+**How does it handle Kubernetes/OpenShift security contexts?**\
+Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern: all system directories, configs and binaries are readable/writable/executable by the root group (GID 0), so it works under arbitrary, dynamically assigned UIDs.
 
 ## License
     The MIT License (MIT)
@@ -115,5 +90,5 @@ Enterprise platforms often forbid running containers as `root` or using static n
 
 [^1]: [Alpaquita Linux](https://bell-sw.com/alpaquita-linux/)
 [^2]: [Liberica JDK](https://bell-sw.com/libericajdk/)
-[^3]: [mimalloc on GitHub](https://github.com/microsoft/mimalloc)
+[^3]: [mimalloc](https://github.com/microsoft/mimalloc)
 
