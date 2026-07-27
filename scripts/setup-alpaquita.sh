@@ -9,7 +9,7 @@ apk add --no-cache \
     coreutils \
     curl \
     git \
-    libgcc \
+    libstdc++ \
     mimalloc-global \
     openssh-client-default \
     unzip
