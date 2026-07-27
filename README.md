@@ -62,8 +62,8 @@ Every image runs a smoke test (assembling a real Android test project inside the
 **Why does every API-level image ship the newest Build-Tools version?**\
 Google's recommended default (letting AGP pick `buildToolsVersion`) causes problems in CI: the default is hardcoded into AGP and often lags behind, you miss recent compiler bugfixes, and without an explicit version AGP scans the local runner environment, which can behave unpredictably. Pinning the latest version avoids all of that.
 
-**Why are `ANDROID_HOME` and `GRADLE_USER_HOME` under `/opt/android/user`?**\
-Anchoring them to a single, user-agnostic path decouples the toolchain from any specific host user layout, which makes setting up persistent volume mounts (Kubernetes, GitLab CI) and dependency caching a lot simpler.
+**Why is `GRADLE_USER_HOME` located under `/opt/android/user`, separate from `ANDROID_HOME`?**\
+`ANDROID_HOME` (`/opt/android/sdk`) holds the fixed SDK installation, while `GRADLE_USER_HOME` and the Android user config live under the separate, user-agnostic `/opt/android/user` path. That split makes it simple to mount just the user/cache directory as a persistent volume (Kubernetes, GitLab CI) without touching the SDK itself.
 
 **How does it handle Kubernetes/OpenShift security contexts?**\
 Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern for its toolchain paths (`/opt/android/sdk` and `/opt/android/user`): those directories are readable/writable/executable by the root group (GID 0), so the container works under arbitrary, dynamically assigned UIDs.
