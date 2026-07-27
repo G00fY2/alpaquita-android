@@ -202,13 +202,13 @@
             groupName: 'liberica jdk container',
             /* Bi-weekly Batching after Tuesday releases (relative to timezone below):
                Minute: * (Every minute)
-               Hour:   4-6 (04:00 AM - 06:59 AM - Catch-all after Tuesday releases)
+               Hour:   4-23 (04:00 AM - 11:59 PM - Catch-all after Tuesday releases)
                Days:   1-7, 15-21 (1st and 3rd week of month)
                Month:  * (Every month)
                DayWk:  3 (Wednesday)
             */
             schedule: [
-                '* 4-6 1-7,15-21 * 3',
+                '* 4-23 1-7,15-21 * 3',
             ],
             timezone: 'America/Los_Angeles',
             semanticCommitType: 'fix',
@@ -220,8 +220,10 @@
                 'moby/**',
             ],
             groupName: 'docker build tools and actions',
-            extends: [
-                'schedule:weekly',
+            separateMajorMinor: false,
+            // Every Sunday (all day)
+            schedule: [
+                '* * * * 0',
             ],
         },
         {
@@ -230,9 +232,11 @@
                 'actions/**',
             ],
             groupName: 'github core actions',
-            extends: [
-                'schedule:weekly',
-            ],
+            separateMajorMinor: false,
+            // Every Sunday (all day)
+            schedule: [
+                '* * * * 0',
+            ]
         }
     ],
 }
