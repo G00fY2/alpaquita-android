@@ -32,6 +32,16 @@ vulnerabilities:
       - "pkg:maven/org.jline/jline-remote-telnet"
     statement: "Internal dependency of the Kotlin compiler. The Telnet server component is never started, used, or exposed during CI builds."
 
+  - id: CVE-2026-56740
+    purls:
+      - "pkg:maven/org.jline/jline-remote-telnet"
+    statement: "Internal dependency of the Kotlin compiler. The Telnet server component is never started, used, or exposed during CI builds."
+
+  - id: CVE-2026-56741
+    purls:
+      - "pkg:maven/org.jline/jline-remote-telnet"
+    statement: "Internal dependency of the Kotlin compiler. The Telnet server component is never started, used, or exposed during CI builds."
+
 misconfigurations:
   - id: DS-0002
     statement: "Dedicated CI build image where root access is required for pipeline tasks. User execution is managed by the CI runner."
