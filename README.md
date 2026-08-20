@@ -48,6 +48,15 @@ The matrix covers the current Java baseline alongside the three most recent stab
 
 When Google ships a new major API level, it's added at the top of the matrix and the oldest one drops out. Minor SDK revisions for the current top API are picked up automatically as they're published.
 
+## Disabling Android CLI Telemetry
+
+The image includes `android-tools` to configure SDK behavior at runtime. To opt out of Android CLI metrics collection, execute the command once in your pipeline after `$HOME` is set:
+
+```bash
+android-tools disable-metrics
+```
+This makes sure `--no-metrics` exists inside `~/.androidrc`.
+
 ## FAQ
 
 **Why is it "minimalist"?**\

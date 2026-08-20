@@ -3,6 +3,7 @@
 
 # Must be LF to execute in Linux/Docker/Hooks
 .githooks/*     text eol=lf
+scripts/*       text eol=lf
 *.sh            text eol=lf
 Dockerfile      text eol=lf
 *.env           text eol=lf

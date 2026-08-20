@@ -65,7 +65,7 @@ This repository maintains a specialized, high-performance Docker image designed 
 * **Registry Authentication:** Secure authentication via GitHub Secrets to target container registries.
 * **Two-Stage Release Logic:**
   1. **Push to main (Version Generation):** Merges to `main` evaluate the git commit history since the last tag. If Conventional Commits contain semantic changes (`feat` or `fix`), a new version tag is automatically generated and pushed. Non-semantic changes (e.g., CI-only dependency updates) will not trigger a new tag.
-  2. **Push of a Git Tag (Release Execution):** The workflow switches to the release environment when triggered by a new version tag. It executes the full multi-arch build (`linux/amd64` and `linux/arm64`), pushes the verified images to the designated registries, and automatically generates the GitHub Release.
+  2. **Push of a Git Tag (Release Execution):** The workflow switches to the release environment when triggered by a new version tag. It executes the full build (`linux/amd64`), pushes the verified images to the designated registries, and automatically generates the GitHub Release.
 * **Concurrency:** Use a conditional grouping strategy:
   * Tags and releases must use a unique `run_id` group to ensure atomicity and prevent cancellation.
   * Standard workflows (main/PRs) must use a branch-based group with `cancel-in-progress: true` to optimize runner usage.
