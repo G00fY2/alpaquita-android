@@ -158,9 +158,6 @@ jobs:
           tag=$(echo "${{ steps.docker-metadata.outputs.tag-names }}" | head -n 1)
           echo "image=${{ env.DOCKER_HUB_IMAGE_NAME }}:$tag" >> "$GITHUB_OUTPUT"
 
-      - name: "Set up QEMU"
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
-
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
         env:
@@ -246,7 +243,7 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           sbom: true
           provenance: mode=max
           tags: ${{ steps.docker-metadata.outputs.tags }}
