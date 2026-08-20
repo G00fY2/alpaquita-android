@@ -17,6 +17,13 @@ echo "--- HOME Directory: $HOME ---"
 echo "--- Working Directory: $(pwd) ---"
 echo "--- Target Project Directory: $target_dir ---"
 
+echo "--- Container: Disabling Android Metrics via android-tools ---"
+if command -v android-tools &>/dev/null; then
+    android-tools disable-metrics
+else
+    echo "WARNING: 'android-tools' command not found in PATH."
+fi
+
 echo "--- Container: Installing Android CLI ---"
 curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash -s -- --yes >/dev/null
 

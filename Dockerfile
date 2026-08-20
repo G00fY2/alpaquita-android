@@ -29,12 +29,14 @@ ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platfo
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
     --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
+    --mount=type=bind,source=scripts/android-tools,target=/tmp/android-tools \
     /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
     /bin/bash /tmp/setup-android.sh \
     "${ANDROID_CMDLINE_TOOLS_ID}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \
     "${ANDROID_BUILD_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_VERSION}" && \
+    cp /tmp/android-tools /usr/local/bin/android-tools && \
     mkdir -p "${ANDROID_USER_HOME}" "${GRADLE_USER_HOME}" && \
     chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_SDK_HOME}" && \
     chmod -R g=u "${ANDROID_HOME}" "${ANDROID_SDK_HOME}"
