@@ -17,7 +17,7 @@ apk add --no-cache \
 # Create symlink to replace default busybox shell with bash
 ln -sf /bin/bash /bin/sh
 
-if [ -z "$(sh -c 'echo $BASH_VERSION')" ]; then
+if ! /bin/sh -c '[[ -n "${BASH_VERSION:-}" ]]' 2>/dev/null; then
     echo "Error: /bin/sh validation failed! It is not executing bash." >&2
     exit 1
 else
