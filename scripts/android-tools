@@ -9,6 +9,8 @@ disable_metrics() {
 
     if [ -f "${HOME}/.androidrc" ]; then
         if ! grep -q -- "--no-metrics" "${HOME}/.androidrc"; then
+            # Ensure the file ends with a newline character before appending
+            awk 1 "${HOME}/.androidrc" >"${HOME}/.androidrc.tmp" && mv "${HOME}/.androidrc.tmp" "${HOME}/.androidrc"
             echo "--no-metrics" >>"${HOME}/.androidrc"
             echo "Info: Added --no-metrics to existing ${HOME}/.androidrc."
         else
