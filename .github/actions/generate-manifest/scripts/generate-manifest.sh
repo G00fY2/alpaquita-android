@@ -6,19 +6,32 @@ image_tag=$2
 report_file=$3
 
 get_sdk_components() {
-    docker run --rm "$image" sdkmanager --list_installed 2>/dev/null |
-        awk -F '|' '
-        /^[[:space:]]*(Path|---)/ { next }
-        /^[[:space:]]+[a-zA-Z0-9.;_-]+[[:space:]]+\|/ {
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", $1);
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2);
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", $3);
-            printf "| %s | %s | %s |\n", $1, $2, $3
-        }' | sort
+    local output
+    output=$(docker run --rm "$image" sdkmanager --list_installed 2>/dev/null |
+        awk '
+        /^Installed packages:/ {
+            in_packages = 1
+            next
+        }
+        in_packages && /[a-zA-Z0-9]/ {
+            line = $0
+            sub(/^[ \t]+/, "", line)
+            sub(/[ \t]+$/, "", line)
+            split(line, arr, /[ \t][ \t]+/)
+            printf "| %s | %s | %s |\n", arr[1], arr[2], arr[3]
+        }' | sort)
+
+    if [ -z "$output" ]; then
+        echo "Error: No installed SDK components found or unable to parse sdkmanager output." >&2
+        return 1
+    fi
+
+    echo "$output"
 }
 
 get_apk_packages() {
-    docker run --rm "$image" apk info -v 2>/dev/null |
+    local output
+    output=$(docker run --rm "$image" apk info -v 2>/dev/null |
         awk '
         /^WARNING:/ { next }
         /^[a-zA-Z0-9]/ {
@@ -26,7 +39,14 @@ get_apk_packages() {
             sub(/-[0-9].*$/, "", pkg);
             ver=substr(full, length(pkg) + 2);
             printf "| %s | %s |\n", pkg, ver
-        }' | sort
+        }' | sort)
+
+    if [ -z "$output" ]; then
+        echo "Error: No installed apk packages found or unable to parse apk output." >&2
+        return 1
+    fi
+
+    echo "$output"
 }
 
 generate_markdown_body() {
