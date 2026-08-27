@@ -18,8 +18,8 @@ curl -fsSL --retry 5 --retry-all-errors "https://dl.google.com/android/cli/lates
 chmod +x /usr/local/bin/android
 
 # Install required packages
-android --sdk="${ANDROID_HOME}" sdk install \
+android --sdk="${ANDROID_HOME}" --no-metrics sdk install \
     "cmdline-tools/latest@${cmdline_tools_version}" \
     "platform-tools@${platform_tools_version}" \
-    "build-tools@${build_tools_version}" \
+    "build-tools/${build_tools_version}" \
     "platforms/android-${platform_version}"
