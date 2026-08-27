@@ -65,12 +65,6 @@ jobs:
         with:
           dockerfile_path: 'Dockerfile'
 
-      - name: "Get command-line tools ID based on version"
-        id: cmdline-tools-id-fetcher
-        uses: ./.github/actions/cmdline-tools-id-fetcher
-        with:
-          version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
-
       - name: "Get latest Android Platform versions"
         id: android-platform-versions-fetcher
         uses: ./.github/actions/android-platform-versions-fetcher
