@@ -13,7 +13,7 @@ touch "${ANDROID_USER_HOME}/repositories.cfg"
 
 # Install Android CLI
 curl -fsSL --retry 5 --retry-all-errors "https://dl.google.com/android/cli/latest/linux_x86_64/android" \
-    -o /usr/local/bin \
+    -o /usr/local/bin/android \
     -w "Downloaded: %{url_effective}\n"
 chmod +x /usr/local/bin/android
 
