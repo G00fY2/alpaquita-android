@@ -38,6 +38,7 @@ jobs:
       cmdline_tools_version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
+      android_cli_version: ${{ env.ANDROID_CLI_VERSION }}
       environment: ${{ steps.set-environment.outputs.environment }}
       version_suffix: ${{ steps.set-environment.outputs.version_suffix }}
     steps:
@@ -122,6 +123,7 @@ jobs:
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=jdk${{ matrix.jdk_version }}
+        ANDROID_CLI_VERSION=${{ needs.setup.outputs.android_cli_version }}
         ANDROID_CMDLINE_TOOLS_VERSION=${{ needs.setup.outputs.cmdline_tools_version }}
         ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
         ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
