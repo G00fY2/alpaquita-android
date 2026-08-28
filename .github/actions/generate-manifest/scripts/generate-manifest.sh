@@ -7,7 +7,7 @@ report_file=$3
 
 get_android_cli() {
     local cliVersion
-    cliVersion=$(docker run --rm "$image" android version 2>/dev/null)
+    cliVersion=$(docker run --rm "$image" android --version 2>/dev/null)
 
     if [ -z "$cliVersion" ]; then
         echo "Error: 'android version' returns no output." >&2
@@ -62,21 +62,29 @@ get_apk_packages() {
 }
 
 generate_markdown_body() {
+    local cli_row
+    local sdk_rows
+    local apk_rows
+
+    cli_row=$(get_android_cli)
+    sdk_rows=$(get_sdk_components)
+    apk_rows=$(get_apk_packages)
+
     cat <<EOF
 <details><summary><b>🐋 Docker Image Content: <code>${image_tag}</code></b></summary>
 
 #### 🤖 Android SDK Components
 | Component | Version | Description |
 | :--- | :--- | :--- |
-$(get_android_cli)
-$(get_sdk_components)
+${cli_row}
+${sdk_rows}
 
 #### 📦 Installed OS Packages (apk)
 <details><summary>Click to view APK list</summary>
 
 | Package | Version |
 | :--- | :--- |
-$(get_apk_packages)
+${apk_rows}
 
 </details>
 </details>
