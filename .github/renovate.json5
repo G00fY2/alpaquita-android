@@ -169,7 +169,7 @@
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
-                'android_cli_version',
+                'android-cli',
             ],
             groupName: 'android sdk components',
             versioning: 'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+))?(?:\\.(?<patch>\\d+))?(-rev(?<build>\\d+))?$',
@@ -181,7 +181,7 @@
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
-                'android_cli_version',
+                'android-cli',
             ],
             groupName: 'android sdk components',
             matchUpdateTypes: [
@@ -197,7 +197,7 @@
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
-                'android_cli_version',
+                'android-cli',
             ],
             groupName: 'android sdk components',
             matchUpdateTypes: [
