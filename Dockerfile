@@ -9,7 +9,7 @@ FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-26.0.2_13-glibc@sha256:b6a4a
 
 FROM ${BASE_IMAGE}
 
-ARG ANDROID_CMDLINE_TOOLS_ID
+ARG ANDROID_CMDLINE_TOOLS_VERSION
 ARG ANDROID_PLATFORM_TOOLS_VERSION
 ARG ANDROID_BUILD_TOOLS_VERSION
 ARG ANDROID_PLATFORM_VERSION
@@ -32,7 +32,7 @@ RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaqu
     --mount=type=bind,source=scripts/android-tools,target=/tmp/android-tools \
     /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
     /bin/bash /tmp/setup-android.sh \
-    "${ANDROID_CMDLINE_TOOLS_ID}" \
+    "${ANDROID_CMDLINE_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \
     "${ANDROID_BUILD_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_VERSION}" && \

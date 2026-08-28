@@ -35,7 +35,7 @@ jobs:
       latest_jdk_version: ${{ steps.jdk-versions-extractor.outputs.latest_version }}
       platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
       latest_platform_version: ${{ steps.android-platform-versions-fetcher.outputs.latest_version }}
-      cmdline_tools_id: ${{ steps.cmdline-tools-id-fetcher.outputs.cmdline_tools_id }}
+      cmdline_tools_version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
       environment: ${{ steps.set-environment.outputs.environment }}
@@ -64,12 +64,6 @@ jobs:
         uses: ./.github/actions/jdk-versions-extractor
         with:
           dockerfile_path: 'Dockerfile'
-
-      - name: "Get command-line tools ID based on version"
-        id: cmdline-tools-id-fetcher
-        uses: ./.github/actions/cmdline-tools-id-fetcher
-        with:
-          version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
 
       - name: "Get latest Android Platform versions"
         id: android-platform-versions-fetcher
@@ -128,7 +122,7 @@ jobs:
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_BUILD_ARGS: |
         BASE_IMAGE=jdk${{ matrix.jdk_version }}
-        ANDROID_CMDLINE_TOOLS_ID=${{ needs.setup.outputs.cmdline_tools_id }}
+        ANDROID_CMDLINE_TOOLS_VERSION=${{ needs.setup.outputs.cmdline_tools_version }}
         ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
         ANDROID_BUILD_TOOLS_VERSION=${{ needs.setup.outputs.build_tools_version }}
         ANDROID_PLATFORM_VERSION=${{ matrix.platform_version }}
