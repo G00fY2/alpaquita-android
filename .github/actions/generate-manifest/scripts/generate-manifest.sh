@@ -14,7 +14,7 @@ get_android_cli() {
         return 1
     fi
 
-    printf "| android | %s | Android CLI |\n" "$cliVersion"
+    printf "| android-cli | %s | Android CLI |\n" "$cliVersion"
 }
 
 get_sdk_components() {
