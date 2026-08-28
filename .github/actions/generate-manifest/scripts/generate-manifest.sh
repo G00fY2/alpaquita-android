@@ -5,9 +5,21 @@ image=$1
 image_tag=$2
 report_file=$3
 
+get_android_cli() {
+    local version
+    version=$(docker run --rm "$image" android version 2>/dev/null)
+
+    if [ -z "$version" ]; then
+        echo "Error: No Android CLI version found or unable to execute 'android version'." >&2
+        return 1
+    fi
+
+    printf "| android | %s | Android CLI |\n" "$version"
+}
+
 get_sdk_components() {
     local output
-    output=$(docker run --rm "$image" sdkmanager --list_installed 2>/dev/null |
+    output=$(docker run --rm "$image" android sdk list 2>/dev/null |
         awk '
         /^Installed packages:/ {
             in_packages = 1
@@ -56,6 +68,7 @@ generate_markdown_body() {
 #### 🤖 Android SDK Components
 | Component | Version | Description |
 | :--- | :--- | :--- |
+$(get_android_cli)
 $(get_sdk_components)
 
 #### 📦 Installed OS Packages (apk)
