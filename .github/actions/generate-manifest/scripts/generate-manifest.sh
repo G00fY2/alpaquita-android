@@ -6,15 +6,15 @@ image_tag=$2
 report_file=$3
 
 get_android_cli() {
-    local version
-    version=$(docker run --rm "$image" android version 2>/dev/null)
+    local cliVersion
+    cliVersion=$(docker run --rm "$image" android version 2>/dev/null)
 
-    if [ -z "$version" ]; then
-        echo "Error: No Android CLI version found or unable to execute 'android version'." >&2
+    if [ -z "$cliVersion" ]; then
+        echo "Error: 'android version' returns no output." >&2
         return 1
     fi
 
-    printf "| android | %s | Android CLI |\n" "$version"
+    printf "| android | %s | Android CLI |\n" "$cliVersion"
 }
 
 get_sdk_components() {
