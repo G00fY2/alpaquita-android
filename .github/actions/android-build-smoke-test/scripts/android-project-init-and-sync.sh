@@ -9,7 +9,6 @@ if [[ -z "${ANDROID_SDK_HOME:-}" ]]; then
 fi
 
 export HOME="$ANDROID_SDK_HOME"
-expected_install_dir="$HOME/.local/bin"
 
 echo "--- Container: Environment Check ---"
 echo "--- User UID: $(id -u) ---"
@@ -23,11 +22,6 @@ if command -v android-tools &>/dev/null; then
 else
     echo "WARNING: 'android-tools' command not found in PATH."
 fi
-
-echo "--- Container: Installing Android CLI ---"
-curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash -s -- --yes >/dev/null
-
-export PATH="$PATH:$expected_install_dir"
 
 if ! command -v android &>/dev/null; then
     echo "ERROR: 'android' command still not found after installation and PATH update."
