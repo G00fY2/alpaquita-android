@@ -34,7 +34,7 @@ get_sdk_components() {
         }' | sort)
 
     if [ -z "$output" ]; then
-        echo "Error: No installed SDK components found or unable to parse sdkmanager output." >&2
+        echo "Error: No installed SDK components found or unable to parse 'android sdk list' output." >&2
         return 1
     fi
 
