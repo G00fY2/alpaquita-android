@@ -27,26 +27,24 @@ docker pull ghcr.io/g00fy2/alpaquita-android:latest
 - **Always current** - Renovate tracks Google's official Android SDK repositories directly and auto-merges updates (including minor platform revisions) as soon as they're released - no manual lag.
 - **Minimal & secure** - Only the OS packages and SDK components needed to compile a standard Java/Kotlin project are included, keeping the image small (~340 MB compressed) and the attack surface low.
 - **Reproducible** - All core components and base images are strictly pinned for deterministic CI/CD builds.
-- **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under arbitrary non-root UIDs while keeping access to the toolchain.
+- **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under any non-root UID while keeping access to the toolchain.
 
 > [!IMPORTANT]
 > **Not included:** Android NDK and the Android Emulator. This image is focused purely on Java/Kotlin compilation; dedicated NDK/Emulator variants are planned.
 
 ## Image Matrix & Tagging
 
-The matrix covers the current Java baseline alongside the three most recent stable major Android API levels (with minor versions). SDK components roll forward automatically as Google ships updates - no separate action needed on the Java side.
+The matrix always covers the three most recent stable major Android API levels, each paired with JDK 26, 25, and 21. When Google ships a new major API level, it's added at the top and the oldest one drops off; minor SDK and platform revisions roll forward automatically, no separate action needed.
 
-| Android API (rolling window) | Platform version | Java versions | Example tags |
-|---|---|---|---|
-| Latest (e.g. `37`) | `37.1` / `37.0` | JDK 26 / 25 / 21 | `android-37.1-jdk26` … `android-37.0-jdk21` |
-| Previous (e.g. `36`) | `36.1` / `36.0` | JDK 26 / 25 / 21 | `android-36.1-jdk26` … `android-36.0-jdk21` |
-| Older (e.g. `35`) | `35.0` | JDK 26 / 25 / 21 | `android-35.0-jdk26` … `android-35.0-jdk21` |
+| Android API | Platform version | Java versions    | Example tags                                |
+|-------------|------------------|------------------|---------------------------------------------|
+| 37 (latest) | `37.1` / `37.0`  | JDK 26 / 25 / 21 | `android-37.1-jdk26` … `android-37.0-jdk21` |
+| 36          | `36.1` / `36.0`  | JDK 26 / 25 / 21 | `android-36.1-jdk26` … `android-36.0-jdk21` |
+| 35          | `35.0`           | JDK 26 / 25 / 21 | `android-35.0-jdk26` … `android-35.0-jdk21` |
 
 - **Rolling tags** - `android-<api>-jdk<java>` - always point to the latest build for that API/JDK combo.
 - **Immutable tags** - `android-<api>-jdk<java>-v<year>.<release>.<patch>` - pinned forever, for production use.
 - **`latest`** - newest stable API level combined with the highest supported Java version.
-
-When Google ships a new major API level, it's added at the top of the matrix and the oldest one drops out. Minor SDK revisions for the current top API are picked up automatically as they're published.
 
 ## Disabling Android CLI Telemetry
 
@@ -59,23 +57,23 @@ This makes sure `--no-metrics` exists inside `~/.androidrc`.
 
 ## FAQ
 
-**Why is it "minimalist"?**\
-Only the bare minimum of OS packages and SDK components needed to compile a standard project are pre-installed, to keep download size, disk usage and attack surface as small as possible. Emulator, hardware acceleration libs and NDK support are planned as separate, dedicated variants rather than being bundled in. Missing a package your pipeline needs? Open an issue.
+### Why is it "minimalist"?
+Only the bare minimum of OS packages and SDK components needed to compile a standard project are pre-installed, keeping download size, disk usage and attack surface small. Emulator, hardware acceleration libs and NDK support are planned as separate, dedicated variants. Missing a package your pipeline needs? Open an issue.
 
-**What's special about the Renovate auto-update setup?**\
-It uses custom datasources that track Google's official Android SDK repo structure directly (including minor revision bumps), and automerges any update that passes the automated smoke tests, without manual intervention.
+### What's special about the Renovate auto-update setup?
+Custom datasources track Google's official Android SDK repo structure directly, including minor revision bumps, and automerge any update that passes the automated smoke tests.
 
-**How is release quality and size guaranteed?**\
-Every image runs a smoke test (assembling a real Android test project inside the container), then gets scanned for vulnerabilities with `Trivy` and audited layer-by-layer with `Dive`. Compressed size lands around 340 MB (zstd level 9).
+### How is release quality and size guaranteed?
+Every image runs a smoke test (assembling a real Android test project inside the container), gets scanned for vulnerabilities with `Trivy`, and audited layer-by-layer with `Dive`. Compressed size lands around 340 MB (zstd level 9).
 
-**Why does every API-level image ship the newest Build-Tools version?**\
-Google's recommended default (letting AGP pick `buildToolsVersion`) causes problems in CI: the default is hardcoded into AGP and often lags behind, you miss recent compiler bugfixes, and without an explicit version AGP scans the local runner environment, which can behave unpredictably. Pinning the latest version avoids all of that.
+### Why does every API-level image ship the newest Build-Tools version?
+Letting AGP pick `buildToolsVersion` (Google's default) can cause issues in CI: it's hardcoded into AGP and often lags behind, so you miss recent fixes in bundled tools like the `aidl` compiler or `aapt2`, and AGP falls back to scanning the runner environment, which can behave unpredictably. Pinning the latest version avoids that.
 
-**Why is `GRADLE_USER_HOME` located under `/opt/android/user`, separate from `ANDROID_HOME`?**\
-`ANDROID_HOME` (`/opt/android/sdk`) holds the fixed SDK installation, while `GRADLE_USER_HOME` and the Android user config live under the separate, user-agnostic `/opt/android/user` path. That split makes it simple to mount just the user/cache directory as a persistent volume (Kubernetes, GitLab CI) without touching the SDK itself.
+### Why is `GRADLE_USER_HOME` located under `/opt/android/user`, separate from `ANDROID_HOME`?
+`ANDROID_HOME` (`/opt/android/sdk`) holds the fixed SDK installation; `GRADLE_USER_HOME` and the Android user config live under the separate `/opt/android/user` path, which works the same no matter which user runs the container. That split makes it simple to mount just the user/cache directory as a persistent volume (Kubernetes, GitLab CI) without touching the SDK itself.
 
-**How does it handle Kubernetes/OpenShift security contexts?**\
-Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern for its toolchain paths (`/opt/android/sdk` and `/opt/android/user`): those directories are readable/writable/executable by the root group (GID 0), so the container works under arbitrary, dynamically assigned UIDs.
+### How does it handle Kubernetes/OpenShift security contexts?
+Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern for its toolchain paths (`/opt/android/sdk` and `/opt/android/user`): those directories are readable/writable/executable by the root group (GID 0), so the container works no matter which UID it's given at runtime.
 
 ## License
     The MIT License (MIT)

@@ -15,7 +15,7 @@ Example: Closes #123 or Fixes #456
 - [ ] I did NOT use AI tools for this PR.
 
 ## Contributor Checklist
-*Before submitting this PR, please confirm that you have read and followed our [Contributing Guidelines](.github/CONTRIBUTING.md). Check all that apply:*
+*Before submitting this PR, please confirm that you have read and followed our [Contributing Guidelines](../.github/CONTRIBUTING.md). Check all that apply:*
 
 - [ ] **Communication:** This change was previously discussed or confirmed in an issue or discussion thread.
 - [ ] **Responsibility:** I fully understand every line of code I am submitting and can explain it without relying on an AI.
