@@ -20,11 +20,12 @@ echo "--- Container: Disabling Android Metrics via android-tools ---"
 if command -v android-tools &>/dev/null; then
     android-tools disable-metrics
 else
-    echo "WARNING: 'android-tools' command not found in PATH."
+    echo "ERROR: 'android-tools' command not found in PATH." >&2
+    exit 1
 fi
 
 if ! command -v android &>/dev/null; then
-    echo "ERROR: 'android' command still not found after installation and PATH update."
+    echo "ERROR: 'android' command not found." >&2
     exit 1
 fi
 
@@ -42,11 +43,18 @@ android create --name="SmokeTestApp" --output="$target_dir"
 
 cd "$target_dir"
 
-echo "--- Container: Initialize the Gradle wrapper ---"
-./gradlew --version --no-daemon
+echo "--- Container: Initialize the Gradle wrapper & verify mimalloc execution ---"
+GRADLE_VERSION_OUTPUT=$(MIMALLOC_VERBOSE=1 ./gradlew --version --no-daemon 2>&1)
+echo "$GRADLE_VERSION_OUTPUT"
+if echo "$GRADLE_VERSION_OUTPUT" | grep -q "mimalloc: process init"; then
+    echo "SUCCESS: Gradle JVM successfully loaded and initialized mimalloc!"
+else
+    echo "ERROR: Gradle JVM started, but mimalloc initialization was NOT detected!" >&2
+    exit 1
+fi
 
 echo "--- Container: Actually build the Android project using gradlew wrapper ---"
-./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache --no-watch-fs
+./gradlew assembleDebug --no-daemon
 
 echo "--- Container: Android CLI Installed SDK packages after build ---"
 android sdk list
