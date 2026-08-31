@@ -30,12 +30,12 @@ commits=$(git log "$commit_range" --format=%s 2>/dev/null || echo "")
 
 # Analyze commits for bump triggers
 has_minor_bump=false
-if echo "$commits" | grep -qE "$minor_bump_pattern" >/dev/null 2>&1; then
+if echo "$commits" | grep -qE "$minor_bump_pattern"; then
     has_minor_bump=true
 fi
 
 has_patch_bump=false
-if echo "$commits" | grep -qE "$patch_bump_pattern" >/dev/null 2>&1; then
+if echo "$commits" | grep -qE "$patch_bump_pattern"; then
     has_patch_bump=true
 fi
 
