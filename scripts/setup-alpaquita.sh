@@ -10,7 +10,7 @@ apk add --no-cache \
     curl \
     git \
     libstdc++ \
-    mimalloc-global \
+    mimalloc \
     openssh-client-default \
     unzip
 
