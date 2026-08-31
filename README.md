@@ -27,7 +27,7 @@ docker pull ghcr.io/g00fy2/alpaquita-android:latest
 - **Always current** - Renovate tracks Google's official Android SDK repositories directly and auto-merges updates (including minor platform revisions) as soon as they're released - no manual lag.
 - **Minimal & secure** - Only the OS packages and SDK components needed to compile a standard Java/Kotlin project are included, keeping the image small (~340 MB compressed) and the attack surface low.
 - **Reproducible** - All core components and base images are strictly pinned for deterministic CI/CD builds.
-- **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under any non-root UID while keeping access to the toolchain.
+- **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under any non-root UID as long as it stays in group 0.
 
 > [!IMPORTANT]
 > **Not included:** Android NDK and the Android Emulator. This image is focused purely on Java/Kotlin compilation; dedicated NDK/Emulator variants are planned.
@@ -39,8 +39,8 @@ The matrix always covers the three most recent stable major Android API levels, 
 | Android API | Platform version | Java versions    | Example tags                                |
 |-------------|------------------|------------------|---------------------------------------------|
 | 37 (latest) | `37.1` / `37.0`  | JDK 26 / 25 / 21 | `android-37.1-jdk26` … `android-37.0-jdk21` |
-| 36          | `36.1` / `36.0`  | JDK 26 / 25 / 21 | `android-36.1-jdk26` … `android-36.0-jdk21` |
-| 35          | `35.0`           | JDK 26 / 25 / 21 | `android-35.0-jdk26` … `android-35.0-jdk21` |
+| 36          | `36.1` / `36`    | JDK 26 / 25 / 21 | `android-36.1-jdk26` … `android-36-jdk21`   |
+| 35          | `35`             | JDK 26 / 25 / 21 | `android-35-jdk26` … `android-35-jdk21`     |
 
 - **Rolling tags** - `android-<api>-jdk<java>` - always point to the latest build for that API/JDK combo.
 - **Immutable tags** - `android-<api>-jdk<java>-v<year>.<release>.<patch>` - pinned forever, for production use.
@@ -73,7 +73,7 @@ Letting AGP pick `buildToolsVersion` (Google's default) can cause issues in CI: 
 `ANDROID_HOME` (`/opt/android/sdk`) holds the fixed SDK installation; `GRADLE_USER_HOME` and the Android user config live under the separate `/opt/android/user` path, which works the same no matter which user runs the container. That split makes it simple to mount just the user/cache directory as a persistent volume (Kubernetes, GitLab CI) without touching the SDK itself.
 
 ### How does it handle Kubernetes/OpenShift security contexts?
-Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern for its toolchain paths (`/opt/android/sdk` and `/opt/android/user`): those directories are readable/writable/executable by the root group (GID 0), so the container works no matter which UID it's given at runtime.
+Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern for its toolchain paths (`/opt/android/sdk` and `/opt/android/user`): those directories are readable/writable/executable by the root group (GID 0), so the container works under any UID that stays in group 0 (OpenShift's default).
 
 ## License
     The MIT License (MIT)
