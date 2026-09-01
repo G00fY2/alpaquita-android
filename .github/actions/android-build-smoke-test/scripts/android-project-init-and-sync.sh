@@ -46,7 +46,7 @@ cd "$target_dir"
 echo "--- Container: Initialize the Gradle wrapper & verify mimalloc execution ---"
 GRADLE_VERSION_OUTPUT=$(MIMALLOC_VERBOSE=1 ./gradlew --version --no-daemon 2>&1)
 echo "$GRADLE_VERSION_OUTPUT"
-if echo "$GRADLE_VERSION_OUTPUT" | grep -q "mimalloc: process init"; then
+if grep -q "mimalloc: process init" <<< "$GRADLE_VERSION_OUTPUT"; then
     echo "SUCCESS: Gradle JVM successfully loaded and initialized mimalloc!"
 else
     echo "ERROR: Gradle JVM started, but mimalloc initialization was NOT detected!" >&2
