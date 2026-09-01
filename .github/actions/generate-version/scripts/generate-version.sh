@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Helper function to convert list into pipe-delimited regex format
 prepare_regex_list() {
-    tr '[:space:],\n' '\n' <<< "$1" | grep -v '^$' | paste -sd '|' -
+    tr '[:space:],\n' '\n' <<<"$1" | grep -v '^$' | paste -sd '|' -
 }
 
 minor_regex=$(prepare_regex_list "$1")
@@ -30,12 +30,12 @@ commits=$(git log "$commit_range" --format=%s 2>/dev/null || echo "")
 
 # Analyze commits for bump triggers
 has_minor_bump=false
-if grep -qE "$minor_bump_pattern" <<< "$commits"; then
+if grep -qE "$minor_bump_pattern" <<<"$commits"; then
     has_minor_bump=true
 fi
 
 has_patch_bump=false
-if grep -qE "$patch_bump_pattern" <<< "$commits"; then
+if grep -qE "$patch_bump_pattern" <<<"$commits"; then
     has_patch_bump=true
 fi
 
