@@ -14,9 +14,6 @@ apk add --no-cache \
     openssh-client-default \
     unzip
 
-# Disable Git ownership checks globally (allows volume-mounted repos from different UIDs)
-git config --system --add safe.directory '*'
-
 # Create symlink to replace default busybox shell with bash
 ln -sf /bin/bash /bin/sh
 
