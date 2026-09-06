@@ -106,8 +106,8 @@ jobs:
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
         env:
-          DOCKER_BUILDX_VERSION: v0.36.1
-          DOCKER_BUILDKIT_VERSION: v0.32.2
+          DOCKER_BUILDX_VERSION: v0.37.0
+          DOCKER_BUILDKIT_VERSION: v0.33.0
         with:
           version: ${{ env.DOCKER_BUILDX_VERSION }}
           driver-opts: image=moby/buildkit:${{ env.DOCKER_BUILDKIT_VERSION }}
