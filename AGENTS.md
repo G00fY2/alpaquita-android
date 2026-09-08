@@ -17,7 +17,7 @@ This repository maintains a specialized, high-performance Docker image designed 
 * **Arbitrary UID Support:** The image must be executable by any arbitrary UID to support restricted Kubernetes environments (e.g., `runAsNonRoot: true` or specific `runAsUser` contexts).
 * **GID 0 Strategy:** Adhere to the **OpenShift/Kubernetes GID 0 pattern**. All defined Android and Gradle directories must be owned by the root group (`chgrp -R 0`) with group permissions mirroring owner permissions (`chmod -R g=u`). This ensures arbitrary-UID CI containers have full read/write access to the following paths:
   * **Tooling (`ANDROID_HOME`):** Contains the Android SDK, build tools, and platform tools.
-  * **User State (`ANDROID_SDK_HOME`):** Parent directory for stateful data, including:
+  * **User State (`ANDROID_USER_HOME_BASE`):** Parent directory for stateful data, including:
     * `ANDROID_USER_HOME`: Stores Android-specific configurations and keys.
     * `GRADLE_USER_HOME`: Stores build caches, dependencies, and daemon logs.
 * **Agnostic Home:** Redirect all stateful data (Gradle caches, Android configs) to a neutral path (`/opt/android/user`) instead of the standard `/root` or `/home`. This ensures portability and simplifies volume mounting for persistent CI caching.
