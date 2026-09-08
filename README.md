@@ -30,7 +30,8 @@ docker pull ghcr.io/g00fy2/alpaquita-android:latest
 - **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under any non-root UID as long as it stays in group 0.
 
 > [!IMPORTANT]
-> **Not included:** Android NDK and the Android Emulator. This image is focused purely on Java/Kotlin compilation; dedicated NDK/Emulator variants are planned.
+> **NDK & CMake:** - Not pre-installed, to keep the image lean, but automatically downloaded by the Android Gradle Plugin the first time your project needs them.\
+> **Android Emulator:** - Not included; a dedicated emulator-enabled variant is planned.
 
 ## Image Matrix & Tagging
 
@@ -58,7 +59,7 @@ This makes sure `--no-metrics` exists inside `~/.androidrc`.
 ## FAQ
 
 ### Why is it "minimalist"?
-Only the bare minimum of OS packages and SDK components needed to compile a standard project are pre-installed, keeping download size, disk usage and attack surface small. Emulator, hardware acceleration libs and NDK support are planned as separate, dedicated variants. Missing a package your pipeline needs? Open an issue.
+Only the bare minimum of OS packages and SDK components needed to compile a standard project are pre-installed, keeping download size, disk usage and attack surface small. Emulator support, including hardware acceleration libs, is planned as a separate, dedicated variant. Missing a package your pipeline needs? Open an issue.
 
 ### What's special about the Renovate auto-update setup?
 Custom datasources track Google's official Android SDK repo structure directly, including minor revision bumps, and automerge any update that passes the automated smoke tests.
