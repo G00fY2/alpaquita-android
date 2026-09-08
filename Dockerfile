@@ -15,6 +15,7 @@ ARG ANDROID_PLATFORM_TOOLS_VERSION
 ARG ANDROID_BUILD_TOOLS_VERSION
 ARG ANDROID_PLATFORM_VERSION
 ARG MIMALLOC_PATH=/usr/lib/libmimalloc_stable.so
+ARG ANDROID_USER_HOME_BASE=/opt/android/user
 
 LABEL org.opencontainers.image.description="Optimized Android CI image (Alpaquita/mimalloc). Self-updating via Renovate automerge." \
       org.opencontainers.image.licenses="MIT" \
@@ -22,10 +23,8 @@ LABEL org.opencontainers.image.description="Optimized Android CI image (Alpaquit
       org.opencontainers.image.title="Alpaquita Android"
 
 ENV ANDROID_HOME=/opt/android/sdk
-ENV ANDROID_SDK_ROOT=${ANDROID_HOME}
-ENV ANDROID_SDK_HOME=/opt/android/user
-ENV ANDROID_USER_HOME=${ANDROID_SDK_HOME}/.android
-ENV GRADLE_USER_HOME=${ANDROID_SDK_HOME}/.gradle
+ENV ANDROID_USER_HOME=${ANDROID_USER_HOME_BASE}/.android
+ENV GRADLE_USER_HOME=${ANDROID_USER_HOME_BASE}/.gradle
 ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
@@ -40,8 +39,8 @@ RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaqu
     "${ANDROID_PLATFORM_VERSION}" && \
     cp /tmp/android-tools /usr/local/bin/android-tools && \
     mkdir -p "${ANDROID_USER_HOME}" "${GRADLE_USER_HOME}" && \
-    chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_SDK_HOME}" && \
-    chmod -R g=u "${ANDROID_HOME}" "${ANDROID_SDK_HOME}"
+    chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}" && \
+    chmod -R g=u "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}"
 
 ENV LD_PRELOAD=$MIMALLOC_PATH
 

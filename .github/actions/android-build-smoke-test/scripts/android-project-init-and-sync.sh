@@ -3,12 +3,13 @@ set -euo pipefail
 
 target_dir=$1
 
-if [[ -z "${ANDROID_SDK_HOME:-}" ]]; then
-    echo "ERROR: The environment variable ANDROID_SDK_HOME is not set or empty."
+if [[ -z "${ANDROID_USER_HOME:-}" ]]; then
+    echo "ERROR: The environment variable ANDROID_USER_HOME is not set or empty."
     exit 1
 fi
 
-export HOME="$ANDROID_SDK_HOME"
+HOME="$(dirname "$ANDROID_USER_HOME")"
+export HOME
 
 echo "--- Container: Environment Check ---"
 echo "--- User UID: $(id -u) ---"
