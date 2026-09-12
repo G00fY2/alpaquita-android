@@ -26,5 +26,5 @@ android --sdk="${ANDROID_HOME}" --no-metrics sdk install \
     "platforms/android-${platform_version}"
 
 # Delete Android CLI embedded installation (e.g. ~160 MB embedded JRE) to save image space.
-# It will be auto-extracted at runtime if needed.
+# It will be auto-installed at runtime if needed.
 rm -rf "${ANDROID_USER_HOME}/cli/bundles"
