@@ -25,7 +25,7 @@ docker pull ghcr.io/g00fy2/alpaquita-android:latest
 
 - **Faster builds** - `glibc` (via Alpaquita Linux) avoids the performance overhead of Alpine's `musl`, and Microsoft's `mimalloc` allocator speeds up the Kotlin Daemon and parallel Gradle workers.
 - **Always current** - Renovate tracks Google's official Android SDK repositories directly and auto-merges updates (including minor platform revisions) as soon as they're released - no manual lag.
-- **Minimal & secure** - Only the OS packages and SDK components needed to compile a standard Java/Kotlin project are included, keeping the image small (~340 MB compressed) and the attack surface low.
+- **Minimal & secure** - Only the OS packages and SDK components needed to compile a standard Java/Kotlin project are included, keeping the image small (~400 MB compressed) and the attack surface low.
 - **Reproducible** - All core components and base images are strictly pinned for deterministic CI/CD builds.
 - **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under any non-root UID as long as it stays in group 0.
 
@@ -65,7 +65,7 @@ Only the bare minimum of OS packages and SDK components needed to compile a stan
 Custom datasources track Google's official Android SDK repo structure directly, including minor revision bumps, and automerge any update that passes the automated smoke tests.
 
 ### How is release quality and size guaranteed?
-Every image runs a smoke test (assembling a real Android test project inside the container), gets scanned for vulnerabilities with `Trivy`, and audited layer-by-layer with `Dive`. Compressed size lands around 340 MB (zstd level 9).
+Every image runs a smoke test (assembling a real Android test project inside the container), gets scanned for vulnerabilities with `Trivy`, and audited layer-by-layer with `Dive`. Compressed size lands around 400 MB (zstd level 9).
 
 ### Why does every API-level image ship the newest Build-Tools version?
 Letting AGP pick `buildToolsVersion` (Google's default) can cause issues in CI: it's hardcoded into AGP and often lags behind, so you miss recent fixes in bundled tools like the `aidl` compiler or `aapt2`, and AGP falls back to scanning the runner environment, which can behave unpredictably. Pinning the latest version avoids that.
