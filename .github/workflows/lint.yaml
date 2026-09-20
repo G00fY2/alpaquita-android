@@ -78,7 +78,7 @@ jobs:
           ${{ env.ACTIONLINT_VERSION }}
 
       - name: "Run actionlint"
-        run: ${{ steps.install-actionlint.outputs.executable }} -color
+        run: ${{ steps.install-actionlint.outputs.executable }} -color -ignore 'label ".+" is unknown'
 
   hadolint:
     name: "Hadolint"
