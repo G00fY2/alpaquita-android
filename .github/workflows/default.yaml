@@ -29,7 +29,7 @@ defaults:
 jobs:
   setup:
     name: "🛠️ Prepare Build Matrix"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
       latest_jdk_version: ${{ steps.jdk-versions-extractor.outputs.latest_version }}
@@ -74,7 +74,7 @@ jobs:
 
   versioning:
     name: "🏷️ Versioning"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       version: ${{ steps.generate-version.outputs.version }}
       create_release_tag: ${{ steps.generate-version.outputs.create_release_tag }}
@@ -93,7 +93,7 @@ jobs:
 
   build:
     needs: [ setup, versioning ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     environment: ${{ needs.setup.outputs.environment }}
     name: >
       ${{ needs.setup.outputs.environment == 'release' && '📦 Build' || '🔬 Validate' }}
@@ -249,7 +249,7 @@ jobs:
 
   build-summary:
     name: "🏁 Build Matrix Complete"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     needs: build
     steps:
@@ -261,7 +261,7 @@ jobs:
 
   create-or-update-github-release:
     name: "🚀 Create or update GitHub Release"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [ setup, versioning, build-summary ]
     if: >-
       ${{ success() && (needs.versioning.outputs.create_release_tag == 'true' ||
