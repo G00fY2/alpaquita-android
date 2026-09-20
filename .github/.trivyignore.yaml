@@ -22,6 +22,16 @@ vulnerabilities:
       - "pkg:maven/org.bouncycastle/bcprov-jdk18on"
     statement: "GOSTCTR vulnerability in Bouncy Castle. Bundled by Google in cmdline-tools. Low risk in CI environment."
 
+  - id: CVE-2026-8763
+    purls:
+      - "pkg:maven/org.bouncycastle/bcprov-jdk18on"
+    statement: "Name Constraints bypass in Bouncy Castle. Bundled by Google in cmdline-tools. Low risk in CI environment."
+
+  - id: CVE-2026-13506
+    purls:
+      - "pkg:maven/org.bouncycastle/bcprov-jdk18on"
+    statement: "Denial of Service in Bouncy Castle. Bundled by Google in cmdline-tools. Low risk in CI environment."
+
   - id: GHSA-2r2c-cx56-8933
     purls:
       - "pkg:maven/org.jline/jline-remote-telnet"
