@@ -19,11 +19,22 @@ curl -fsSL --retry 5 --retry-all-errors "https://dl.google.com/android/cli/${and
 chmod +x /usr/local/bin/android
 
 # Install required packages
-android --sdk="${ANDROID_HOME}" --no-metrics sdk install \
-    "cmdline-tools/latest@${cmdline_tools_version}" \
-    "platform-tools@${platform_tools_version}" \
-    "build-tools/${build_tools_version}" \
-    "platforms/android-${platform_version}"
+for i in {1..5}; do
+    android --sdk="${ANDROID_HOME}" --no-metrics sdk install \
+        "cmdline-tools/latest@${cmdline_tools_version}" \
+        "platform-tools@${platform_tools_version}" \
+        "build-tools/${build_tools_version}" \
+        "platforms/android-${platform_version}" && break
+
+    if [ "$i" -eq 5 ]; then
+        echo "ERROR: SDK download failed after 5 attempts." >&2
+        exit 1
+    fi
+
+    wait_time=$((i * 5))
+    echo "WARNING: Download failed. Attempt $i of 5... Retrying in ${wait_time}s." >&2
+    sleep "$wait_time"
+done
 
 # Delete Android CLI embedded installation (e.g. ~160 MB embedded JRE) to save image space.
 # It will be auto-installed at runtime if needed.
