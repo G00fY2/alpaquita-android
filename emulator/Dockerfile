@@ -21,6 +21,14 @@ RUN --mount=type=bind,source=scripts/setup-virtual-device.sh,target=/tmp/setup-v
     "${ANDROID_IMAGE_ARCH}" \
     "${ANDROID_DEVICE_DEFINITION}"
 
+# Optimize footprint for headless CI by stripping GUI toolkit (Qt) and non-x86_64 QEMU engines
+RUN rm -rf ${ANDROID_HOME}/emulator/lib64/qt && \
+    rm -f \
+    ${ANDROID_HOME}/emulator/qemu/linux-x86_64/qemu-system-aarch64* \
+    ${ANDROID_HOME}/emulator/qemu/linux-x86_64/qemu-system-armel* \
+    ${ANDROID_HOME}/emulator/qemu/linux-x86_64/qemu-system-i386* \
+    ${ANDROID_HOME}/emulator/qemu/linux-x86_64/qemu-system-x86_64
+
 FROM ghcr.io/bell-sw/alpaquita-linux-base:glibc@sha256:68c2ddf82cc7913fd178fd5b54dda5ffa11251c318a4cd0dff865d7ec1f8eefd  AS emulator
 
 ARG ANDROID_IMAGE_VERSION
