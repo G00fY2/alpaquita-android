@@ -64,6 +64,6 @@ RUN touch "${ANDROID_EMULATOR_HOME}/emu-update-last-check.ini" && \
     chgrp -R 0 "${ANDROID_USER_HOME_BASE}" && \
     chmod -R g=u "${ANDROID_USER_HOME_BASE}"
 
-COPY --chmod=755 scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --chmod=755 scripts/start-emulator.sh /usr/local/bin/start-emulator
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/start-emulator"]
