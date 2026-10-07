@@ -10,28 +10,24 @@ EMULATOR_TIMEZONE="${EMULATOR_TIMEZONE:-Etc/UTC}"
 log() { echo "[entrypoint] $*"; }
 
 if [ "$#" -gt 0 ]; then
-    log "WARNING: ignoring unsupported arguments: $*"
+    log "WARNING: ignoring unsupported arguments: $*. Configure the image via environment variables."
 fi
 
-# Disable animations; retry briefly, then fail loudly and stop the emulator
+# Disable animations in a single adb call; fail loudly and stop the emulator on error
 disable_animations() {
-    attempt=1
-    until adb shell "
-        settings put global window_animation_scale 0 && \
-        settings put global transition_animation_scale 0 && \
+    adb shell "
+        settings put global window_animation_scale 0 &&
+        settings put global transition_animation_scale 0 &&
         settings put global animator_duration_scale 0
-    " >/dev/null 2>&1; do
-        if [ "$attempt" -ge 10 ]; then
-            log "ERROR: could not disable animations after $attempt attempts"
-            kill "$emu_pid"
-            exit 1
-        fi
-        attempt=$((attempt + 1))
-        sleep 1
-    done
+    " >/dev/null || {
+        log "ERROR: could not disable animations"
+        : >/tmp/emulator-failed
+        kill "$emu_pid"
+        exit 1
+    }
 }
 
-rm -f /tmp/emulator-ready
+rm -f /tmp/emulator-ready /tmp/emulator-failed
 
 # Start the adb server before the emulator and the background task
 adb start-server
@@ -47,6 +43,9 @@ emulator "@${AVD_NAME}" \
     -ports 5554,5555 -delay-adb &
 emu_pid=$!
 
+# Shut the emulator down cleanly on SIGTERM/SIGINT
+trap 'log "Stopping emulator"; adb emu kill >/dev/null 2>&1 || true; wait "$emu_pid" || true; exit 0' TERM INT
+
 # After boot: apply guest settings and mark the container as ready
 (
     waited=0
@@ -54,17 +53,18 @@ emu_pid=$!
         waited=$((waited + 1))
         if [ "$waited" -ge 300 ]; then
             log "ERROR: emulator did not finish booting within 300 seconds"
+            : >/tmp/emulator-failed
             kill "$emu_pid"
             exit 1
         fi
         sleep 1
     done
-    configure_guest_settings
+    disable_animations
     : >/tmp/emulator-ready
     log "Emulator ready"
 ) &
 
-# Shut the emulator down cleanly on SIGTERM/SIGINT
-trap 'log "Stopping emulator"; adb emu kill >/dev/null 2>&1 || true; wait "$emu_pid" || true; exit 0' TERM INT
-
 wait "$emu_pid"
+if [ -f /tmp/emulator-failed ]; then
+    exit 1
+fi
