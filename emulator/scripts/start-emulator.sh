@@ -65,6 +65,7 @@ trap 'log "Stopping emulator"; adb emu kill >/dev/null 2>&1 || true; wait "$emu_
 ) &
 
 wait "$emu_pid"
+# Reached only if the emulator exited with status 0, e.g. after our own kill on a failed start
 if [ -f /tmp/emulator-failed ]; then
     exit 1
 fi
