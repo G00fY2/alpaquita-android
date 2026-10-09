@@ -113,6 +113,17 @@
                 '/versions\\.env$/',
             ],
             matchStrings: [
+                'ANDROID_IMAGE_GOOGLE_APIS_VERSION=(?<currentValue>.*)',
+            ],
+            depNameTemplate: 'android_atd_system_version',
+            datasourceTemplate: 'custom.android_atd_system_version',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
+                '/versions\\.env$/',
+            ],
+            matchStrings: [
                 'ANDROID_CLI_VERSION=(?<currentValue>.*)',
             ],
             depNameTemplate: 'android-cli',
@@ -160,6 +171,18 @@
                 '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
             ],
         },
+        android_atd_system_version: {
+            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/sys-img/google_atd/sys-img2-3.xml',
+            format: 'plain',
+            transformTemplates: [
+                'releases[($contains(version, "google_atd;x86_64") or $contains(version, "<major>"))].version',
+                '$map($, function($v) { $replace($v, /.*system-images;android-([^;]+);google_atd;x86_64.*/, "v:$1") })',
+                '$map($, function($v) { $replace($v, /.*<major>([0-9]+)<.*/, "r:$1") })',
+                '$map($, function($v, $i) { $contains($v, /^v:/) ? $replace($v, "v:", "") & "-rev" & ($contains($[$i+1], /^r:/) ? $replace($[$i+1], "r:", "") : "0") : null })',
+                '$filter($, function($v) { $v != null })',
+                '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
+            ],
+        }
     },
     packageRules: [
         {
@@ -169,6 +192,7 @@
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
+                'android_atd_system_version',
                 'android-cli',
             ],
             groupName: 'android sdk components',
@@ -181,6 +205,7 @@
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
+                'android_atd_system_version',
                 'android-cli',
             ],
             groupName: 'android sdk components',
@@ -197,6 +222,7 @@
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
+                'android_atd_system_version',
                 'android-cli',
             ],
             groupName: 'android sdk components',
@@ -206,7 +232,7 @@
             semanticCommitType: 'fix',
         },
         {
-            description: 'Group Liberica JDK images updates (fix)',
+            description: 'Group Liberica JDK images updates',
             matchPackageNames: [
                 'ghcr.io/bell-sw/liberica-runtime-container',
             ],
@@ -214,7 +240,15 @@
             major: {
                 enabled: false,
             },
-            groupName: 'liberica jdk container',
+            groupName: 'alpaquita container',
+        },
+        {
+            description: 'Group Alpaquita images',
+            matchPackageNames: [
+                'ghcr.io/bell-sw/liberica-runtime-container',
+                'ghcr.io/bell-sw/alpaquita-linux-base',
+            ],
+            groupName: 'alpaquita container',
             /* Bi-weekly Batching after Tuesday releases (relative to timezone below):
                Minute: * (Every minute)
                Hour:   4-23 (04:00 AM - 11:59 PM - Catch-all after Tuesday releases)
