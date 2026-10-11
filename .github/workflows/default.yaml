@@ -34,6 +34,7 @@ jobs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
       latest_jdk_version: ${{ steps.jdk-versions-extractor.outputs.latest_version }}
       platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
+      system_image_versions: ${{ steps.android-system-image-versions-fetcher.outputs.versions_json }}
       latest_platform_version: ${{ steps.android-platform-versions-fetcher.outputs.latest_version }}
       cmdline_tools_version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
@@ -58,13 +59,14 @@ jobs:
 
       - name: "Prepare environment variables"
         run: |
-          grep -v '^#' versions.env >> "$GITHUB_ENV"
+          grep -v '^#' android/versions.env >> "$GITHUB_ENV"
+          grep -v '^#' emulator/versions.env >> "$GITHUB_ENV"
 
       - name: "Get supported jdk versions from Dockerfile"
         id: jdk-versions-extractor
         uses: ./.github/actions/jdk-versions-extractor
         with:
-          dockerfile_path: 'Dockerfile'
+          dockerfile_path: 'android/Dockerfile'
 
       - name: "Get latest Android Platform versions"
         id: android-platform-versions-fetcher
@@ -72,12 +74,20 @@ jobs:
         with:
           max_version: ${{ env.ANDROID_PLATFORM_MAX_VERSION }}
 
+      - name: "Get latest System Image versions"
+        id: android-system-image-versions-fetcher
+        uses: ./.github/actions/android-system-image-versions-fetcher
+        with:
+          max_version: ${{ env.ANDROID_IMAGE_GOOGLE_APIS_VERSION }}
+
   versioning:
     name: "🏷️ Versioning"
     runs-on: ubuntu-26.04
     outputs:
-      version: ${{ steps.generate-version.outputs.version }}
-      create_release_tag: ${{ steps.generate-version.outputs.create_release_tag }}
+      android_version: ${{ steps.generate-android-version.outputs.version }}
+      create_android_release_tag: ${{ steps.generate-android-version.outputs.create_release_tag }}
+      emulator_version: ${{ steps.generate-emulator-version.outputs.version }}
+      create_emulator_release_tag: ${{ steps.generate-emulator-version.outputs.create_release_tag }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -85,11 +95,21 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - uses: ./.github/actions/generate-version
-        id: generate-version
+        id: generate-android-version
         with:
           version_tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
-          minor_types: 'feat'
-          patch_types: 'fix'
+          version_base_prefix: 'v'
+          commit_scopes: 'sdk'
+          minor_commit_types: 'feat'
+          patch_commit_types: 'fix'
+      - uses: ./.github/actions/generate-version
+        id: generate-emulator-version
+        with:
+          version_tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          version_base_prefix: 'emulator-v'
+          commit_scopes: 'emulator'
+          minor_commit_types: 'feat'
+          patch_commit_types: 'fix'
 
   build:
     needs: [ setup, versioning ]
@@ -117,7 +137,7 @@ jobs:
           ) }}
 
     env:
-      IMAGE_VERSION: ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.version_suffix }}
+      IMAGE_VERSION: ${{ needs.versioning.outputs.android_version }}${{ needs.setup.outputs.version_suffix }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_HUB_USERNAME: g00fy2
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android
@@ -166,7 +186,7 @@ jobs:
       - name: "Build Docker Image without pushing"
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
-          context: .
+          context: ./android
           load: true
           platforms: linux/amd64
           tags: ${{ steps.docker-metadata.outputs.tags }}
@@ -237,7 +257,7 @@ jobs:
         if: ${{ needs.setup.outputs.environment == 'release' }}
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
-          context: .
+          context: ./android
           push: true
           platforms: linux/amd64
           sbom: true
@@ -264,7 +284,7 @@ jobs:
     runs-on: ubuntu-26.04
     needs: [ setup, versioning, build-summary ]
     if: >-
-      ${{ success() && (needs.versioning.outputs.create_release_tag == 'true' ||
+      ${{ success() && (needs.versioning.outputs.create_android_release_tag == 'true' ||
       needs.setup.outputs.environment == 'release') }}
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
@@ -284,5 +304,5 @@ jobs:
           bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
           prerelease: ${{ needs.setup.outputs.environment != 'release' }}
           generateReleaseNotes: true
-          tag: ${{ needs.versioning.outputs.version }}
+          tag: ${{ needs.versioning.outputs.android_version }}
           token: ${{ secrets.GH_PAT_TOKEN }}
