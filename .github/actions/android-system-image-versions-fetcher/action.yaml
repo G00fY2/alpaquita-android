@@ -1,0 +1,37 @@
+name: 'Android System Image Version Fetcher'
+description: 'Fetches the latest google_atd x86_64 System Image versions'
+
+inputs:
+  max_version:
+    description: 'The highest System Image version to include (e.g. 36)'
+    required: true
+  max_major_versions_count:
+    description: 'How many major versions to include'
+    required: false
+    default: '3'
+
+outputs:
+  versions_json:
+    description: 'JSON array of System Image versions'
+    value: ${{ steps.fetch-versions.outputs.json }}
+  latest_version:
+    description: 'Latest System Image version of the list'
+    value: ${{ steps.fetch-versions.outputs.latest }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: fetch-versions
+      shell: bash
+      run: |
+        raw_list=$("${{ github.action_path }}/scripts/fetch-versions.sh" \
+          "${{ inputs.max_version }}" \
+          "${{ inputs.max_major_versions_count }}")
+
+        json_result=$(echo "$raw_list" | jq -R . | jq -s -c .)
+        echo "List: $json_result"
+        echo "json=$json_result" >> "$GITHUB_OUTPUT"
+
+        latest=$(echo "$raw_list" | head -n 1)
+        echo "Latest: $latest"
+        echo "latest=$latest" >> "$GITHUB_OUTPUT"

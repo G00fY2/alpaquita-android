@@ -1,26 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+version_base_prefix=$1
+commit_scopes=$2
+minor_commit_types=$3
+patch_commit_types=$4
+
 # Helper function to convert list into pipe-delimited regex format
 prepare_regex_list() {
     tr '[:space:],\n' '\n' <<<"$1" | grep -v '^$' | paste -sd '|' -
 }
 
-minor_regex=$(prepare_regex_list "$1")
-patch_regex=$(prepare_regex_list "$2")
+scope_regex=$(prepare_regex_list "$commit_scopes")
+minor_regex=$(prepare_regex_list "$minor_commit_types")
+patch_regex=$(prepare_regex_list "$patch_commit_types")
 
 current_year=$(date +%Y)
-version_prefix="v$current_year."
+version_prefix="${version_base_prefix}${current_year}."
 
 # Find the latest version tag, fallback to empty string if none exist
-latest_tag=$(git tag --list "v*" --sort=v:refname | tail -n 1 || true)
+latest_tag=$(git tag --list "${version_base_prefix}*" --sort=v:refname | tail -n 1 || true)
 is_new_year=false
-if [[ ! "$latest_tag" == v"$current_year".* ]]; then
+if [[ ! "$latest_tag" == "${version_base_prefix}${current_year}".* ]]; then
     is_new_year=true
 fi
 
 # Define the Conventional Commit structure for the subject line
-conv_pattern="(\(.+\))?(!)?: "
+conv_pattern="(\(($scope_regex\))?(!)?: "
 minor_bump_pattern="^($minor_regex)$conv_pattern"
 patch_bump_pattern="^($patch_regex)$conv_pattern"
 
