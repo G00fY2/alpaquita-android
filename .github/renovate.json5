@@ -69,6 +69,18 @@
                 '/versions\\.env$/',
             ],
             matchStrings: [
+                'ANDROID_CLI_VERSION=(?<currentValue>.*)',
+            ],
+            depNameTemplate: 'android-cli',
+            datasourceTemplate: 'deb',
+            registryUrlTemplate: 'https://dl.google.com/android/cli/latest/debian?suite=stable&components=main&binaryArch=amd64',
+        },
+        {
+            customType: 'regex',
+            managerFilePatterns: [
+                '/versions\\.env$/',
+            ],
+            matchStrings: [
                 'ANDROID_CMDLINE_TOOLS_VERSION=(?<currentValue>.*)',
             ],
             depNameTemplate: 'android_cmdline_tools',
@@ -124,11 +136,10 @@
                 '/versions\\.env$/',
             ],
             matchStrings: [
-                'ANDROID_CLI_VERSION=(?<currentValue>.*)',
+                'ANDROID_EMULATOR_VERSION=(?<currentValue>.*)',
             ],
-            depNameTemplate: 'android-cli',
-            datasourceTemplate: 'deb',
-            registryUrlTemplate: 'https://dl.google.com/android/cli/latest/debian?suite=stable&components=main&binaryArch=amd64',
+            depNameTemplate: 'android_emulator_version',
+            datasourceTemplate: 'custom.android_emulator_version',
         },
     ],
     customDatasources: {
@@ -171,6 +182,17 @@
                 '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
             ],
         },
+        android_emulator_version: {
+            defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/repository2-3.xml',
+            format: 'plain',
+            transformTemplates: [
+                'releases.version',
+                '$split($join($, " "), "<remotePackage path=")',
+                '$filter($, function($b) { $contains($b, /^"emulator"/) and $contains($b, /channelRef ref="channel-0"/) })',
+                '$map($, function($b) { ( $rev := $substringBefore($substringAfter($b, "<revision>"), "</revision>"); $part := function($tag) { $substringBefore($substringAfter($rev, "<" & $tag & ">"), "</" & $tag & ">") }; $part("major") & "." & $part("minor") & "." & $part("micro") ) })',
+                '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
+            ],
+        },
         android_atd_system_version: {
             defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/sys-img/google_atd/sys-img2-3.xml',
             format: 'plain',
@@ -188,12 +210,13 @@
         {
             description: 'Group all Android SDK updates',
             matchPackageNames: [
+                'android-cli',
                 'android_cmdline_tools',
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
+                'android_emulator_version',
                 'android_atd_system_version',
-                'android-cli',
             ],
             groupName: 'android sdk components',
             versioning: 'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+))?(?:\\.(?<patch>\\d+))?(-rev(?<build>\\d+))?$',
@@ -201,12 +224,13 @@
         {
             description: 'Use "feat" for major/minor Android SDK updates',
             matchPackageNames: [
+                'android-cli',
                 'android_cmdline_tools',
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
+                'android_emulator_version',
                 'android_atd_system_version',
-                'android-cli',
             ],
             groupName: 'android sdk components',
             matchUpdateTypes: [
@@ -218,12 +242,13 @@
         {
             description: 'Use "fix" for patch Android SDK updates',
             matchPackageNames: [
+                'android-cli',
                 'android_cmdline_tools',
                 'android_platform_tools',
                 'android_build_tools',
                 'android_platform_version',
+                'android_emulator_version',
                 'android_atd_system_version',
-                'android-cli',
             ],
             groupName: 'android sdk components',
             matchUpdateTypes: [
@@ -245,8 +270,8 @@
         {
             description: 'Group Alpaquita images',
             matchPackageNames: [
-                'ghcr.io/bell-sw/liberica-runtime-container',
                 'ghcr.io/bell-sw/alpaquita-linux-base',
+                'ghcr.io/bell-sw/liberica-runtime-container',
             ],
             groupName: 'alpaquita container',
             /* Bi-weekly Batching after Tuesday releases (relative to timezone below):
