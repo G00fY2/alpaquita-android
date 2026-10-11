@@ -137,7 +137,7 @@ jobs:
           ) }}
 
     env:
-      IMAGE_VERSION: ${{ needs.versioning.outputs.version }}${{ needs.setup.outputs.version_suffix }}
+      IMAGE_VERSION: ${{ needs.versioning.outputs.android_version }}${{ needs.setup.outputs.version_suffix }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
       DOCKER_HUB_USERNAME: g00fy2
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android
@@ -284,7 +284,7 @@ jobs:
     runs-on: ubuntu-26.04
     needs: [ setup, versioning, build-summary ]
     if: >-
-      ${{ success() && (needs.versioning.outputs.create_release_tag == 'true' ||
+      ${{ success() && (needs.versioning.outputs.create_android_release_tag == 'true' ||
       needs.setup.outputs.environment == 'release') }}
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
