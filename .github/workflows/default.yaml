@@ -304,5 +304,5 @@ jobs:
           bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
           prerelease: ${{ needs.setup.outputs.environment != 'release' }}
           generateReleaseNotes: true
-          tag: ${{ needs.versioning.outputs.version }}
+          tag: ${{ needs.versioning.outputs.android_version }}
           token: ${{ secrets.GH_PAT_TOKEN }}
