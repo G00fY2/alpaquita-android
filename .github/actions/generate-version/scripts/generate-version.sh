@@ -26,7 +26,7 @@ if [[ ! "$latest_tag" == "${version_base_prefix}${current_year}".* ]]; then
 fi
 
 # Define the Conventional Commit structure for the subject line
-conv_pattern="(\(($scope_regex\))?(!)?: "
+conv_pattern="(\((${scope_regex})\))?!?: "
 minor_bump_pattern="^($minor_regex)$conv_pattern"
 patch_bump_pattern="^($patch_regex)$conv_pattern"
 

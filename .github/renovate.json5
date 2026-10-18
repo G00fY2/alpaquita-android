@@ -303,8 +303,8 @@
         {
             description: 'Group Alpaquita images',
             matchPackageNames: [
-                'ghcr.io/bell-sw/alpaquita-linux-base',
                 'ghcr.io/bell-sw/liberica-runtime-container',
+                'ghcr.io/bell-sw/alpaquita-linux-base',
             ],
             groupName: 'alpaquita container',
             /* Bi-weekly Batching after Tuesday releases (relative to timezone below):
@@ -318,7 +318,24 @@
                 '* 4-23 1-7,15-21 * 3',
             ],
             timezone: 'America/Los_Angeles',
+        },
+        {
+            description: 'Use "fix" for Android Alpaquita updates',
+            matchPackageNames: [
+                'ghcr.io/bell-sw/liberica-runtime-container',
+            ],
+            groupName: 'alpaquita container',
             semanticCommitType: 'fix',
+            semanticCommitScope: 'sdk',
+        },
+        {
+            description: 'Use "fix" for Android Emulator Alpaquita updates',
+            matchPackageNames: [
+                'ghcr.io/bell-sw/alpaquita-linux-base',
+            ],
+            groupName: 'alpaquita container',
+            semanticCommitType: 'fix',
+            semanticCommitScope: 'emulator',
         },
         {
             description: 'Group official Docker Build Tool and Actions',

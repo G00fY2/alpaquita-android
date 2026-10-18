@@ -336,7 +336,9 @@ jobs:
           tags: |
             type=raw,value=api-${{ matrix.system_image_version }}-${{ env.IMAGE_VERSION }}
             type=raw,value=api-${{ matrix.system_image_version }}
-            type=raw,value=latest,enable=${{ matrix.system_image_version == needs.setup.outputs.latest_system_image_version }}
+            type=raw,value=latest,enable=${{
+              matrix.system_image_version == needs.setup.outputs.latest_system_image_version
+            }}
 
       - name: "Set Docker image reference"
         id: set-image-ref
@@ -458,7 +460,8 @@ jobs:
     runs-on: ubuntu-26.04
     needs: [ setup, versioning, build-summary ]
     if: >-
-      ${{ success() && needs.setup.outputs.component != 'emulator' &&
+      ${{ !cancelled() && needs.build-summary.result == 'success' &&
+      needs.setup.outputs.component != 'emulator' &&
       (needs.versioning.outputs.create_android_release_tag == 'true' ||
       needs.setup.outputs.environment == 'release') }}
     environment: ${{ needs.setup.outputs.environment }}
@@ -489,7 +492,8 @@ jobs:
     runs-on: ubuntu-26.04
     needs: [ setup, versioning, build-summary ]
     if: >-
-      ${{ success() && needs.setup.outputs.component != 'android' &&
+      ${{ !cancelled() && needs.build-summary.result == 'success' &&
+      needs.setup.outputs.component != 'android' &&
       (needs.versioning.outputs.create_emulator_release_tag == 'true' ||
       needs.setup.outputs.environment == 'release') }}
     environment: ${{ needs.setup.outputs.environment }}
