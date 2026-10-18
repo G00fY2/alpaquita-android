@@ -29,7 +29,7 @@ ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platfo
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
     --mount=type=bind,source=scripts/setup-android-sdk.sh,target=/tmp/setup-android-sdk.sh \
-    --mount=type=bind,source=scripts/android-tools,target=/tmp/android-tools \
+    --mount=type=bind,source=scripts/android-tools.sh,target=/tmp/android-tools.sh \
     /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
     /bin/bash /tmp/setup-android-sdk.sh \
     "${ANDROID_CLI_VERSION}" \
