@@ -42,7 +42,6 @@ jobs:
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
       android_cli_version: ${{ env.ANDROID_CLI_VERSION }}
-      android_device_profile: ${{ env.ANDROID_DEVICE_PROFILE }}
       environment: ${{ steps.set-environment.outputs.environment }}
       version_suffix: ${{ steps.set-environment.outputs.version_suffix }}
       component: ${{ steps.set-environment.outputs.component }}
@@ -322,7 +321,6 @@ jobs:
         ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
         ANDROID_EMULATOR_VERSION=${{ needs.setup.outputs.emulator_version }}
         ANDROID_IMAGE_VERSION=${{ matrix.system_image_version }}
-        ANDROID_DEVICE_PROFILE=${{ needs.setup.outputs.android_device_profile }}
 
     steps:
       - name: "Checkout repository"

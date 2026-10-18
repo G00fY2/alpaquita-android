@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 # check=experimental=all;error=true
 
-ARG ANDROID_DEVICE_PROFILE
 ARG ANDROID_IMAGE_VERSION
+ARG ANDROID_DEVICE_PROFILE=medium_phone
 ARG ANDROID_IMAGE_VARIANT=google_atd
 ARG ANDROID_IMAGE_ARCH=x86_64
 ARG ANDROID_HOME=/opt/android/sdk
