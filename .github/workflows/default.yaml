@@ -52,20 +52,29 @@ jobs:
 
       - name: "Set GitHub Deployment Environment"
         id: set-environment
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "environment=release" >> "$GITHUB_OUTPUT"
-            echo "version_suffix=" >> "$GITHUB_OUTPUT"
-            if [[ "${{ github.ref_name }}" == emulator-v* ]]; then
-              echo "component=emulator" >> "$GITHUB_OUTPUT"
+          environment="preview"
+          version_suffix="-dev"
+          component="all"
+
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            environment="release"
+            version_suffix=""
+            if [[ "$REF_NAME" == emulator-v* ]]; then
+              component="emulator"
             else
-              echo "component=android" >> "$GITHUB_OUTPUT"
+              component="android"
             fi
-          else
-            echo "environment=preview" >> "$GITHUB_OUTPUT"
-            echo "version_suffix=-dev" >> "$GITHUB_OUTPUT"
-            echo "component=all" >> "$GITHUB_OUTPUT"
           fi
+
+          {
+            echo "environment=$environment"
+            echo "version_suffix=$version_suffix"
+            echo "component=$component"
+          } >> "$GITHUB_OUTPUT"
 
       - name: "Prepare environment variables"
         run: |
