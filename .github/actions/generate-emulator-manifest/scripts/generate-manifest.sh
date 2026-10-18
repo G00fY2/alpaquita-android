@@ -8,7 +8,7 @@ report_file=$3
 get_adb() {
     local adb_version
     adb_version=$(
-        docker run --rm "$image" adb -version 2>/dev/null | grep -oP 'Android Debug Bridge version \K[0-9.]+'
+        docker run --rm "$image" adb --version 2>/dev/null | grep -oP 'Android Debug Bridge version \K[0-9.]+'
     )
 
     if [ -z "$adb_version" ]; then
