@@ -28,16 +28,16 @@ ENV GRADLE_USER_HOME=${ANDROID_USER_HOME_BASE}/.gradle
 ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
 
 RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaquita.sh \
-    --mount=type=bind,source=scripts/setup-android.sh,target=/tmp/setup-android.sh \
+    --mount=type=bind,source=scripts/setup-android-sdk.sh,target=/tmp/setup-android-sdk.sh \
     --mount=type=bind,source=scripts/android-tools,target=/tmp/android-tools \
     /bin/sh /tmp/setup-alpaquita.sh "${MIMALLOC_PATH}" && \
-    /bin/bash /tmp/setup-android.sh \
+    /bin/bash /tmp/setup-android-sdk.sh \
     "${ANDROID_CLI_VERSION}" \
     "${ANDROID_CMDLINE_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_TOOLS_VERSION}" \
     "${ANDROID_BUILD_TOOLS_VERSION}" \
     "${ANDROID_PLATFORM_VERSION}" && \
-    cp /tmp/android-tools /usr/local/bin/android-tools && \
+    cp /tmp/android-tools.sh /usr/local/bin/android-tools && \
     mkdir -p "${ANDROID_USER_HOME}" "${GRADLE_USER_HOME}" && \
     chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}" && \
     chmod -R g=u "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}"

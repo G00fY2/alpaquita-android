@@ -2,10 +2,10 @@
 set -eu
 
 # --- Configuration (override via environment variables) ---
-AVD_NAME="${AVD_NAME:-medium_phone}"
-EMULATOR_RAM="${EMULATOR_RAM:-2560}"
-EMULATOR_CORES="${EMULATOR_CORES:-2}"
-EMULATOR_TIMEZONE="${EMULATOR_TIMEZONE:-Etc/UTC}"
+emulator_name="${EMULATOR_NAME:?}"
+emulator_ram="${EMULATOR_RAM:-2560}"
+emulator_cores="${EMULATOR_CORES:-2}"
+emulator_timezone="${EMULATOR_TIMEZONE:-Etc/UTC}"
 
 log() { echo "[entrypoint] $*"; }
 
@@ -32,14 +32,14 @@ rm -f /tmp/emulator-ready /tmp/emulator-failed
 # Start the adb server before the emulator and the background task
 adb start-server
 
-log "Starting emulator '${AVD_NAME}' (memory: ${EMULATOR_RAM} MB, cores: ${EMULATOR_CORES})"
-emulator "@${AVD_NAME}" \
+log "Starting emulator '${emulator_name}' (memory: ${emulator_ram} MB, cores: ${emulator_cores})"
+emulator "@${emulator_name}" \
     -no-window -no-audio -no-boot-anim \
     -gpu swiftshader -accel on \
-    -memory "${EMULATOR_RAM}" -cores "${EMULATOR_CORES}" \
+    -memory "${emulator_ram}" -cores "${emulator_cores}" \
     -camera-back none -camera-front none \
     -no-snapshot -no-metrics \
-    -timezone "${EMULATOR_TIMEZONE}" \
+    -timezone "${emulator_timezone}" \
     -ports 5554,5555 -delay-adb &
 emu_pid=$!
 
