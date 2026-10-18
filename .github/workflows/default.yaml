@@ -317,11 +317,13 @@ jobs:
       DOCKER_HUB_USERNAME: g00fy2
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android-emulator
       DOCKER_BUILD_ARGS: |
+        ANDROID_CLI_VERSION=${{ needs.setup.outputs.android_cli_version }}
         ANDROID_CMDLINE_TOOLS_VERSION=${{ needs.setup.outputs.cmdline_tools_version }}
-        ANDROID_DEVICE_PROFILE=${{ needs.setup.outputs.android_device_profile }}
+        ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
         ANDROID_EMULATOR_VERSION=${{ needs.setup.outputs.emulator_version }}
         ANDROID_IMAGE_VERSION=${{ matrix.system_image_version }}
-        ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
+        ANDROID_DEVICE_PROFILE=${{ needs.setup.outputs.android_device_profile }}
+
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
