@@ -25,13 +25,13 @@ docker pull ghcr.io/g00fy2/alpaquita-android:latest
 
 - **Faster builds** - `glibc` (via Alpaquita Linux) avoids the performance overhead of Alpine's `musl`, and Microsoft's `mimalloc` allocator speeds up the Kotlin Daemon and parallel Gradle workers.
 - **Always current** - Renovate tracks Google's official Android SDK repositories directly and auto-merges updates (including minor platform revisions) as soon as they're released - no manual lag.
-- **Minimal & secure** - Only the OS packages and SDK components needed to compile a standard Java/Kotlin project are included, keeping the image small (~400 MB compressed) and the attack surface low.
+- **Minimal & secure** - Only the OS packages and SDK components needed for the respective image are included, keeping the image small and the attack surface low. The build image stays around ~400 MB compressed.
 - **Reproducible** - All core components and base images are strictly pinned for deterministic CI/CD builds.
 - **K8s/OpenShift-ready** - Follows the OpenShift GID 0 pattern for `/opt/android/sdk` and `/opt/android/user`, so the container runs under any non-root UID as long as it stays in group 0.
 
 > [!IMPORTANT]
 > **NDK & CMake:** - Not pre-installed, to keep the image lean, but automatically downloaded by the Android Gradle Plugin the first time your project needs them.\
-> **Android Emulator:** - Not included; a dedicated emulator-enabled variant is planned.
+> **Android Emulator:** - Headless emulator image for instrumented tests and Baseline Profile generation. Runs as a sidecar next to the build container and needs KVM (`/dev/kvm`) on the host for usable performance. Minimal runtime: Alpaquita glibc plus only the libraries the emulator and adb need, no JDK, bash, curl or git.
 
 ## Image Matrix & Tagging
 
@@ -46,6 +46,7 @@ The matrix always covers the three most recent stable major Android API levels, 
 - **Rolling tags** - `android-<api>-jdk<java>` - always point to the latest build for that API/JDK combo.
 - **Immutable tags** - `android-<api>-jdk<java>-v<year>.<release>.<patch>` - pinned forever, for production use.
 - **`latest`** - newest stable API level combined with the highest supported Java version.
+- **Emulator tags** - `<emulator-tag-scheme>` - headless emulator images for instrumented tests and Baseline Profile generation.
 
 ## Disabling Android CLI Telemetry
 
@@ -59,13 +60,16 @@ This makes sure `--no-metrics` exists inside `~/.androidrc`.
 ## FAQ
 
 ### Why is it "minimalist"?
-Only the bare minimum of OS packages and SDK components needed to compile a standard project are pre-installed, keeping download size, disk usage and attack surface small. Emulator support, including hardware acceleration libs, is planned as a separate, dedicated variant. Missing a package your pipeline needs? Open an issue.
+Only the bare minimum of OS packages and SDK components needed for each image is pre-installed, keeping download size, disk usage and attack surface small. Missing a package your pipeline needs? Open an issue.
+
+### Why does the emulator image not contain a JDK, bash, curl or git?
+The emulator image only runs the emulator and adb. Build tooling belongs in the build image.
 
 ### What's special about the Renovate auto-update setup?
 Custom datasources track Google's official Android SDK repo structure directly, including minor revision bumps, and automerge any update that passes the automated smoke tests.
 
 ### How is release quality and size guaranteed?
-Every image runs a smoke test (assembling a real Android test project inside the container), gets scanned for vulnerabilities with `Trivy`, and audited layer-by-layer with `Dive`. Compressed size lands around 400 MB (zstd level 9).
+Every image runs a smoke test (assembling a real Android test project inside the container for the build image, booting the emulator for the emulator image), gets scanned for vulnerabilities with `Trivy`, and audited layer-by-layer with `Dive`. Compressed size of the build image lands around 400 MB (zstd level 9).
 
 ### Why does every API-level image ship the newest Build-Tools version?
 Letting AGP pick `buildToolsVersion` (Google's default) can cause issues in CI: it's hardcoded into AGP and often lags behind, so you miss recent fixes in bundled tools like the `aidl` compiler or `aapt2`, and AGP falls back to scanning the runner environment, which can behave unpredictably. Pinning the latest version avoids that.
@@ -77,24 +81,18 @@ Letting AGP pick `buildToolsVersion` (Google's default) can cause issues in CI: 
 Many enterprise platforms don't allow containers to run as `root` or with a static non-root UID. This image follows the OpenShift GID 0 pattern for its toolchain paths (`/opt/android/sdk` and `/opt/android/user`): those directories are readable/writable/executable by the root group (GID 0), so the container works under any UID that stays in group 0 (OpenShift's default).
 
 ## License
-    The MIT License (MIT)
-    
-    Copyright (C) 2026 Thomas Wirth
-    
-    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-    associated documentation files (the "Software"), to deal in the Software without restriction,
-    including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-    and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
-    subject to the following conditions:
-    
-    The above copyright notice and this permission notice shall be included in all copies or substantial
-    portions of the Software.
-    
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
-    OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+The contents of this repository (Dockerfiles, scripts, workflows and documentation) are licensed under the [MIT License](LICENSE).
+
+The published Docker images additionally contain third-party software that is **not** covered by the MIT License and remains subject to its own license terms:
+
+| Component                                                           | License                                                                                                         |
+|---------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| Android SDK (platforms, build-tools, platform-tools, cmdline-tools) | [Android Software Development Kit License Agreement](https://developer.android.com/studio/terms)                |
+| Android Emulator and system images (emulator variant)               | [Android Software Development Kit License Agreement](https://developer.android.com/studio/terms)                |
+| Liberica JDK                                                        | GPL-2.0 with Classpath Exception, see [BellSoft](https://bell-sw.com/libericajdk/)                              |
+| Alpaquita Linux and OS packages                                     | Various, see [Alpaquita Linux](https://bell-sw.com/alpaquita-linux/) and the package metadata inside the image  |
+| mimalloc                                                            | [MIT](https://github.com/microsoft/mimalloc/blob/main/LICENSE)                                                  |
 
 [^1]: [Alpaquita Linux](https://bell-sw.com/alpaquita-linux/)
 [^2]: [Liberica JDK](https://bell-sw.com/libericajdk/)

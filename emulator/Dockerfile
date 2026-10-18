@@ -68,7 +68,7 @@ ARG ANDROID_IMAGE_VARIANT
 ARG ANDROID_IMAGE_ARCH
 
 LABEL org.opencontainers.image.description="Minimal Android Headless Emulator image (Alpaquita). Self-updating via Renovate automerge." \
-      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.licenses="MIT AND LicenseRef-Android-SDK" \
       org.opencontainers.image.source="https://github.com/g00fy2/alpaquita-android" \
       org.opencontainers.image.title="Alpaquita Android Emulator"
 

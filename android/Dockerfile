@@ -18,7 +18,7 @@ ARG MIMALLOC_PATH=/usr/lib/libmimalloc_stable.so
 ARG ANDROID_USER_HOME_BASE=/opt/android/user
 
 LABEL org.opencontainers.image.description="Optimized Android CI image (Alpaquita/mimalloc). Self-updating via Renovate automerge." \
-      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.licenses="MIT AND LicenseRef-Android-SDK" \
       org.opencontainers.image.source="https://github.com/g00fy2/alpaquita-android" \
       org.opencontainers.image.title="Alpaquita Android"
 
