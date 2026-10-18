@@ -32,4 +32,5 @@ runs:
         ${{ github.action_path }}/scripts/emulator-boot-complete-test.sh \
           "${{ inputs.image-ref }}" \
           "${{ inputs.run-as-uid }}" \
+          "${{ inputs.run-as-gid }}" \
           "${{ inputs.emulator-timeout }}"
