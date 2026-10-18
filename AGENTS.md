@@ -64,7 +64,7 @@ This repository maintains two specialized Docker images for Android CI on Kubern
 ## Principles
 * **Headless Only:** Run with `-no-window`, software rendering (`-gpu swiftshader`), no audio and no snapshots. x86_64 only. Hardware acceleration (KVM) is mandatory: the emulator must refuse to start without it instead of falling back to slow emulation (`-accel on`).
 * **Minimal Runtime:** Alpaquita glibc base plus only the libraries the headless emulator and adb need. No JDK, bash, curl or git in the final image. Every added package needs a justification.
-* **System Image:** `google_atd` (Automated Test Device), x86_64, without Play Store. The API level is pinned deliberately and never bumped automatically.
+* **System Image:** `google_atd` (Automated Test Device), x86_64, without Play Store.
 * **Pruning:** Remove files the headless setup never loads (e.g., Qt, non-x86_64 QEMU binaries) in the SDK stage that produces them, never in the final stage. Every change to the prune list requires a passing boot smoke test.
 * **Clean Starts:** The AVD is created at build time. Every container start is a clean cold boot without snapshots.
 
