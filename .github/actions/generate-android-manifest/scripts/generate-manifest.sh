@@ -7,10 +7,10 @@ report_file=$3
 
 get_android_cli() {
     local cli_version
-    cli_version=$(docker run --rm "$image" android --version 2>/dev/null)
+    cli_version=$(docker run --rm "$image" android --version 2>/dev/null | head -n 1 || true)
 
     if [ -z "$cli_version" ]; then
-        echo "Error: 'android version' returns no output." >&2
+        echo "Error: could not determine android version." >&2
         return 1
     fi
 

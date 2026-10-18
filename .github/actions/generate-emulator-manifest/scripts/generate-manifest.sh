@@ -8,11 +8,12 @@ report_file=$3
 get_adb() {
     local adb_version
     adb_version=$(
-        docker run --rm "$image" adb --version 2>/dev/null | grep -oP 'Android Debug Bridge version \K[0-9.]+'
+        docker run --rm --entrypoint adb "$image" --version 2>/dev/null |
+            grep -oP 'Android Debug Bridge version \K[0-9.]+' || true
     )
 
     if [ -z "$adb_version" ]; then
-        echo "Error: 'adb version' returns no output." >&2
+        echo "Error: could not determine adb version." >&2
         return 1
     fi
 
@@ -22,11 +23,12 @@ get_adb() {
 get_emulator() {
     local emulator_version
     emulator_version=$(
-        docker run --rm "${image}" emulator -version 2>&1 | grep -oP 'Android emulator version \K[0-9.]+'
+        docker run --rm --entrypoint emulator "${image}" -version 2>&1 |
+            grep -oP 'Android emulator version \K[0-9.]+' || true
     )
 
     if [ -z "$emulator_version" ]; then
-        echo "Error: 'emulator version' returns no output." >&2
+        echo "Error: could not determine emulator version." >&2
         return 1
     fi
 
@@ -40,7 +42,7 @@ get_system_image() {
     local api_level
     local revision
 
-    package_xml="$(docker run --rm "${image}" sh -c \
+    package_xml="$(docker run --rm --entrypoint sh "${image}" -c \
         'find "${ANDROID_HOME}/system-images" -name package.xml -exec cat {} +')"
 
     parsed="$(
@@ -76,7 +78,7 @@ get_system_image() {
 
 get_apk_packages() {
     local output
-    output=$(docker run --rm "$image" apk info -v 2>/dev/null |
+    output=$(docker run --rm --entrypoint apk "$image" info -v 2>/dev/null |
         awk '
         /^WARNING:/ { next }
         /^[a-zA-Z0-9]/ {
