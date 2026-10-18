@@ -6,9 +6,8 @@ cmdline_tools_version=$2
 platform_tools_version=$3
 emulator_version=$4
 android_version=$5
-image_revision=$6
-image_variant=$7
-image_arch=$8
+image_variant=$6
+image_arch=$7
 
 # Prepare Android SDK directories and configuration
 mkdir -p "${ANDROID_HOME}/cmdline-tools"
@@ -27,7 +26,7 @@ for i in {1..5}; do
         "cmdline-tools/latest@${cmdline_tools_version}" \
         "platform-tools@${platform_tools_version}" \
         "emulator@${emulator_version}" \
-        "system-images/android-${android_version}/${image_variant}/${image_arch}@${image_revision}" && break
+        "system-images/android-${android_version}/${image_variant}/${image_arch}" && break
 
     if [ "$i" -eq 5 ]; then
         echo "ERROR: SDK download failed after 5 attempts." >&2

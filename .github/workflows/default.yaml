@@ -34,14 +34,17 @@ jobs:
       jdk_versions: ${{ steps.jdk-versions-extractor.outputs.versions_json }}
       latest_jdk_version: ${{ steps.jdk-versions-extractor.outputs.latest_version }}
       platform_versions: ${{ steps.android-platform-versions-fetcher.outputs.versions_json }}
-      system_image_versions: ${{ steps.android-system-image-versions-fetcher.outputs.versions_json }}
       latest_platform_version: ${{ steps.android-platform-versions-fetcher.outputs.latest_version }}
+      system_image_versions: ${{ steps.emulator-system-image-versions-fetcher.outputs.versions_json }}
+      latest_system_image_version: ${{ steps.emulator-system-image-versions-fetcher.outputs.latest_version }}
       cmdline_tools_version: ${{ env.ANDROID_CMDLINE_TOOLS_VERSION }}
+      emulator_version: ${{ env.ANDROID_EMULATOR_VERSION }}
       platform_tools_version: ${{ env.ANDROID_PLATFORM_TOOLS_VERSION }}
       build_tools_version: ${{ env.ANDROID_BUILD_TOOLS_VERSION }}
       android_cli_version: ${{ env.ANDROID_CLI_VERSION }}
       environment: ${{ steps.set-environment.outputs.environment }}
       version_suffix: ${{ steps.set-environment.outputs.version_suffix }}
+      component: ${{ steps.set-environment.outputs.component }}
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -52,9 +55,15 @@ jobs:
           if [[ "${{ github.event_name }}" == "release" ]]; then
             echo "environment=release" >> "$GITHUB_OUTPUT"
             echo "version_suffix=" >> "$GITHUB_OUTPUT"
+            if [[ "${{ github.ref_name }}" == emulator-v* ]]; then
+              echo "component=emulator" >> "$GITHUB_OUTPUT"
+            else
+              echo "component=android" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "environment=preview" >> "$GITHUB_OUTPUT"
             echo "version_suffix=-dev" >> "$GITHUB_OUTPUT"
+            echo "component=all" >> "$GITHUB_OUTPUT"
           fi
 
       - name: "Prepare environment variables"
@@ -75,8 +84,8 @@ jobs:
           max_version: ${{ env.ANDROID_PLATFORM_MAX_VERSION }}
 
       - name: "Get latest System Image versions"
-        id: android-system-image-versions-fetcher
-        uses: ./.github/actions/android-system-image-versions-fetcher
+        id: emulator-system-image-versions-fetcher
+        uses: ./.github/actions/emulator-system-image-versions-fetcher
         with:
           max_version: ${{ env.ANDROID_IMAGE_GOOGLE_APIS_VERSION }}
 
@@ -94,25 +103,32 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      - uses: ./.github/actions/generate-version
+
+      - name: "Generate Android image version"
         id: generate-android-version
+        uses: ./.github/actions/generate-version
         with:
-          version_tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          version_tag: >-
+            ${{ github.ref_type == 'tag' && !startsWith(github.ref_name, 'emulator-v') && github.ref_name || '' }}
           version_base_prefix: 'v'
           commit_scopes: 'sdk'
           minor_commit_types: 'feat'
           patch_commit_types: 'fix'
-      - uses: ./.github/actions/generate-version
+
+      - name: "Generate Emulator image version"
         id: generate-emulator-version
+        uses: ./.github/actions/generate-version
         with:
-          version_tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          version_tag: >-
+            ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'emulator-v') && github.ref_name || '' }}
           version_base_prefix: 'emulator-v'
           commit_scopes: 'emulator'
           minor_commit_types: 'feat'
           patch_commit_types: 'fix'
 
-  build:
+  build-android:
     needs: [ setup, versioning ]
+    if: ${{ needs.setup.outputs.component != 'emulator' }}
     runs-on: ubuntu-26.04
     environment: ${{ needs.setup.outputs.environment }}
     name: >
@@ -135,7 +151,6 @@ jobs:
           needs.setup.outputs.platform_versions ||
           format('["{0}"]', needs.setup.outputs.latest_platform_version)
           ) }}
-
     env:
       IMAGE_VERSION: ${{ needs.versioning.outputs.android_version }}${{ needs.setup.outputs.version_suffix }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android
@@ -220,8 +235,8 @@ jobs:
           echo "::notice title=Trivy Report::Exit code 1 indicates found CVEs. Check 'Run Trivy' logs for details."
 
       - name: "Run image and generate Manifest"
-        id: generate-manifest
-        uses: ./.github/actions/generate-manifest
+        id: generate-android-manifest
+        uses: ./.github/actions/generate-android-manifest
         with:
           image-ref: ${{ steps.set-image-ref.outputs.image }}
 
@@ -229,7 +244,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: manifest-jdk${{ matrix.jdk_version }}-android${{ matrix.platform_version }}
-          path: ${{ steps.generate-manifest.outputs.manifest_path }}
+          path: ${{ steps.generate-android-manifest.outputs.manifest_path }}
           if-no-files-found: error
           archive: false
 
@@ -267,24 +282,174 @@ jobs:
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
           outputs: type=registry,compression=zstd,compression-level=9,force-compression=true
 
+  build-emulator:
+    needs: [ setup, versioning ]
+    if: ${{ needs.setup.outputs.component != 'android' }}
+    runs-on: ubuntu-26.04
+    environment: ${{ needs.setup.outputs.environment }}
+    name: >
+      ${{ needs.setup.outputs.environment == 'release' && '📦 Build' || '🔬 Validate' }}
+      Emulator (API ${{ matrix.system_image_version }})
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        system_image_version: ${{
+          fromJson(
+          needs.setup.outputs.environment == 'release' &&
+          needs.setup.outputs.system_image_versions ||
+          format('["{0}"]', needs.setup.outputs.latest_system_image_version)
+          ) }}
+    env:
+      IMAGE_VERSION: ${{ needs.versioning.outputs.emulator_version }}${{ needs.setup.outputs.version_suffix }}
+      DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android-emulator
+      DOCKER_HUB_USERNAME: g00fy2
+      GHCR_IMAGE_NAME: g00fy2/alpaquita-android-emulator
+      DOCKER_BUILD_ARGS: |
+        ANDROID_CMDLINE_TOOLS_VERSION=${{ needs.setup.outputs.cmdline_tools_version }}
+        ANDROID_DEVICE_PROFILE=${{ env.ANDROID_DEVICE_PROFILE }}
+        ANDROID_EMULATOR_VERSION=${{ needs.setup.outputs.emulator_version }}
+        ANDROID_IMAGE_VERSION=${{ matrix.system_image_version }}
+        ANDROID_PLATFORM_TOOLS_VERSION=${{ needs.setup.outputs.platform_tools_version }}
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: "Docker metadata"
+        id: docker-metadata
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+        with:
+          images: |
+            ${{ env.DOCKER_HUB_IMAGE_NAME }}
+            ghcr.io/${{ env.GHCR_IMAGE_NAME }}
+          tags: |
+            type=raw,value=api-${{ matrix.system_image_version }}-${{ env.IMAGE_VERSION }}
+            type=raw,value=api-${{ matrix.system_image_version }}
+            type=raw,value=latest,enable=${{ matrix.system_image_version == needs.setup.outputs.latest_system_image_version }}
+
+      - name: "Set Docker image reference"
+        id: set-image-ref
+        run: |
+          tag=$(echo "${{ steps.docker-metadata.outputs.tag-names }}" | head -n 1)
+          echo "image=${{ env.DOCKER_HUB_IMAGE_NAME }}:$tag" >> "$GITHUB_OUTPUT"
+
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+        env:
+          DOCKER_BUILDX_VERSION: v0.38.0
+          DOCKER_BUILDKIT_VERSION: v0.34.0
+        with:
+          version: ${{ env.DOCKER_BUILDX_VERSION }}
+          driver-opts: image=moby/buildkit:${{ env.DOCKER_BUILDKIT_VERSION }}
+
+      - name: "Build Docker Image without pushing"
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: ./emulator
+          load: true
+          platforms: linux/amd64
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          labels: ${{ steps.docker-metadata.outputs.labels }}
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
+
+      - name: "Run Dive"
+        uses: ./.github/actions/dive-analyze
+        env:
+          DIVE_VERSION: v0.13.1
+        with:
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
+          dive-ci-config: .github/.dive-ci.yaml
+          dive-version: ${{ env.DIVE_VERSION }}
+
+      - name: "Run Trivy"
+        id: trivy
+        continue-on-error: true # Non-blocking CVE visibility. Fails softly as we use latest versions.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: true
+        with:
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
+          scan-type: image
+          trivy-config: .github/trivy.yaml
+
+      - name: "Annotate Trivy Failures"
+        if: steps.trivy.outcome == 'failure'
+        run: |
+          echo "::notice title=Trivy Report::Exit code 1 indicates found CVEs. Check 'Run Trivy' logs for details."
+
+      - name: "Run image and generate Manifest"
+        id: generate-emulator-manifest
+        uses: ./.github/actions/generate-emulator-manifest
+        with:
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
+
+      - name: "Upload manifest artifact"
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: manifest-emulator-api${{ matrix.system_image_version }}
+          path: ${{ steps.generate-emulator-manifest.outputs.manifest_path }}
+          if-no-files-found: error
+          archive: false
+
+      - name: "Run emulator boot smoke test"
+        uses: ./.github/actions/emulator-boot-smoke-test
+        with:
+          image-ref: ${{ steps.set-image-ref.outputs.image }}
+
+      - name: "Login to Docker Hub"
+        if: ${{ needs.setup.outputs.environment == 'release' }}
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: "Login to GitHub Container Registry"
+        if: ${{ needs.setup.outputs.environment == 'release' }}
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Build and push Docker Images"
+        if: ${{ needs.setup.outputs.environment == 'release' }}
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: ./emulator
+          push: true
+          platforms: linux/amd64
+          sbom: true
+          provenance: mode=max
+          tags: ${{ steps.docker-metadata.outputs.tags }}
+          labels: ${{ steps.docker-metadata.outputs.labels }}
+          build-args: ${{ env.DOCKER_BUILD_ARGS }}
+          outputs: type=registry,compression=zstd,compression-level=9,force-compression=true
+
   build-summary:
     name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-26.04
     if: always()
-    needs: build
+    needs: [ build-android, build-emulator ]
     steps:
       - name: "Consolidate build status"
+        env:
+          ANDROID_RESULT: ${{ needs.build-android.result }}
+          EMULATOR_RESULT: ${{ needs.build-emulator.result }}
         run: |
-          if [ "${{ needs.build.result }}" != "success" ]; then
-            exit 1
-          fi
+          for result in "$ANDROID_RESULT" "$EMULATOR_RESULT"; do
+            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+              exit 1
+            fi
+          done
 
-  create-or-update-github-release:
-    name: "🚀 Create or update GitHub Release"
+  release-android:
+    name: "🚀 Create or update Android GitHub Release"
     runs-on: ubuntu-26.04
     needs: [ setup, versioning, build-summary ]
     if: >-
-      ${{ success() && (needs.versioning.outputs.create_android_release_tag == 'true' ||
+      ${{ success() && needs.setup.outputs.component != 'emulator' &&
+      (needs.versioning.outputs.create_android_release_tag == 'true' ||
       needs.setup.outputs.environment == 'release') }}
     environment: ${{ needs.setup.outputs.environment }}
     permissions:
@@ -296,6 +461,8 @@ jobs:
       - name: "Merge build manifests"
         id: merge-manifests
         uses: ./.github/actions/merge-build-manifests
+        with:
+          artifact-pattern: 'android_manifest_*'
 
       - name: "Create GitHub release"
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
@@ -305,4 +472,35 @@ jobs:
           prerelease: ${{ needs.setup.outputs.environment != 'release' }}
           generateReleaseNotes: true
           tag: ${{ needs.versioning.outputs.android_version }}
+          token: ${{ secrets.GH_PAT_TOKEN }}
+
+  release-emulator:
+    name: "🚀 Create or update Emulator GitHub Release"
+    runs-on: ubuntu-26.04
+    needs: [ setup, versioning, build-summary ]
+    if: >-
+      ${{ success() && needs.setup.outputs.component != 'android' &&
+      (needs.versioning.outputs.create_emulator_release_tag == 'true' ||
+      needs.setup.outputs.environment == 'release') }}
+    environment: ${{ needs.setup.outputs.environment }}
+    permissions:
+      contents: write
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: "Merge build manifests"
+        id: merge-manifests
+        uses: ./.github/actions/merge-build-manifests
+        with:
+          artifact-pattern: 'emulator_manifest_*'
+
+      - name: "Create GitHub release"
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
+        with:
+          allowUpdates: true
+          bodyFile: ${{ steps.merge-manifests.outputs.merged_manifests_path }}
+          prerelease: ${{ needs.setup.outputs.environment != 'release' }}
+          generateReleaseNotes: true
+          tag: ${{ needs.versioning.outputs.emulator_version }}
           token: ${{ secrets.GH_PAT_TOKEN }}

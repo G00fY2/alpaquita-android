@@ -1,4 +1,4 @@
-name: 'Run Image & Generate Manifest'
+name: 'Run Image & Generate Android Manifest'
 description: 'Validates the Android image and generates a markdown manifest'
 
 inputs:
@@ -19,7 +19,7 @@ runs:
       run: |
         image_ref="${{ inputs.image-ref }}"
         image_tag="${image_ref#*:}"
-        report_name="manifest_${image_tag}.md"
+        report_name="android_manifest_${image_tag}.md"
 
         "${{ github.action_path }}/scripts/generate-manifest.sh" \
           "$image_ref" \

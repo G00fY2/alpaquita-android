@@ -1,0 +1,35 @@
+name: 'Android Emulator Smoke Test'
+description: 'Checks if emulator boots successfully'
+
+inputs:
+  image-ref:
+    description: 'Docker Image Tag to be tested'
+    required: true
+  run-as-uid:
+    description: 'The UID to run the container as'
+    default: '1000'
+  run-as-gid:
+    description: 'The GID to run the container as'
+    default: '0'
+  emulator-timeout:
+    description: 'Emulator timeout in seconds'
+    default: '300'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Enable KVM group perms'
+      shell: bash
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+          | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: 'Check if Emulator boots successfully'
+      shell: bash
+      run: |
+        ${{ github.action_path }}/scripts/emulator-boot-complete-test.sh \
+          "${{ inputs.image-ref }}" \
+          "${{ inputs.run-as-uid }}" \
+          "${{ inputs.emulator-timeout }}"

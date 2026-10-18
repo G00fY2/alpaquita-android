@@ -15,7 +15,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Run Orchestrator Script
+    - name: 'Run Orchestrator Script'
       shell: bash
       run: |
         ${{ github.action_path }}/scripts/run-integration-test.sh \
