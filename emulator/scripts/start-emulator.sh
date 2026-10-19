@@ -7,11 +7,25 @@ emulator_ram="${EMULATOR_RAM:-2560}"
 emulator_cores="${EMULATOR_CORES:-2}"
 emulator_timezone="${EMULATOR_TIMEZONE:-Etc/UTC}"
 
+emu_pid=""
+
 log() { echo "[entrypoint] $*"; }
 
 if [ "$#" -gt 0 ]; then
     log "WARNING: ignoring unsupported arguments: $*. Configure the image via environment variables."
 fi
+
+# Shut the emulator down cleanly on SIGTERM/SIGINT. Registered first so that
+# signals during adb start-server or the emulator launch are not lost as PID 1.
+shutdown() {
+    log "Stopping emulator"
+    if [ -n "$emu_pid" ]; then
+        adb emu kill >/dev/null 2>&1 || true
+        wait "$emu_pid" || true
+    fi
+    exit 0
+}
+trap shutdown TERM INT
 
 # Disable animations in a single adb call; fail loudly and stop the emulator on error
 disable_animations() {
@@ -42,9 +56,6 @@ emulator "@${emulator_name}" \
     -timezone "${emulator_timezone}" \
     -ports 5554,5555 -delay-adb &
 emu_pid=$!
-
-# Shut the emulator down cleanly on SIGTERM/SIGINT
-trap 'log "Stopping emulator"; adb emu kill >/dev/null 2>&1 || true; wait "$emu_pid" || true; exit 0' TERM INT
 
 # After boot: apply guest settings and mark the container as ready
 (
