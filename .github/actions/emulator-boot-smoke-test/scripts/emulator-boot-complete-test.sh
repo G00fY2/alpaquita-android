@@ -6,16 +6,43 @@ run_as_uid=$2
 run_as_gid=$3
 boot_timeout_seconds=$4
 
+container_id=""
+
+cleanup() {
+    local exit_code=$?
+    if [[ -n "$container_id" ]]; then
+        if ((exit_code != 0)); then
+            echo "### Host: Test failed, dumping container logs ###" >&2
+            docker logs "$container_id" >&2 || true
+        fi
+        docker rm -f "$container_id" >/dev/null 2>&1 || true
+    fi
+    exit "$exit_code"
+}
+trap cleanup EXIT
+
+if [[ ! -e /dev/kvm ]]; then
+    echo "ERROR: /dev/kvm is missing on this host. KVM must be enabled and passed through to the runner." >&2
+    exit 1
+fi
+if [[ ! -w /dev/kvm ]]; then
+    echo "ERROR: /dev/kvm is not writable for the current user. Check group membership (e.g. the kvm group)." >&2
+    exit 1
+fi
+
 echo "### Host: Starting emulator container as $run_as_uid:$run_as_gid ###"
 container_id=$(
-    docker run -d --rm \
+    docker run -d \
         --device /dev/kvm \
         --user "$run_as_uid:$run_as_gid" \
         -e HOME=/opt/android/user \
         "$image"
 )
 
-trap 'docker logs "$container_id" || true; docker stop "$container_id" >/dev/null || true' EXIT
+if [[ -z "$container_id" ]]; then
+    echo "ERROR: Failed to start emulator container from image $image." >&2
+    exit 1
+fi
 
 echo "### Host: Waiting for emulator readiness ###"
 deadline=$((SECONDS + boot_timeout_seconds))
