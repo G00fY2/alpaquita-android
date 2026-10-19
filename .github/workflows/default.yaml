@@ -105,6 +105,7 @@ jobs:
       android_version: ${{ steps.generate-android-version.outputs.version }}
       create_android_release_tag: ${{ steps.generate-android-version.outputs.create_release_tag }}
       emulator_version: ${{ steps.generate-emulator-version.outputs.version }}
+      plain_emulator_version: ${{ steps.get-plain-emulator-version.outputs.version }}
       create_emulator_release_tag: ${{ steps.generate-emulator-version.outputs.create_release_tag }}
     steps:
       - name: "Checkout repository"
@@ -119,7 +120,7 @@ jobs:
         with:
           version_tag: >-
             ${{ github.ref_type == 'tag' && !startsWith(github.ref_name, 'emulator-v') && github.ref_name || '' }}
-          version_base_prefix: 'v'
+          version_prefix: 'v'
           commit_scopes: 'sdk'
           minor_commit_types: 'feat'
           patch_commit_types: 'fix'
@@ -130,10 +131,18 @@ jobs:
         with:
           version_tag: >-
             ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'emulator-v') && github.ref_name || '' }}
-          version_base_prefix: 'emulator-v'
+          version_prefix: 'emulator-v'
           commit_scopes: 'emulator'
           minor_commit_types: 'feat'
           patch_commit_types: 'fix'
+
+      - name: "Plain emulator version"
+        id: get-plain-emulator-version
+        env:
+          EMULATOR_VERSION: ${{ steps.generate-emulator-version.outputs.version }}
+          EMULATOR_PREFIX: 'emulator-'
+        run: |
+          echo "version=${EMULATOR_VERSION#"${EMULATOR_PREFIX}"}" >> "$GITHUB_OUTPUT"
 
   build-android:
     needs: [ setup, versioning ]
@@ -252,7 +261,6 @@ jobs:
       - name: "Upload manifest artifact"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: manifest-jdk${{ matrix.jdk_version }}-android${{ matrix.platform_version }}
           path: ${{ steps.generate-android-manifest.outputs.manifest_path }}
           if-no-files-found: error
           archive: false
@@ -311,7 +319,7 @@ jobs:
           format('["{0}"]', needs.setup.outputs.latest_system_image_version)
           ) }}
     env:
-      IMAGE_VERSION: ${{ needs.versioning.outputs.emulator_version }}${{ needs.setup.outputs.version_suffix }}
+      IMAGE_VERSION: ${{ needs.versioning.outputs.plain_emulator_version }}${{ needs.setup.outputs.version_suffix }}
       DOCKER_HUB_IMAGE_NAME: g00fy2/alpaquita-android-emulator
       DOCKER_HUB_USERNAME: g00fy2
       GHCR_IMAGE_NAME: g00fy2/alpaquita-android-emulator
@@ -334,8 +342,8 @@ jobs:
             ${{ env.DOCKER_HUB_IMAGE_NAME }}
             ghcr.io/${{ env.GHCR_IMAGE_NAME }}
           tags: |
-            type=raw,value=api-${{ matrix.system_image_version }}-${{ env.IMAGE_VERSION }}
-            type=raw,value=api-${{ matrix.system_image_version }}
+            type=raw,value=android-${{ matrix.system_image_version }}-${{ env.IMAGE_VERSION }}
+            type=raw,value=android-${{ matrix.system_image_version }}
             type=raw,value=latest,enable=${{
               matrix.system_image_version == needs.setup.outputs.latest_system_image_version
             }}
@@ -399,7 +407,6 @@ jobs:
       - name: "Upload manifest artifact"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: manifest-emulator-api${{ matrix.system_image_version }}
           path: ${{ steps.generate-emulator-manifest.outputs.manifest_path }}
           if-no-files-found: error
           archive: false
@@ -442,18 +449,28 @@ jobs:
     name: "🏁 Build Matrix Complete"
     runs-on: ubuntu-26.04
     if: always()
-    needs: [ build-android, build-emulator ]
+    needs: [ setup, versioning, build-android, build-emulator ]
     steps:
       - name: "Consolidate build status"
         env:
+          SETUP_RESULT: ${{ needs.setup.result }}
+          VERSIONING_RESULT: ${{ needs.versioning.result }}
           ANDROID_RESULT: ${{ needs.build-android.result }}
           EMULATOR_RESULT: ${{ needs.build-emulator.result }}
         run: |
+          if [[ "$SETUP_RESULT" != "success" || "$VERSIONING_RESULT" != "success" ]]; then
+            echo "::error::setup or versioning did not succeed" >&2
+            exit 1
+          fi
           for result in "$ANDROID_RESULT" "$EMULATOR_RESULT"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then
               exit 1
             fi
           done
+          if [[ "$ANDROID_RESULT" == "skipped" && "$EMULATOR_RESULT" == "skipped" ]]; then
+            echo "::error::Both build jobs were skipped" >&2
+            exit 1
+          fi
 
   release-android:
     name: "🚀 Create or update Android GitHub Release"

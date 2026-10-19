@@ -50,7 +50,7 @@ RUN --mount=type=bind,source=scripts/builder/setup-alpaquita.sh,target=/tmp/buil
     chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}" && \
     chmod -R g=u "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}"
 
-# Optimize footprint for headless CI by stripping GUI toolkit (Qt) and non-x86_64 QEMU engines
+# Optimize footprint for headless CI by stripping GUI toolkit (Qt) and non-x86_64 and non-headless QEMU engines
 RUN rm -rf \
     "${ANDROID_HOME}/emulator/lib64/qt" \
     "${ANDROID_HOME}"/emulator/qemu/linux-x86_64/qemu-system-aarch64* \

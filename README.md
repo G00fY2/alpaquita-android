@@ -46,7 +46,6 @@ The matrix always covers the three most recent stable major Android API levels, 
 - **Rolling tags** - `android-<api>-jdk<java>` - always point to the latest build for that API/JDK combo.
 - **Immutable tags** - `android-<api>-jdk<java>-v<year>.<release>.<patch>` - pinned forever, for production use.
 - **`latest`** - newest stable API level combined with the highest supported Java version.
-- **Emulator tags** - `<emulator-tag-scheme>` - headless emulator images for instrumented tests and Baseline Profile generation.
 
 ## Disabling Android CLI Telemetry
 

@@ -74,9 +74,9 @@ else
     bumped=false
 fi
 
-# Validate the generated version format (vYYYY.M.P)
+# Validate the generated version format (e.g. vYYYY.M.P)
 if [[ ! "$version" =~ ^${version_base_prefix}[0-9]{4}\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Error: Calculated version '$version' does not match the required 'vYYYY.M.P' format." >&2
+    echo "Error: Calculated version '$version' does not match the required format." >&2
     exit 1
 fi
 

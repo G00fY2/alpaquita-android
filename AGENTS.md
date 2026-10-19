@@ -95,7 +95,7 @@ This repository maintains two specialized Docker images for Android CI on Kubern
 
 # CI/CD Strategy (GitHub Actions)
 * **Dry-Run:** Build `linux/amd64` only for rapid feedback and security scanning on feature branches and pull requests.
-* **Boot Smoke Test:** Start the built emulator image with `/dev/kvm`, wait for `/tmp/emulator-ready` (with timeout), assert `sys.boot_completed=1` and network access, and upload the container log on failure. Runners must provide KVM.
+* **Boot Smoke Test:** Start the built emulator image with `/dev/kvm`, wait for `/tmp/emulator-ready` (with timeout), assert `sys.boot_completed=1`, and upload the container log on failure. Runners must provide KVM.
 * **Registry Authentication:** Secure authentication via GitHub Secrets to target container registries.
 * **Two-Stage Release Logic:**
   1. **Push to main (Version Generation):** Merges to `main` evaluate the git commit history since the last tag. If Conventional Commits contain semantic changes (`feat` or `fix`), a new version tag is automatically generated and pushed. Non-semantic changes (e.g., CI-only dependency updates) will not trigger a new tag.

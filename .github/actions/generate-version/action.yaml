@@ -5,7 +5,7 @@ inputs:
   version_tag:
     description: 'Current tag name (if triggered by a tag push). If set will not generate new version.'
     required: true
-  version_base_prefix:
+  version_prefix:
     description: 'The prefix of the tag that should be generated'
     required: true
   commit_scopes:
@@ -42,7 +42,7 @@ runs:
       shell: bash
       run: |
         json_output=$("${{ github.action_path }}/scripts/generate-version.sh" \
-          "${{ inputs.version_base_prefix }}" \
+          "${{ inputs.version_prefix }}" \
           "${{ inputs.commit_scopes }}" \
           "${{ inputs.minor_commit_types }}" \
           "${{ inputs.patch_commit_types }}")

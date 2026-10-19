@@ -13,7 +13,7 @@ inputs:
     default: '0'
   emulator-timeout:
     description: 'Emulator timeout in seconds'
-    default: '300'
+    default: '360'
 
 runs:
   using: 'composite'

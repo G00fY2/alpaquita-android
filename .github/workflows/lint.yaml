@@ -81,22 +81,22 @@ jobs:
         run: ${{ steps.install-actionlint.outputs.executable }} -color -ignore 'label ".+" is unknown'
 
   hadolint:
-    name: "Hadolint"
+    name: "Hadolint ${{ matrix.dockerfile }}"
     runs-on: ubuntu-26.04
+    strategy:
+      matrix:
+        dockerfile:
+          - ./android/Dockerfile
+          - ./emulator/Dockerfile
+
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: "Run Hadolint for Android Dockerfile"
+      - name: "Run Hadolint"
         uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
         with:
-          dockerfile: ./android/Dockerfile
-          verbose: true
-
-      - name: "Run Hadolint for Emulator Dockerfile"
-        uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
-        with:
-          dockerfile: ./emulator/Dockerfile
+          dockerfile: ${{ matrix.dockerfile }}
           verbose: true
 
       - name: "Hadolint Results"

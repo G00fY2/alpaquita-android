@@ -1,5 +1,5 @@
 name: 'Run Image & Generate Emulator Manifest'
-description: 'Validates the Android image and generates a markdown manifest'
+description: 'Validates the Emulator image and generates a markdown manifest'
 
 inputs:
   image-ref:
