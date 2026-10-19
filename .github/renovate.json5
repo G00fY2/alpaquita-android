@@ -198,14 +198,13 @@
             defaultRegistryUrlTemplate: 'https://dl.google.com/android/repository/sys-img/google_atd/sys-img2-3.xml',
             format: 'plain',
             transformTemplates: [
-                'releases[($contains(version, "google_atd;x86_64") or $contains(version, "<major>"))].version',
-                '$map($, function($v) { $replace($v, /.*system-images;android-([^;]+);google_atd;x86_64.*/, "v:$1") })',
-                '$map($, function($v) { $replace($v, /.*<major>([0-9]+)<.*/, "r:$1") })',
-                '$map($, function($v, $i) { $contains($v, /^v:/) ? $replace($v, "v:", "") & "-rev" & ($contains($[$i+1], /^r:/) ? $replace($[$i+1], "r:", "") : "0") : null })',
-                '$filter($, function($v) { $v != null })',
+                'releases.version',
+                '$split($join($, " "), "<remotePackage path=")',
+                '$filter($, function($b) { $contains($b, /^"system-images;android-[^;]+;google_atd;x86_64"/) and $contains($b, /channelRef ref="channel-0"/) })',
+                '$map($, function($b) { $substringBefore($substringAfter($b, "android-"), ";") & "-rev" & $substringBefore($substringAfter($substringAfter($b, "<revision>"), "<major>"), "</major>") })',
                 '{"releases": [ $map($, function($v) { {"version": $v} }) ]}',
             ],
-        },
+        }
     },
     packageRules: [
         {
@@ -311,7 +310,7 @@
             ],
             timezone: 'America/Los_Angeles',
             semanticCommitType: 'fix',
-            semanticCommitScope: 'sdk'
+            semanticCommitScope: 'sdk',
         },
         {
             description: 'Use "fix" for Base Alpaquita updates',
@@ -331,7 +330,7 @@
             ],
             timezone: 'America/Los_Angeles',
             semanticCommitType: 'fix',
-            semanticCommitScope: 'emulator'
+            semanticCommitScope: 'emulator',
         },
         {
             description: 'Group official Docker Build Tool and Actions',
