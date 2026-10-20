@@ -5,45 +5,16 @@ image=$1
 image_tag=$2
 report_file=$3
 
-get_adb() {
-    local adb_version
-    adb_version=$(
-        docker run --rm --entrypoint adb "$image" --version 2>/dev/null |
-            grep -oP 'Android Debug Bridge version \K[0-9.]+' || true
-    )
-
-    if [ -z "$adb_version" ]; then
-        echo "Error: could not determine adb version." >&2
-        return 1
-    fi
-
-    printf "| adb | %s | Android Debug Bridge |\n" "$adb_version"
-}
-
-get_emulator() {
-    local emulator_version
-    emulator_version=$(
-        docker run --rm --entrypoint emulator "${image}" -version 2>&1 |
-            grep -oP 'Android emulator version \K[0-9.]+' || true
-    )
-
-    if [ -z "$emulator_version" ]; then
-        echo "Error: could not determine emulator version." >&2
-        return 1
-    fi
-
-    printf "| emulator | %s | Android Emulator |\n" "$emulator_version"
-}
-
-get_system_image() {
+get_android_package_info() {
+    local package_dir=$1
     local package_xml
     local parsed
+    local package_path
     local display_name
-    local api_level
-    local revision
+    local version
 
     package_xml="$(docker run --rm --entrypoint sh "${image}" -c \
-        'find "${ANDROID_HOME}/system-images" -name package.xml -exec cat {} +')"
+        "find \"\${ANDROID_HOME}/${package_dir}\" -name package.xml -exec cat {} +")"
 
     parsed="$(
         awk '
@@ -52,28 +23,31 @@ get_system_image() {
             sub("</" tag ">.*", "", line)
             return line
         }
-        /<api-level>/        { api_level = tag_value($0, "api-level") }
+        /<localPackage / {
+            match($0, /path="[^"]*"/)
+            package_path = substr($0, RSTART + 6, RLENGTH - 7)
+            gsub(/;/, "/", package_path)
+        }
         /<display-name>/ { display_name = tag_value($0, "display-name") }
-        /<revision>/         { in_revision = 1 }
-        /<\/revision>/     { in_revision = 0 }
+        /<revision>/     { in_revision = 1 }
+        /<\/revision>/   { in_revision = 0 }
         in_revision && /<major>/ && major == "" { major = tag_value($0, "major") }
         in_revision && /<minor>/ && minor == "" { minor = tag_value($0, "minor") }
         in_revision && /<micro>/ && micro == "" { micro = tag_value($0, "micro") }
         END {
-            if (display_name == "" || api_level == "" || major == "") {
+            if (package_path == "" || display_name == "" || major == "") {
                 print "Missing required field in package.xml" > "/dev/stderr"
                 exit 1
             }
-            printf "%s|%s|%s.%s.%s\n", display_name, api_level, \
+            printf "%s|%s|%s.%s.%s\n", package_path, display_name, \
                 major, (minor == "" ? 0 : minor), (micro == "" ? 0 : micro)
         }
         ' <<<"${package_xml}"
     )"
 
-    IFS='|' read -r display_name api_level revision <<<"${parsed}"
+    IFS='|' read -r package_path display_name version <<<"${parsed}"
 
-    printf '| system-image | %s (API %s) | %s |\n' \
-        "${revision}" "${api_level}" "${display_name}"
+    printf '| %s | %s | %s |\n' "${package_path}" "${version}" "${display_name}"
 }
 
 get_apk_packages() {
@@ -97,14 +71,14 @@ get_apk_packages() {
 }
 
 generate_markdown_body() {
-    local adb_row
+    local platform_tools_row
     local emulator_row
     local system_image_row
     local apk_rows
 
-    adb_row=$(get_adb)
-    emulator_row=$(get_emulator)
-    system_image_row=$(get_system_image)
+    platform_tools_row=$(get_android_package_info "platform-tools")
+    emulator_row=$(get_android_package_info "emulator")
+    system_image_row=$(get_android_package_info "system-images")
     apk_rows=$(get_apk_packages)
 
     cat <<EOF
@@ -113,7 +87,7 @@ generate_markdown_body() {
 #### 🤖 Android SDK Components
 | Component | Version | Description |
 | :--- | :--- | :--- |
-${adb_row}
+${platform_tools_row}
 ${emulator_row}
 ${system_image_row}
 
