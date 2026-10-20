@@ -1,0 +1,31 @@
+name: 'Run Image & Generate Emulator Manifest'
+description: 'Validates the Emulator image and generates a markdown manifest'
+
+inputs:
+  image-ref:
+    description: 'The image to analyze'
+    required: true
+
+outputs:
+  manifest_path:
+    description: 'The path to the generated manifest file'
+    value: ${{ steps.generate-manifest.outputs.manifest_file }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: generate-manifest
+      shell: bash
+      run: |
+        image_ref="${{ inputs.image-ref }}"
+        image_tag="${image_ref#*:}"
+        report_name="emulator_manifest_${image_tag}.md"
+
+        "${{ github.action_path }}/scripts/generate-manifest.sh" \
+          "$image_ref" \
+          "$image_tag" \
+          "$report_name"
+
+        cat "$report_name" >> "$GITHUB_STEP_SUMMARY"
+
+        echo "manifest_file=$report_name" >> "$GITHUB_OUTPUT"

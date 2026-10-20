@@ -5,8 +5,8 @@ manifests_dir=$1
 output_file=$2
 
 {
-    echo "# Android CI Build Image Release"
-    echo "This release contains the following built image variants:"
+    echo "# Alpaquita Android Image Release"
+    echo "This release contains the following image variants:"
     echo ""
 } >"$output_file"
 

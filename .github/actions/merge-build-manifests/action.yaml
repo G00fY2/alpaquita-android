@@ -1,6 +1,11 @@
 name: 'Merge build manifests'
 description: 'Downloads build manifests, merges them into a single file, and updates the step summary.'
 
+inputs:
+  artifact-pattern:
+    description: 'The file pattern for the manifests'
+    required: true
+
 outputs:
   merged_manifests_path:
     description: 'The path to the merged manifest file'
@@ -14,6 +19,7 @@ runs:
       uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       with:
         path: merged-manifests
+        pattern: ${{ inputs.artifact-pattern }}
 
     - name: "Merge manifests"
       id: merge

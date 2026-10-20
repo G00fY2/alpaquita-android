@@ -81,8 +81,14 @@ jobs:
         run: ${{ steps.install-actionlint.outputs.executable }} -color -ignore 'label ".+" is unknown'
 
   hadolint:
-    name: "Hadolint"
+    name: "Hadolint ${{ matrix.dockerfile }}"
     runs-on: ubuntu-26.04
+    strategy:
+      matrix:
+        dockerfile:
+          - ./android/Dockerfile
+          - ./emulator/Dockerfile
+
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -90,6 +96,7 @@ jobs:
       - name: "Run Hadolint"
         uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
         with:
+          dockerfile: ${{ matrix.dockerfile }}
           verbose: true
 
       - name: "Hadolint Results"
@@ -112,9 +119,16 @@ jobs:
           version: ${{ env.DOCKER_BUILDX_VERSION }}
           driver-opts: image=moby/buildkit:${{ env.DOCKER_BUILDKIT_VERSION }}
 
-      - name: "Run Buildx Checks"
+      - name: "Run Buildx Checks for Android Dockerfile"
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
-          context: .
+          context: ./android
+          call: check
+          platforms: linux/amd64
+
+      - name: "Run Buildx Checks for Emulator Dockerfile"
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: ./emulator
           call: check
           platforms: linux/amd64
