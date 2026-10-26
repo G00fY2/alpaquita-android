@@ -43,6 +43,21 @@ android --version
 echo "--- Container: Android CLI Info ---"
 android info
 
+echo "--- Install SDK Platform 37.0 ---" # TODO remove step once fixed https://issuetracker.google.com/issues/578109577
+for i in {1..5}; do
+    android sdk install platforms/android-37.0 && break
+
+    if [ "$i" -eq 5 ]; then
+        echo "ERROR: SDK download failed after 5 attempts." >&2
+        exit 1
+    fi
+
+    wait_time=$((i * 5))
+    echo "WARNING: Download failed. Attempt $i of 5... Retrying in ${wait_time}s." >&2
+    sleep "$wait_time"
+done
+
+
 echo "--- Container: Android CLI Installed SDK packages ---"
 android sdk list
 
@@ -53,14 +68,16 @@ android create --name="SmokeTestApp" --output="$target_dir"
 
 cd "$target_dir"
 
-echo "--- Container: Initialize the Gradle wrapper & verify mimalloc execution ---"
-gradle_version_output=$(MIMALLOC_VERBOSE=1 ./gradlew --version --no-daemon 2>&1)
-grep -v '^mimalloc:' <<<"$gradle_version_output" || true
-if grep -q "mimalloc: process init" <<<"$gradle_version_output"; then
-    echo "SUCCESS: Gradle JVM successfully loaded and initialized mimalloc!"
+echo "--- Container: Initialize the Gradle wrapper ---"
+./gradlew --version --no-daemon
+
+echo "--- Container: Verify mimalloc execution ---"
+mimalloc_verbose_output=$(MIMALLOC_VERBOSE=1 ./gradlew --version --no-daemon 2>&1)
+if grep -q "mimalloc: process init" <<<"$mimalloc_verbose_output"; then
+    echo "SUCCESS: mimalloc was loaded and initialized!"
 else
-    echo "ERROR: Gradle JVM started, but mimalloc initialization was NOT detected!" >&2
-    echo "$gradle_version_output" >&2
+    echo "ERROR: mimalloc initialization was NOT detected!" >&2
+    echo "$mimalloc_verbose_output" >&2
     exit 1
 fi
 
