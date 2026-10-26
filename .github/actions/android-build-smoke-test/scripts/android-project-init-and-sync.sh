@@ -45,6 +45,7 @@ android info
 
 echo "--- Workaround: set compileSdk to android-37.0 (AGP platform hash bug) ---" # TODO remove step once fixed https://issuetracker.google.com/issues/578109577
 sed -i -E 's/^(\s*)compileSdk\s*=\s*37\s*$/\1compileSdk {\n\1    version = release(37) { minorApiLevel = 0 }\n\1}/' app/build.gradle.kts
+grep -q 'minorApiLevel = 0' app/build.gradle.kts || echo "INFO: compileSdk workaround not applied"
 
 echo "--- Container: Android CLI Installed SDK packages ---"
 android sdk list
