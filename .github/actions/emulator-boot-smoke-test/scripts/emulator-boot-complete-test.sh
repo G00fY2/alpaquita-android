@@ -11,10 +11,8 @@ container_id=""
 cleanup() {
     local exit_code=$?
     if [[ -n "$container_id" ]]; then
-        if ((exit_code != 0)); then
-            echo "### Host: Test failed, dumping container logs ###" >&2
-            docker logs "$container_id" >&2 || true
-        fi
+        echo "### Host: Emulator container logs ###"
+        docker logs "$container_id" 2>&1 || true
         docker rm -f "$container_id" >/dev/null 2>&1 || true
     fi
     exit "$exit_code"
