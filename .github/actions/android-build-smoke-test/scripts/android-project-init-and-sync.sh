@@ -43,20 +43,8 @@ android --version
 echo "--- Container: Android CLI Info ---"
 android info
 
-echo "--- Install SDK Platform 37.0 ---" # TODO remove step once fixed https://issuetracker.google.com/issues/578109577
-for i in {1..5}; do
-    android sdk install platforms/android-37.0 && break
-
-    if [ "$i" -eq 5 ]; then
-        echo "ERROR: SDK download failed after 5 attempts." >&2
-        exit 1
-    fi
-
-    wait_time=$((i * 5))
-    echo "WARNING: Download failed. Attempt $i of 5... Retrying in ${wait_time}s." >&2
-    sleep "$wait_time"
-done
-
+echo "--- Workaround: set compileSdk to android-37.0 (AGP platform hash bug) ---" # TODO remove step once fixed https://issuetracker.google.com/issues/578109577
+sed -i -E 's/^(\s*)compileSdk\s*=\s*37\s*$/\1compileSdk {\n\1    version = release(37) { minorApiLevel = 0 }\n\1}/' app/build.gradle.kts
 
 echo "--- Container: Android CLI Installed SDK packages ---"
 android sdk list
