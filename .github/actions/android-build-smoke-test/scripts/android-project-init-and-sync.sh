@@ -3,13 +3,6 @@ set -euo pipefail
 
 target_dir=$1
 
-print_installed_sdk_packages() {
-    local exit_code=$?
-    echo "--- Container: Android CLI Installed SDK packages after build (exit code: $exit_code) ---"
-    android sdk list || echo "WARNING: 'android sdk list' failed." >&2
-    exit "$exit_code"
-}
-
 if [[ -z "${ANDROID_USER_HOME:-}" ]]; then
     echo "ERROR: The environment variable ANDROID_USER_HOME is not set or empty."
     exit 1
@@ -46,8 +39,6 @@ android info
 echo "--- Container: Android CLI Installed SDK packages ---"
 android sdk list
 
-trap print_installed_sdk_packages EXIT
-
 echo "--- Container: Initialize a new default Android Gradle project ---"
 android create --name="SmokeTestApp" --output="$target_dir"
 
@@ -72,5 +63,8 @@ fi
 
 echo "--- Container: Actually build the Android project using gradlew wrapper ---"
 ./gradlew assembleDebug --no-daemon
+
+echo "--- Container: Android CLI Installed SDK packages after build ---"
+android sdk list
 
 echo "--- Container: Smoke test completed successfully ---"
