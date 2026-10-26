@@ -50,7 +50,7 @@ RUN --mount=type=bind,source=scripts/builder/setup-alpaquita.sh,target=/tmp/buil
     chgrp -R 0 "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}" && \
     chmod -R g=u "${ANDROID_HOME}" "${ANDROID_USER_HOME_BASE}"
 
-# Optimize footprint for headless CI by stripping GUI toolkit (Qt) and non-x86_64 and non-headless QEMU engines
+# Optimize footprint for headless CI by stripping GUI toolkit (Qt), non-x86_64 and non-headless QEMU engines
 RUN rm -rf \
     "${ANDROID_HOME}/emulator/lib64/qt" \
     "${ANDROID_HOME}"/emulator/qemu/linux-x86_64/qemu-system-aarch64* \
@@ -83,14 +83,11 @@ RUN --mount=type=bind,source=scripts/setup-alpaquita.sh,target=/tmp/setup-alpaqu
     /bin/sh /tmp/setup-alpaquita.sh
 
 COPY --parents --from=builder \
+    ${ANDROID_AVD_HOME} \
+    ${ANDROID_EMULATOR_HOME}/emu-update-last-check.ini \
     ${ANDROID_HOME}/emulator \
     ${ANDROID_HOME}/platform-tools \
     ${ANDROID_HOME}/system-images/android-${ANDROID_IMAGE_VERSION}/${ANDROID_IMAGE_VARIANT}/${ANDROID_IMAGE_ARCH} \
-    /
-
-COPY --parents --from=builder \
-    ${ANDROID_AVD_HOME} \
-    ${ANDROID_EMULATOR_HOME}/emu-update-last-check.ini \
     /
 
 COPY --chmod=755 scripts/start-emulator.sh /usr/local/bin/start-emulator

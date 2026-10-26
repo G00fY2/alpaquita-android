@@ -44,13 +44,20 @@ android create --name="SmokeTestApp" --output="$target_dir"
 
 cd "$target_dir"
 
-echo "--- Container: Initialize the Gradle wrapper & verify mimalloc execution ---"
-GRADLE_VERSION_OUTPUT=$(MIMALLOC_VERBOSE=1 ./gradlew --version --no-daemon 2>&1)
-echo "$GRADLE_VERSION_OUTPUT"
-if grep -q "mimalloc: process init" <<<"$GRADLE_VERSION_OUTPUT"; then
-    echo "SUCCESS: Gradle JVM successfully loaded and initialized mimalloc!"
+echo "--- Workaround: set compileSdk to android-37.0 (AGP platform hash bug) ---" # TODO remove step once fixed https://issuetracker.google.com/issues/578109577
+sed -i -E 's/^(\s*)compileSdk\s*=\s*37\s*$/\1compileSdk {\n\1    version = release(37) { minorApiLevel = 0 }\n\1}/' app/build.gradle.kts
+grep -q 'minorApiLevel = 0' app/build.gradle.kts || echo "INFO: compileSdk workaround not applied"
+
+echo "--- Container: Initialize the Gradle wrapper ---"
+./gradlew --version --no-daemon
+
+echo "--- Container: Verify mimalloc execution ---"
+mimalloc_verbose_output=$(MIMALLOC_VERBOSE=1 ./gradlew --version --no-daemon 2>&1)
+if grep -q "mimalloc: process init" <<<"$mimalloc_verbose_output"; then
+    echo "SUCCESS: mimalloc was loaded and initialized!"
 else
-    echo "ERROR: Gradle JVM started, but mimalloc initialization was NOT detected!" >&2
+    echo "ERROR: mimalloc initialization was NOT detected!" >&2
+    echo "$mimalloc_verbose_output" >&2
     exit 1
 fi
 
