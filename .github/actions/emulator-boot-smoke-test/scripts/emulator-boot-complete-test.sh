@@ -57,7 +57,7 @@ until docker exec "$container_id" test -f /tmp/emulator-ready 2>/dev/null; do
 done
 echo "### Host: Emulator is ready after ${SECONDS}s ###"
 
-echo "### Host: Listing installed packages ###"
+echo "### Host: Counting installed packages ###"
 installed_packages=$(docker exec "$container_id" adb shell pm list packages)
 
 if [[ -z "$installed_packages" ]]; then
@@ -72,5 +72,4 @@ if ((package_count == 0)); then
     exit 1
 fi
 
-echo "$installed_packages"
 echo "### Host: Found $package_count packages. Emulator boot test finished successfully ###"
