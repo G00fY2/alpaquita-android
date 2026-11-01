@@ -5,10 +5,9 @@ inputs:
   max_version:
     description: 'The highest System Image version to include (e.g. 36)'
     required: true
-  max_major_versions_count:
-    description: 'How many major versions to include'
-    required: false
-    default: '3'
+  min_version:
+    description: 'The lowest System Image version to include (e.g. 34)'
+    required: true
 
 outputs:
   versions_json:
@@ -26,7 +25,7 @@ runs:
       run: |
         raw_list=$("${{ github.action_path }}/scripts/fetch-versions.sh" \
           "${{ inputs.max_version }}" \
-          "${{ inputs.max_major_versions_count }}")
+          "${{ inputs.min_version }}")
 
         json_result=$(echo "$raw_list" | jq -R . | jq -s -c .)
         echo "List: $json_result"

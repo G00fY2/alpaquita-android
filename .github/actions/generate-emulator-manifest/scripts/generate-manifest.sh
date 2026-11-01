@@ -13,10 +13,10 @@ get_android_package_info() {
     local display_name
     local version
 
-    package_xml="$(docker run --rm --entrypoint sh "${image}" -c \
-        "find \"\${ANDROID_HOME}/${package_dir}\" -name package.xml -exec cat {} +")"
+    package_xml=$(docker run --rm --entrypoint sh "${image}" -c \
+        'find "${ANDROID_HOME}/$1" -name package.xml -exec cat {} +' sh "${package_dir}")
 
-    parsed="$(
+    parsed=$(
         awk '
         function tag_value(line, tag) {
             sub(".*<" tag ">", "", line)
@@ -43,7 +43,7 @@ get_android_package_info() {
                 major, (minor == "" ? 0 : minor), (micro == "" ? 0 : micro)
         }
         ' <<<"${package_xml}"
-    )"
+    )
 
     IFS='|' read -r package_path display_name version <<<"${parsed}"
 
