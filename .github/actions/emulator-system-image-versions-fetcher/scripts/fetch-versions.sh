@@ -27,7 +27,7 @@ filtered_versions=$(echo "$all_versions" | awk -v start_ver="$max_version" -v en
 ')
 
 # Validate result
-expected_major_versions_count=$((max_version - min_version + 1))
+expected_major_versions_count=$((${max_version%%.*} - ${min_version%%.*} + 1))
 if [[ "$(echo "$filtered_versions" | cut -d. -f1 | uniq | grep -c '^')" -lt "$expected_major_versions_count" ]]; then
     echo "ERROR: Expected $expected_major_versions_count distinct major versions between $max_version and $min_version:" >&2
     echo "$filtered_versions" >&2

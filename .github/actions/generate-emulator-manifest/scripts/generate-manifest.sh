@@ -14,7 +14,8 @@ get_android_package_info() {
     local version
 
     package_xml="$(docker run --rm --entrypoint sh "${image}" -c \
-        "find \"\${ANDROID_HOME}/${package_dir}\" -name package.xml -exec cat {} +")"
+        'find "${ANDROID_HOME}/$1" -name package.xml -exec cat {} +' \
+        sh "${package_dir}")"
 
     parsed="$(
         awk '
