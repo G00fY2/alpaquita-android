@@ -98,6 +98,7 @@ jobs:
         uses: ./.github/actions/emulator-system-image-versions-fetcher
         with:
           max_version: ${{ env.ANDROID_IMAGE_GOOGLE_APIS_VERSION }}
+          min_version: '34'
 
   versioning:
     name: "🏷️ Versioning"

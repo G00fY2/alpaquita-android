@@ -5,10 +5,9 @@ inputs:
   max_version:
     description: 'The highest System Image version to include (e.g. 36)'
     required: true
-  max_major_versions_count:
-    description: 'How many major versions to include'
-    required: false
-    default: '3'
+  min_version:
+    description: 'The lowest System Image version to include (e.g. 34)'
+    required: true
 
 outputs:
   versions_json:
