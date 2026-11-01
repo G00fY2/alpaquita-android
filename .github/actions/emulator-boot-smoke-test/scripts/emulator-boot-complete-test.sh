@@ -38,12 +38,14 @@ on_exit() {
         local container_logs
         container_logs=$(docker logs "$container_id" 2>&1 || true)
 
-        echo "### Host: Emulator container logs ###"
-        echo "$container_logs"
+        {
+            echo "### Host: Emulator container logs ###"
+            echo "$container_logs"
 
-        if ! verify_emulator_logs "$container_logs" && ((exit_code == 0)); then
-            exit_code=1
-        fi
+            if ! verify_emulator_logs "$container_logs" && ((exit_code == 0)); then
+                exit_code=1
+            fi
+        } 2>&1
 
         docker rm -f "$container_id" >/dev/null 2>&1 || true
     fi
