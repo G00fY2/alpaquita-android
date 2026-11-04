@@ -8,7 +8,7 @@ ARG ANDROID_IMAGE_ARCH=x86_64
 ARG ANDROID_HOME=/opt/android/sdk
 ARG ANDROID_USER_HOME_BASE=/opt/android/user
 
-FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25.0.4_9-glibc@sha256:15040ae05e80cf034bb4e8def353eb2563228a39581545ea6c24faf4baf7a439 AS builder
+FROM ghcr.io/bell-sw/liberica-runtime-container:jdk-25.0.5.0.3-glibc@sha256:dca96487d9eee87e5f81c00d9304757175b484a7d67845b9e682220fb983ca7d AS builder
 
 ARG ANDROID_HOME
 ARG ANDROID_USER_HOME_BASE
