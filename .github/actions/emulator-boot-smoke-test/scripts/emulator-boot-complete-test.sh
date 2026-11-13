@@ -8,16 +8,51 @@ boot_timeout_seconds=$4
 
 container_id=""
 
-cleanup() {
+verify_emulator_logs() {
+    local container_logs=$1
+    local verification_result=0
+
+    local error_lines
+    error_lines=$(grep -E '^ERROR' <<<"$container_logs" || true)
+    if [[ -n "$error_lines" ]]; then
+        echo "ERROR: Emulator logs contain lines starting with 'ERROR':" >&2
+        echo "$error_lines" >&2
+        verification_result=1
+    fi
+
+    local ram_increase_lines
+    ram_increase_lines=$(grep -F 'Increasing RAM size to' <<<"$container_logs" || true)
+    if [[ -n "$ram_increase_lines" ]]; then
+        echo "ERROR: Emulator increased the configured RAM size. Check EMULATOR_RAM against the AVD's minimum requirements:" >&2
+        echo "$ram_increase_lines" >&2
+        verification_result=1
+    fi
+
+    return "$verification_result"
+}
+
+on_exit() {
     local exit_code=$?
+
     if [[ -n "$container_id" ]]; then
-        echo "### Host: Emulator container logs ###"
-        docker logs "$container_id" 2>&1 || true
+        local container_logs
+        container_logs=$(docker logs "$container_id" 2>&1 || true)
+
+        {
+            echo "### Host: Emulator container logs ###"
+            echo "$container_logs"
+
+            if ! verify_emulator_logs "$container_logs" && ((exit_code == 0)); then
+                exit_code=1
+            fi
+        } 2>&1
+
         docker rm -f "$container_id" >/dev/null 2>&1 || true
     fi
+
     exit "$exit_code"
 }
-trap cleanup EXIT
+trap on_exit EXIT
 
 if [[ ! -e /dev/kvm ]]; then
     echo "ERROR: /dev/kvm is missing on this host. KVM must be enabled and passed through to the runner." >&2
