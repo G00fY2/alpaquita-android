@@ -58,7 +58,7 @@ RUN rm -rf \
     "${ANDROID_HOME}"/emulator/qemu/linux-x86_64/qemu-system-i386* \
     "${ANDROID_HOME}/emulator/qemu/linux-x86_64/qemu-system-x86_64"
 
-FROM ghcr.io/bell-sw/alpaquita-linux-base:glibc@sha256:3e9499498e6cdb7cf06bc216d03868c4d8db75811e62b4500c6a55ab4eb11637 AS emulator
+FROM ghcr.io/bell-sw/alpaquita-linux-base:glibc@sha256:4af7ede6e277f35959e2c33c690f7fa2b1c7c122d202fc26829cfd6cf8715d67 AS emulator
 
 ARG ANDROID_HOME
 ARG ANDROID_USER_HOME_BASE
